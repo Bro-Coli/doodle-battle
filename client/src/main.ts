@@ -5,6 +5,7 @@ import { ThicknessPreset } from './drawing/StrokeRenderer';
 import { exportPng } from './drawing/exportPng';
 import { recognizeDrawing } from './recognition/recognizeApi';
 import { RecognitionOverlay } from './recognition/RecognitionOverlay';
+import { WorldStage } from './world/WorldStage';
 
 async function init(): Promise<void> {
   // PixiJS v8 pattern: create Application, then await app.init()
@@ -17,9 +18,12 @@ async function init(): Promise<void> {
 
   document.body.appendChild(app.canvas);
 
-  // Create drawing canvas and add to stage
+  // Dual-container architecture: drawingRoot (draw mode) + worldRoot (world mode)
+  const worldStage = new WorldStage(app);
+
+  // Create drawing canvas and add to drawingRoot (not directly to stage)
   const drawingCanvas = new DrawingCanvas(app);
-  app.stage.addChild(drawingCanvas.region);
+  worldStage.drawingRoot.addChild(drawingCanvas.region);
 
   // Recognition overlay (manages spinner, result card, error toast, mock badge)
   const overlay = new RecognitionOverlay();
@@ -39,6 +43,12 @@ async function init(): Promise<void> {
   const undoBtn = document.createElement('button');
   undoBtn.textContent = 'Undo';
   undoBtn.disabled = true;
+
+  // View toggle button — always enabled, switches between Draw and World views
+  const viewToggleBtn = document.createElement('button');
+  viewToggleBtn.id = 'view-toggle';
+  viewToggleBtn.textContent = 'World';
+  viewToggleBtn.disabled = false;
 
   // Thickness toggle buttons
   const thicknessToggle = document.createElement('div');
@@ -100,6 +110,8 @@ async function init(): Promise<void> {
       try {
         const profile = await recognizeDrawing(dataUrl);
         overlay.showCard(profile, () => {
+          // Capture texture BEFORE clearing canvas (locked decision)
+          worldStage.spawnEntity(app, drawingCanvas.strokeContainerRef, profile);
           drawingCanvas.clear();
           enableAllToolbar();
         });
@@ -129,6 +141,20 @@ async function init(): Promise<void> {
     drawingCanvas.undo();
   });
 
+  // View toggle: switch between Draw and World modes
+  viewToggleBtn.addEventListener('click', () => {
+    worldStage.toggle();
+    if (worldStage.inWorld) {
+      // Now in world mode — disable draw tools, show "Draw" button to go back
+      viewToggleBtn.textContent = 'Draw';
+      disableAllToolbar();
+    } else {
+      // Back in draw mode — re-enable draw tools, show "World" button
+      viewToggleBtn.textContent = 'World';
+      enableAllToolbar();
+    }
+  });
+
   drawingCanvas.undoStack.onChange = syncButtonState;
 
   // Detect mock mode at page load — show badge if running without API key
@@ -156,6 +182,7 @@ async function init(): Promise<void> {
   toolbar.appendChild(submitBtn);
   toolbar.appendChild(clearBtn);
   toolbar.appendChild(undoBtn);
+  toolbar.appendChild(viewToggleBtn);
   toolbar.appendChild(thicknessToggle);
   document.body.appendChild(toolbar);
 }
