@@ -1,17 +1,17 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.0
-milestone_name: Single-Player PoC
-status: complete
-stopped_at: Milestone v1.0 complete
+milestone: v1.2
+milestone_name: React Client Integration
+status: defining_requirements
+stopped_at: null
 last_updated: "2026-04-07"
-last_activity: 2026-04-07 — v1.0 Single-Player PoC shipped, all 5 phases complete
+last_activity: 2026-04-07 — Milestone v1.2 started
 progress:
-  total_phases: 5
-  completed_phases: 5
-  total_plans: 11
-  completed_plans: 11
-  percent: 100
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
+  percent: 0
 ---
 
 # Project State
@@ -21,21 +21,22 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-07)
 
 **Core value:** Draw something and it comes alive acting like itself — a wolf that hunts, a bird that flies, a tree that grows.
-**Current focus:** v1.0 complete — planning next milestone
+**Current focus:** v1.2 React Client Integration — defining requirements
 
 ## Current Position
 
-Milestone: v1.0 Single-Player PoC — SHIPPED 2026-04-07
-Status: Complete
-Last activity: 2026-04-07 — All 5 phases, 11 plans executed and verified
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements
+Last activity: 2026-04-07 — Milestone v1.2 started
 
-Progress: [██████████] 100%
+Progress: [░░░░░░░░░░] 0%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 11
-- Timeline: 1 day (2026-04-07)
+- Previous milestone plans completed: 11
+- Previous milestone timeline: 1 day (2026-04-07)
 
 **By Phase:**
 
@@ -62,14 +63,14 @@ Key decisions documented in PROJECT.md Key Decisions table.
 
 ### Pending Todos
 
-None.
+None yet.
 
 ### Blockers/Concerns
 
-None — v1.0 complete. Future milestone will define new concerns.
+None identified yet.
 
 ## Session Continuity
 
 Last session: 2026-04-07
-Stopped at: Milestone v1.0 complete
+Stopped at: Milestone v1.2 started
 Resume file: None

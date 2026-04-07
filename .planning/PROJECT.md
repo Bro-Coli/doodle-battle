@@ -6,6 +6,16 @@ A multiplayer browser game where players draw anything freehand and AI brings th
 
 v1.0 shipped a **single-player proof of concept** validating the core magic: draw something, AI recognizes it, it spawns and behaves like itself. The draw-to-life pipeline works end-to-end.
 
+## Current Milestone: v1.2 React Client Integration
+
+**Goal:** Convert the client from a Pixi-only app into a React-based application shell while keeping Pixi focused on the interactive game canvas and simulation.
+
+**Target features:**
+- React owns the client entrypoint and top-level screen structure
+- Pixi mounts inside React as the game canvas/runtime layer
+- UI shell, overlays, and controls move to React-managed components
+- Existing draw-to-life and world simulation behavior remains intact during the migration
+
 ## Core Value
 
 The moment you draw something and it comes alive acting like itself — a wolf that hunts, a bird that flies, a tree that grows. That recognition-to-behavior pipeline is the entire game.
@@ -33,7 +43,10 @@ The moment you draw something and it comes alive acting like itself — a wolf t
 
 ### Active
 
-(None yet — define for next milestone)
+- [ ] Client boots through a React entrypoint instead of imperative DOM assembly
+- [ ] Pixi game lifecycle is encapsulated behind a React-consumable boundary
+- [ ] UI shell, overlays, and controls are rendered through React components
+- [ ] Existing drawing, recognition, spawning, and simulation flows continue to work after the React migration
 
 ### Out of Scope
 
@@ -81,5 +94,21 @@ The full vision includes Colyseus multiplayer, asymmetric team scenarios (Popula
 | Neighbor-averaging over perfect-freehand | Eliminates flickering on tight spirals | ✓ Good — switched mid-Phase 2, cleaner result |
 | Separate draw/world views | Manual toggle between drawing canvas and game world | ✓ Good — clean separation, future camera support |
 
+## Evolution
+
+This document evolves at phase transitions and milestone boundaries.
+
+**After each phase transition** (via `/gsd-transition`):
+1. Requirements invalidated? → Move to Out of Scope with reason
+2. Requirements validated? → Move to Validated with phase reference
+3. New requirements emerged? → Add to Active
+4. Decisions to log? → Add to Key Decisions
+5. "What This Is" still accurate? → Update if drifted
+
+**After each milestone** (via `/gsd-complete-milestone`):
+1. Full review of all sections
+2. Core Value check — still the right priority?
+3. Audit Out of Scope — reasons still valid?
+4. Update Context with current state
 ---
-*Last updated: 2026-04-07 after v1.0 milestone*
+*Last updated: 2026-04-07 after starting milestone v1.2*
