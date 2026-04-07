@@ -25,6 +25,15 @@ describe('MOCK_ENTITIES', () => {
       expect(entity.role.length).toBeGreaterThan(0);
     }
   });
+
+  it('each entity has a valid speed between 1 and 10', () => {
+    for (const entity of MOCK_ENTITIES) {
+      expect(typeof entity.speed).toBe('number');
+      expect(Number.isInteger(entity.speed)).toBe(true);
+      expect(entity.speed).toBeGreaterThanOrEqual(1);
+      expect(entity.speed).toBeLessThanOrEqual(10);
+    }
+  });
 });
 
 describe('isMockMode', () => {

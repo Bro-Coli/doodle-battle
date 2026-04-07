@@ -10,12 +10,111 @@ describe('validateEntityProfile', () => {
       archetype: 'walking',
       traits: ['predatory'],
       role: 'Apex predator',
+      speed: 7,
     });
     expect(result).toEqual({
       name: 'Wolf',
       archetype: 'walking',
       traits: ['predatory'],
       role: 'Apex predator',
+      speed: 7,
+    });
+  });
+
+  describe('speed validation', () => {
+    it('includes speed when valid', () => {
+      const result = validateEntityProfile({
+        name: 'Wolf',
+        archetype: 'walking',
+        traits: ['predatory'],
+        role: 'Apex predator',
+        speed: 7,
+      });
+      expect(result).not.toBeNull();
+      expect(result!.speed).toBe(7);
+    });
+
+    it('defaults speed to 5 when missing', () => {
+      const result = validateEntityProfile({
+        name: 'Wolf',
+        archetype: 'walking',
+        traits: ['predatory'],
+        role: 'Apex predator',
+      });
+      expect(result).not.toBeNull();
+      expect(result!.speed).toBe(5);
+    });
+
+    it('defaults speed to 5 when non-number', () => {
+      const result = validateEntityProfile({
+        name: 'Wolf',
+        archetype: 'walking',
+        traits: ['predatory'],
+        role: 'Apex predator',
+        speed: 'fast',
+      });
+      expect(result).not.toBeNull();
+      expect(result!.speed).toBe(5);
+    });
+
+    it('clamps speed below 1 to 1', () => {
+      const result0 = validateEntityProfile({
+        name: 'Wolf',
+        archetype: 'walking',
+        traits: ['x'],
+        role: 'y',
+        speed: 0,
+      });
+      expect(result0!.speed).toBe(1);
+
+      const resultNeg = validateEntityProfile({
+        name: 'Wolf',
+        archetype: 'walking',
+        traits: ['x'],
+        role: 'y',
+        speed: -5,
+      });
+      expect(resultNeg!.speed).toBe(1);
+    });
+
+    it('clamps speed above 10 to 10', () => {
+      const result11 = validateEntityProfile({
+        name: 'Wolf',
+        archetype: 'walking',
+        traits: ['x'],
+        role: 'y',
+        speed: 11,
+      });
+      expect(result11!.speed).toBe(10);
+
+      const result100 = validateEntityProfile({
+        name: 'Wolf',
+        archetype: 'walking',
+        traits: ['x'],
+        role: 'y',
+        speed: 100,
+      });
+      expect(result100!.speed).toBe(10);
+    });
+
+    it('rounds fractional speed', () => {
+      const result57 = validateEntityProfile({
+        name: 'Wolf',
+        archetype: 'walking',
+        traits: ['x'],
+        role: 'y',
+        speed: 5.7,
+      });
+      expect(result57!.speed).toBe(6);
+
+      const result32 = validateEntityProfile({
+        name: 'Wolf',
+        archetype: 'walking',
+        traits: ['x'],
+        role: 'y',
+        speed: 3.2,
+      });
+      expect(result32!.speed).toBe(3);
     });
   });
 
@@ -103,6 +202,12 @@ describe('mysteryBlob', () => {
     expect(blob.traits.length).toBeGreaterThan(0);
     expect(typeof blob.role).toBe('string');
     expect(blob.role.length).toBeGreaterThan(0);
+    expect(typeof blob.speed).toBe('number');
+  });
+
+  it('returns speed 5', () => {
+    const blob = mysteryBlob();
+    expect(blob.speed).toBe(5);
   });
 
   it('returns a random archetype from all 6 archetypes', () => {
