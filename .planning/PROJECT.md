@@ -33,13 +33,30 @@ The moment you draw something and it comes alive acting like itself — a wolf t
 
 ### Active
 
-(None yet — define for next milestone)
+- [ ] Batch interaction analysis — one Haiku call determines relationships between all entities
+- [ ] Round system — "Start Round" triggers interaction analysis, timed simulation (~30s)
+- [ ] Chase/flee behavior — predators pursue prey, prey runs away
+- [ ] Fight/destroy behavior — hostile entities eliminate each other (loser removed)
+- [ ] Symbiosis behavior — friendly entities benefit each other
+- [ ] Surviving entities persist between rounds — world accumulates
+- [ ] Entity removal — defeated entities fade out and are cleaned up
+
+## Current Milestone: v1.1 Entity Interactions & Rounds
+
+**Goal:** Entities interact with each other based on AI-determined relationships, driven by a round-based system.
+
+**Target features:**
+- Batch Haiku call for interaction analysis
+- Round system (draw → start → simulate → repeat)
+- Four interaction types: chase/flee, fight/destroy, symbiosis, ignore
+- Entity removal on defeat
+- Survivors persist across rounds
 
 ### Out of Scope
 
 - Multiplayer / networking — deferred to next milestone, but stack must not block it
 - Scenario system / team objectives — general behavior only for PoC
-- Entity-vs-entity interaction (chasing, combat) — entities move independently for now
+- Entity-vs-entity interaction (chasing, combat) — moved to v1.1 Active
 - Crayon aesthetic / paper texture — visual polish deferred
 - Sound design — deferred
 - Login / authentication — web-accessible, no login
@@ -82,4 +99,4 @@ The full vision includes Colyseus multiplayer, asymmetric team scenarios (Popula
 | Separate draw/world views | Manual toggle between drawing canvas and game world | ✓ Good — clean separation, future camera support |
 
 ---
-*Last updated: 2026-04-07 after v1.0 milestone*
+*Last updated: 2026-04-07 after v1.1 milestone start*
