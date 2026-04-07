@@ -42,7 +42,7 @@ Plans:
   2. Strokes render with smooth, tapered appearance (not jagged pixel lines)
   3. Player can undo the last stroke and see it removed from the canvas
   4. Player can clear the entire canvas with a single action
-**Plans:** 2 plans
+**Plans:** 1/2 plans executed
 Plans:
 - [ ] 02-01-PLAN.md — Drawing engine with smooth tapered strokes, undo, clear, and thickness toggle
 - [ ] 02-02-PLAN.md — PNG export, submit button wiring, and visual verification
@@ -87,7 +87,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Infrastructure | 2/2 | Complete   | 2026-04-07 |
-| 2. Drawing Canvas | 0/2 | Planning complete | - |
+| 2. Drawing Canvas | 1/2 | In Progress|  |
 | 3. Recognition Pipeline | 0/? | Not started | - |
 | 4. Entity Spawn & Rendering | 0/? | Not started | - |
 | 5. Entity Simulation | 0/? | Not started | - |

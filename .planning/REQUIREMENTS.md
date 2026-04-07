@@ -9,10 +9,10 @@ Requirements for the single-player proof of concept. Each maps to roadmap phases
 
 ### Drawing Canvas
 
-- [ ] **DRAW-01**: Player can draw freehand on a canvas with mouse or touch input
-- [ ] **DRAW-02**: Strokes render in real-time with smooth, tapered appearance
-- [ ] **DRAW-03**: Player can clear the entire drawing canvas
-- [ ] **DRAW-04**: Player can undo the last stroke
+- [x] **DRAW-01**: Player can draw freehand on a canvas with mouse or touch input
+- [x] **DRAW-02**: Strokes render in real-time with smooth, tapered appearance
+- [x] **DRAW-03**: Player can clear the entire drawing canvas
+- [x] **DRAW-04**: Player can undo the last stroke
 
 ### AI Recognition
 
@@ -83,10 +83,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| DRAW-01 | Phase 2 | Pending |
-| DRAW-02 | Phase 2 | Pending |
-| DRAW-03 | Phase 2 | Pending |
-| DRAW-04 | Phase 2 | Pending |
+| DRAW-01 | Phase 2 | Complete |
+| DRAW-02 | Phase 2 | Complete |
+| DRAW-03 | Phase 2 | Complete |
+| DRAW-04 | Phase 2 | Complete |
 | RECG-01 | Phase 3 | Pending |
 | RECG-02 | Phase 3 | Pending |
 | RECG-03 | Phase 3 | Pending |

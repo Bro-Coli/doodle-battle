@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: planning
-stopped_at: Phase 2 planning complete — 2 plans in 2 waves
-last_updated: "2026-04-07T03:52:49.519Z"
+stopped_at: Completed 02-drawing-canvas 02-01-PLAN.md
+last_updated: "2026-04-07T04:19:37.539Z"
 last_activity: 2026-04-07 — Roadmap created, 5 phases, 16/16 requirements mapped
 progress:
   total_phases: 5
   completed_phases: 1
   total_plans: 4
-  completed_plans: 2
+  completed_plans: 3
   percent: 0
 ---
 
@@ -52,6 +52,7 @@ Progress: [░░░░░░░░░░] 0%
 *Updated after each plan completion*
 | Phase 01-infrastructure P01 | 12 | 2 tasks | 13 files |
 | Phase 01-infrastructure P02 | 8 | 2 tasks | 4 files |
+| Phase 02-drawing-canvas P01 | 26 | 2 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -68,6 +69,9 @@ Recent decisions affecting current work:
 - [Phase 01-infrastructure]: PixiJS v8 requires await app.init() — do NOT pass options to constructor
 - [Phase 01-infrastructure]: Toolbar implemented as HTML overlay buttons for native disabled state and accessibility
 - [Phase 01-infrastructure]: No top-level await in main.ts — wrapped in async init() function to avoid Vite production build failures
+- [Phase 02-drawing-canvas]: Quadratic curve midpoint smoothing for stroke outlines — smoother than lineTo at minimal CPU cost
+- [Phase 02-drawing-canvas]: UndoStack onChange callback decouples button state sync from DrawingCanvas DOM knowledge
+- [Phase 02-drawing-canvas]: DrawingCanvas exposes strokeContainer and region getters for Plan 02 PNG export without changes
 
 ### Pending Todos
 
@@ -80,6 +84,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-07T03:52:49.516Z
-Stopped at: Phase 2 planning complete — 2 plans in 2 waves
-Resume file: .planning/phases/02-drawing-canvas/02-01-PLAN.md
+Last session: 2026-04-07T04:19:37.537Z
+Stopped at: Completed 02-drawing-canvas 02-01-PLAN.md
+Resume file: None
