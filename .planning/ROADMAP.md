@@ -16,7 +16,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 2: Drawing Canvas** - Freehand drawing, smooth strokes, undo, clear, PNG export (completed 2026-04-07)
 - [x] **Phase 3: Recognition Pipeline** - Submit drawing to Claude Haiku, receive entity profile, loading and error states (completed 2026-04-07)
 - [x] **Phase 4: Entity Spawn & Rendering** - Entities appear on canvas with labels and behavior profile display (completed 2026-04-07)
-- [ ] **Phase 5: Entity Simulation** - Archetype behavior dispatch, delta-time game loop, entities move like themselves
+- [x] **Phase 5: Entity Simulation** - Archetype behavior dispatch, delta-time game loop, entities move like themselves (completed 2026-04-07)
 
 ## Phase Details
 
@@ -83,7 +83,7 @@ Plans:
   1. All six archetypes (walking, flying, rooted, spreading, drifting, stationary) produce visibly distinct movement patterns
   2. Entity movement is driven by delta-time so motion is frame-rate independent
   3. Drawing a wolf, a bird, and a tree produces three entities each moving in recognizably identity-appropriate ways simultaneously
-**Plans:** 2/3 plans executed
+**Plans:** 3/3 plans complete
 Plans:
 - [ ] 05-01-PLAN.md — Speed field in EntityProfile: shared type, Claude prompt, server validation, mock data, tests
 - [ ] 05-02-PLAN.md — Entity state types and 6 pure archetype behavior functions (simulation engine)
@@ -100,4 +100,4 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 | 2. Drawing Canvas | 2/2 | Complete    | 2026-04-07 |
 | 3. Recognition Pipeline | 2/2 | Complete    | 2026-04-07 |
 | 4. Entity Spawn & Rendering | 2/2 | Complete    | 2026-04-07 |
-| 5. Entity Simulation | 2/3 | In Progress|  |
+| 5. Entity Simulation | 3/3 | Complete   | 2026-04-07 |

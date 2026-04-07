@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: planning
-stopped_at: Completed 05-entity-simulation 05-02-PLAN.md
-last_updated: "2026-04-07T07:50:58.813Z"
+stopped_at: Completed 05-entity-simulation 05-03-PLAN.md
+last_updated: "2026-04-07T08:01:57.098Z"
 last_activity: 2026-04-07 — Roadmap created, 5 phases, 16/16 requirements mapped
 progress:
   total_phases: 5
-  completed_phases: 4
+  completed_phases: 5
   total_plans: 11
-  completed_plans: 10
+  completed_plans: 11
   percent: 0
 ---
 
@@ -60,6 +60,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 04-entity-spawn-rendering P02 | 15 | 2 tasks | 4 files |
 | Phase 05-entity-simulation P01 | 2 | 2 tasks | 6 files |
 | Phase 05-entity-simulation P02 | 3 | 3 tasks | 8 files |
+| Phase 05-entity-simulation P03 | 5 | 2 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -98,6 +99,8 @@ Recent decisions affecting current work:
 - [Phase 05-entity-simulation]: Behavior functions use (state, dt, world) => state contract — pure, no PixiJS, Colyseus-compatible
 - [Phase 05-entity-simulation]: flyingBehavior tracks bobOriginY as real Y base to prevent vertical drift from sine bob
 - [Phase 05-entity-simulation]: EntitySimulation imports @crayon-world/shared alias not relative path to match client convention and avoid rootDir tsc error
+- [Phase 05-entity-simulation]: Single shared _gameTick iterates all entity state entries — one ticker registration per WorldStage, not per entity
+- [Phase 05-entity-simulation]: Spreading copies initialized with isACopy=true to prevent chain-spreading beyond one generation
 
 ### Pending Todos
 
@@ -110,6 +113,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-07T07:50:58.810Z
-Stopped at: Completed 05-entity-simulation 05-02-PLAN.md
+Last session: 2026-04-07T08:01:57.096Z
+Stopped at: Completed 05-entity-simulation 05-03-PLAN.md
 Resume file: None
