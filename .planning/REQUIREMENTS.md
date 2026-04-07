@@ -20,13 +20,13 @@ Requirements for the single-player proof of concept. Each maps to roadmap phases
 - [x] **RECG-02**: AI returns an entity label using open vocabulary (no fixed object list)
 - [x] **RECG-03**: Loading indicator displayed during AI processing
 - [x] **RECG-04**: Graceful error handling when drawing is unrecognized (fallback entity or message)
-- [ ] **RECG-05**: Behavior profile displayed to player on spawn (traits, role)
+- [x] **RECG-05**: Behavior profile displayed to player on spawn (traits, role)
 
 ### Entity System
 
 - [x] **ENTY-01**: Entity spawns as a distinct visual object on the canvas after recognition
 - [ ] **ENTY-02**: Entity moves according to its archetype (walking, flying, rooted, spreading, drifting, stationary)
-- [ ] **ENTY-03**: Multiple entities coexist on the canvas simultaneously
+- [x] **ENTY-03**: Multiple entities coexist on the canvas simultaneously
 - [x] **ENTY-04**: Entity name label floats above its sprite
 
 ### Infrastructure
@@ -91,10 +91,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 | RECG-02 | Phase 3 | Complete |
 | RECG-03 | Phase 3 | Complete |
 | RECG-04 | Phase 3 | Complete |
-| RECG-05 | Phase 4 | Pending |
+| RECG-05 | Phase 4 | Complete |
 | ENTY-01 | Phase 4 | Complete |
 | ENTY-02 | Phase 5 | Pending |
-| ENTY-03 | Phase 4 | Pending |
+| ENTY-03 | Phase 4 | Complete |
 | ENTY-04 | Phase 4 | Complete |
 | INFR-01 | Phase 1 | Complete |
 | INFR-02 | Phase 1 | Complete |

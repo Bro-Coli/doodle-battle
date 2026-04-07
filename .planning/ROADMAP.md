@@ -15,7 +15,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 1: Infrastructure** - Monorepo scaffold, API proxy, mock AI mode, browser-accessible with no login (completed 2026-04-07)
 - [x] **Phase 2: Drawing Canvas** - Freehand drawing, smooth strokes, undo, clear, PNG export (completed 2026-04-07)
 - [x] **Phase 3: Recognition Pipeline** - Submit drawing to Claude Haiku, receive entity profile, loading and error states (completed 2026-04-07)
-- [ ] **Phase 4: Entity Spawn & Rendering** - Entities appear on canvas with labels and behavior profile display
+- [x] **Phase 4: Entity Spawn & Rendering** - Entities appear on canvas with labels and behavior profile display (completed 2026-04-07)
 - [ ] **Phase 5: Entity Simulation** - Archetype behavior dispatch, delta-time game loop, entities move like themselves
 
 ## Phase Details
@@ -70,7 +70,7 @@ Plans:
   2. The entity's name label floats visibly above its sprite
   3. The entity's behavior profile (traits, role) is displayed to the player at spawn time
   4. Multiple entities from multiple draws coexist on the canvas simultaneously without replacing each other
-**Plans:** 1/2 plans executed
+**Plans:** 2/2 plans complete
 Plans:
 - [ ] 04-01-PLAN.md — World stage infrastructure, entity sprite rendering (texture capture, labels, shadows, fade-in)
 - [ ] 04-02-PLAN.md — Hover tooltips, multi-entity coexistence verification, visual checkpoint
@@ -95,5 +95,5 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 | 1. Infrastructure | 2/2 | Complete   | 2026-04-07 |
 | 2. Drawing Canvas | 2/2 | Complete    | 2026-04-07 |
 | 3. Recognition Pipeline | 2/2 | Complete    | 2026-04-07 |
-| 4. Entity Spawn & Rendering | 1/2 | In Progress|  |
+| 4. Entity Spawn & Rendering | 2/2 | Complete   | 2026-04-07 |
 | 5. Entity Simulation | 0/? | Not started | - |

@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: planning
-stopped_at: Completed 04-entity-spawn-rendering-01-PLAN.md
-last_updated: "2026-04-07T06:57:27.543Z"
+stopped_at: Completed 04-entity-spawn-rendering-02-PLAN.md
+last_updated: "2026-04-07T16:06:33Z"
 last_activity: 2026-04-07 — Roadmap created, 5 phases, 16/16 requirements mapped
 progress:
   total_phases: 5
-  completed_phases: 3
+  completed_phases: 4
   total_plans: 8
-  completed_plans: 7
+  completed_plans: 8
   percent: 0
 ---
 
@@ -57,6 +57,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 03-recognition-pipeline P01 | 22 | 2 tasks | 8 files |
 | Phase 03-recognition-pipeline P02 | 45 | 2 tasks | 5 files |
 | Phase 04-entity-spawn-rendering P01 | 18 | 2 tasks | 6 files |
+| Phase 04-entity-spawn-rendering P02 | 15 | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -87,6 +88,9 @@ Recent decisions affecting current work:
 - [Phase 04-entity-spawn-rendering]: pixi-filters v6 uses offset: PointData instead of distance scalar for DropShadowFilter
 - [Phase 04-entity-spawn-rendering]: Entity spawned before canvas clear in card dismiss callback so texture captures live strokes
 - [Phase 04-entity-spawn-rendering]: WorldStage is the single point of view management — drawingCanvas.region reparented into worldStage.drawingRoot
+- [Phase 04-entity-spawn-rendering]: Entity tooltip uses create-on-show DOM pattern (same as RecognitionOverlay) — no persistent DOM nodes
+- [Phase 04-entity-spawn-rendering]: captureEntityTexture uses getLocalBounds() not getBounds() — PixiJS generateTexture operates in local space
+- [Phase 04-entity-spawn-rendering]: Name label Text resolution set to window.devicePixelRatio for crisp rendering on retina displays
 
 ### Pending Todos
 
@@ -99,6 +103,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-07T06:57:27.540Z
-Stopped at: Completed 04-entity-spawn-rendering-01-PLAN.md
+Last session: 2026-04-07T16:06:33Z
+Stopped at: Completed 04-entity-spawn-rendering-02-PLAN.md
 Resume file: None
