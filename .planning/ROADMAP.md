@@ -95,5 +95,5 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 | 1. Infrastructure | 2/2 | Complete   | 2026-04-07 |
 | 2. Drawing Canvas | 2/2 | Complete    | 2026-04-07 |
 | 3. Recognition Pipeline | 2/2 | Complete    | 2026-04-07 |
-| 4. Entity Spawn & Rendering | 2/2 | Complete   | 2026-04-07 |
+| 4. Entity Spawn & Rendering | 2/2 | Complete    | 2026-04-07 |
 | 5. Entity Simulation | 0/? | Not started | - |
