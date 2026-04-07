@@ -10,7 +10,8 @@ The player submits a freehand sketch. Respond with ONLY a JSON object matching t
   "name": string,       // The thing you see, in plain English (open vocabulary — name anything)
   "archetype": "walking" | "flying" | "rooted" | "spreading" | "drifting" | "stationary",
   "traits": string[],   // 2–4 short descriptive traits (non-empty array)
-  "role": string        // One sentence describing the entity's role in nature or the world
+  "role": string,       // One sentence describing the entity's role in nature or the world
+  "speed": number       // 1-10 how fast this entity moves in real life (1=snail, 10=cheetah)
 }
 If the drawing is unclear or unrecognizable, make your best guess. Do not refuse, apologize, or explain. Do not include any text outside the JSON object. JSON only.`;
 

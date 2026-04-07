@@ -14,4 +14,5 @@ export interface EntityProfile {
   archetype: Archetype;
   traits: string[];    // e.g. ["predatory", "pack hunter"]
   role: string;        // e.g. "Apex predator"
+  speed: number;       // 1-10 scale from Claude, maps to pixels/second in simulation
 }

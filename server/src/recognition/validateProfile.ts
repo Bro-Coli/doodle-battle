@@ -37,11 +37,19 @@ export function validateEntityProfile(raw: unknown): EntityProfile | null {
     ? (obj['archetype'] as Archetype)
     : 'stationary';
 
+  // Speed: valid number in 1-10 clamped and rounded; non-number defaults to 5
+  const rawSpeed = obj['speed'];
+  const speed =
+    typeof rawSpeed === 'number'
+      ? Math.round(Math.max(1, Math.min(10, rawSpeed)))
+      : 5;
+
   return {
     name: obj['name'] as string,
     archetype,
     traits: obj['traits'] as string[],
     role: obj['role'] as string,
+    speed,
   };
 }
 
@@ -56,5 +64,6 @@ export function mysteryBlob(): EntityProfile {
     archetype,
     traits: ['mysterious', 'amorphous'],
     role: 'An unidentifiable entity',
+    speed: 5,
   };
 }
