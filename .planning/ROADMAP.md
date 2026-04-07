@@ -28,7 +28,10 @@ Decimal phases appear between their surrounding integers in numeric order.
   1. Opening the app URL in a browser loads a blank PixiJS canvas with no install or login required
   2. A POST to the API proxy returns a valid mock entity profile when `MOCK_AI=true` is set, with no Anthropic API key in the browser bundle
   3. The client/server/shared directory structure exists with typed interfaces in `shared/types.ts`
-**Plans**: TBD
+**Plans:** 2 plans
+Plans:
+- [ ] 01-01-PLAN.md — Scaffold monorepo with shared types and Express mock AI server
+- [ ] 01-02-PLAN.md — PixiJS client with full-viewport canvas, toolbar, and Vite dev proxy
 
 ### Phase 2: Drawing Canvas
 **Goal**: Players can draw freehand on the canvas with smooth strokes and recover from mistakes
@@ -80,7 +83,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Infrastructure | 0/? | Not started | - |
+| 1. Infrastructure | 0/2 | Planning complete | - |
 | 2. Drawing Canvas | 0/? | Not started | - |
 | 3. Recognition Pipeline | 0/? | Not started | - |
 | 4. Entity Spawn & Rendering | 0/? | Not started | - |
