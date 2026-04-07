@@ -83,7 +83,11 @@ Plans:
   1. All six archetypes (walking, flying, rooted, spreading, drifting, stationary) produce visibly distinct movement patterns
   2. Entity movement is driven by delta-time so motion is frame-rate independent
   3. Drawing a wolf, a bird, and a tree produces three entities each moving in recognizably identity-appropriate ways simultaneously
-**Plans**: TBD
+**Plans:** 3 plans
+Plans:
+- [ ] 05-01-PLAN.md — Speed field in EntityProfile: shared type, Claude prompt, server validation, mock data, tests
+- [ ] 05-02-PLAN.md — Entity state types and 6 pure archetype behavior functions (simulation engine)
+- [ ] 05-03-PLAN.md — Wire game loop into WorldStage, spreading copy spawns, visual verification
 
 ## Progress
 
@@ -96,4 +100,4 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 | 2. Drawing Canvas | 2/2 | Complete    | 2026-04-07 |
 | 3. Recognition Pipeline | 2/2 | Complete    | 2026-04-07 |
 | 4. Entity Spawn & Rendering | 2/2 | Complete    | 2026-04-07 |
-| 5. Entity Simulation | 0/? | Not started | - |
+| 5. Entity Simulation | 0/3 | Not started | - |
