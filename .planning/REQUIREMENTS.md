@@ -36,17 +36,17 @@ Requirements for milestone v1.2 React Client Integration.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| UIM-01 | Unmapped | Pending |
-| UIM-02 | Unmapped | Pending |
-| UIM-03 | Unmapped | Pending |
-| UIM-04 | Unmapped | Pending |
-| UIM-05 | Unmapped | Pending |
+| UIM-01 | Phase 6 | Pending |
+| UIM-02 | Phase 7 | Pending |
+| UIM-03 | Phase 6 | Pending |
+| UIM-04 | Phase 6 | Pending |
+| UIM-05 | Phase 7 | Pending |
 
 **Coverage:**
 - v1 requirements: 5 total
-- Mapped to phases: 0
-- Unmapped: 5 ⚠️
+- Mapped to phases: 5
+- Unmapped: 0 ✓
 
 ---
 *Requirements defined: 2026-04-07*
-*Last updated: 2026-04-07 after milestone v1.2 definition*
+*Last updated: 2026-04-07 after roadmap creation for milestone v1.2*

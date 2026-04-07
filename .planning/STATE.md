@@ -5,9 +5,9 @@ milestone_name: React Client Integration
 status: defining_requirements
 stopped_at: null
 last_updated: "2026-04-07"
-last_activity: 2026-04-07 — Milestone v1.2 started
+last_activity: 2026-04-07 — Roadmap created for milestone v1.2
 progress:
-  total_phases: 0
+  total_phases: 2
   completed_phases: 0
   total_plans: 0
   completed_plans: 0
@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-07)
 
 **Core value:** Draw something and it comes alive acting like itself — a wolf that hunts, a bird that flies, a tree that grows.
-**Current focus:** v1.2 React Client Integration — defining requirements
+**Current focus:** Phase 6 React Control Surface
 
 ## Current Position
 
-Phase: Not started (defining requirements)
+Phase: 6 React Control Surface
 Plan: —
-Status: Defining requirements
-Last activity: 2026-04-07 — Milestone v1.2 started
+Status: Ready for discussion and planning
+Last activity: 2026-04-07 — Roadmap created for milestone v1.2
 
 Progress: [░░░░░░░░░░] 0%
 
