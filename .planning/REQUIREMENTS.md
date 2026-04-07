@@ -73,26 +73,26 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| ROUND-01 | — | Pending |
-| ROUND-02 | — | Pending |
-| ROUND-03 | — | Pending |
-| ROUND-04 | — | Pending |
-| BATC-01 | — | Pending |
-| BATC-02 | — | Pending |
-| BATC-03 | — | Pending |
-| INTR-01 | — | Pending |
-| INTR-02 | — | Pending |
-| INTR-03 | — | Pending |
-| INTR-04 | — | Pending |
-| INTR-05 | — | Pending |
-| REMV-01 | — | Pending |
-| REMV-02 | — | Pending |
+| ROUND-01 | Phase 7 | Pending |
+| ROUND-02 | Phase 7 | Pending |
+| ROUND-03 | Phase 7 | Pending |
+| ROUND-04 | Phase 9 | Pending |
+| BATC-01 | Phase 6 | Pending |
+| BATC-02 | Phase 6 | Pending |
+| BATC-03 | Phase 6 | Pending |
+| INTR-01 | Phase 8 | Pending |
+| INTR-02 | Phase 8 | Pending |
+| INTR-03 | Phase 8 | Pending |
+| INTR-04 | Phase 8 | Pending |
+| INTR-05 | Phase 8 | Pending |
+| REMV-01 | Phase 7 | Pending |
+| REMV-02 | Phase 7 | Pending |
 
 **Coverage:**
 - v1.1 requirements: 14 total
-- Mapped to phases: 0
-- Unmapped: 14
+- Mapped to phases: 14
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-04-07*
-*Last updated: 2026-04-07 after v1.1 milestone definition*
+*Last updated: 2026-04-07 after v1.1 roadmap creation*
