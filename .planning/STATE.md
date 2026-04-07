@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: planning
-stopped_at: Completed 02-drawing-canvas 02-01-PLAN.md
-last_updated: "2026-04-07T04:19:37.539Z"
+stopped_at: Completed 02-drawing-canvas 02-02-PLAN.md
+last_updated: "2026-04-07T04:34:19.781Z"
 last_activity: 2026-04-07 — Roadmap created, 5 phases, 16/16 requirements mapped
 progress:
   total_phases: 5
-  completed_phases: 1
+  completed_phases: 2
   total_plans: 4
-  completed_plans: 3
+  completed_plans: 4
   percent: 0
 ---
 
@@ -53,6 +53,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 01-infrastructure P01 | 12 | 2 tasks | 13 files |
 | Phase 01-infrastructure P02 | 8 | 2 tasks | 4 files |
 | Phase 02-drawing-canvas P01 | 26 | 2 tasks | 6 files |
+| Phase 02-drawing-canvas P02 | 20 | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -72,6 +73,8 @@ Recent decisions affecting current work:
 - [Phase 02-drawing-canvas]: Quadratic curve midpoint smoothing for stroke outlines — smoother than lineTo at minimal CPU cost
 - [Phase 02-drawing-canvas]: UndoStack onChange callback decouples button state sync from DrawingCanvas DOM knowledge
 - [Phase 02-drawing-canvas]: DrawingCanvas exposes strokeContainer and region getters for Plan 02 PNG export without changes
+- [Phase 02-drawing-canvas]: PixiJS native stroke (round caps/joins) + neighbor-averaging smoothing replaces perfect-freehand polygon fill — eliminates flickering on tight spirals
+- [Phase 02-drawing-canvas]: exportPng is a pure function returning data URL; Phase 3 replaces console.log with POST to /api/recognize
 
 ### Pending Todos
 
@@ -84,6 +87,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-07T04:19:37.537Z
-Stopped at: Completed 02-drawing-canvas 02-01-PLAN.md
+Last session: 2026-04-07T04:34:19.779Z
+Stopped at: Completed 02-drawing-canvas 02-02-PLAN.md
 Resume file: None

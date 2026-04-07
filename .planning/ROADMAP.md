@@ -13,7 +13,7 @@ Five phases that build the draw-to-life pipeline from the ground up. Phase 1 lay
 Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: Infrastructure** - Monorepo scaffold, API proxy, mock AI mode, browser-accessible with no login (completed 2026-04-07)
-- [ ] **Phase 2: Drawing Canvas** - Freehand drawing, smooth strokes, undo, clear, PNG export
+- [x] **Phase 2: Drawing Canvas** - Freehand drawing, smooth strokes, undo, clear, PNG export (completed 2026-04-07)
 - [ ] **Phase 3: Recognition Pipeline** - Submit drawing to Claude Haiku, receive entity profile, loading and error states
 - [ ] **Phase 4: Entity Spawn & Rendering** - Entities appear on canvas with labels and behavior profile display
 - [ ] **Phase 5: Entity Simulation** - Archetype behavior dispatch, delta-time game loop, entities move like themselves
@@ -42,7 +42,7 @@ Plans:
   2. Strokes render with smooth, tapered appearance (not jagged pixel lines)
   3. Player can undo the last stroke and see it removed from the canvas
   4. Player can clear the entire canvas with a single action
-**Plans:** 1/2 plans executed
+**Plans:** 2/2 plans complete
 Plans:
 - [ ] 02-01-PLAN.md — Drawing engine with smooth tapered strokes, undo, clear, and thickness toggle
 - [ ] 02-02-PLAN.md — PNG export, submit button wiring, and visual verification
@@ -87,7 +87,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Infrastructure | 2/2 | Complete   | 2026-04-07 |
-| 2. Drawing Canvas | 1/2 | In Progress|  |
+| 2. Drawing Canvas | 2/2 | Complete   | 2026-04-07 |
 | 3. Recognition Pipeline | 0/? | Not started | - |
 | 4. Entity Spawn & Rendering | 0/? | Not started | - |
 | 5. Entity Simulation | 0/? | Not started | - |
