@@ -16,10 +16,10 @@ Requirements for the single-player proof of concept. Each maps to roadmap phases
 
 ### AI Recognition
 
-- [ ] **RECG-01**: Drawing is exported as PNG and sent to Claude Haiku for entity recognition
-- [ ] **RECG-02**: AI returns an entity label using open vocabulary (no fixed object list)
+- [x] **RECG-01**: Drawing is exported as PNG and sent to Claude Haiku for entity recognition
+- [x] **RECG-02**: AI returns an entity label using open vocabulary (no fixed object list)
 - [ ] **RECG-03**: Loading indicator displayed during AI processing
-- [ ] **RECG-04**: Graceful error handling when drawing is unrecognized (fallback entity or message)
+- [x] **RECG-04**: Graceful error handling when drawing is unrecognized (fallback entity or message)
 - [ ] **RECG-05**: Behavior profile displayed to player on spawn (traits, role)
 
 ### Entity System
@@ -87,10 +87,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 | DRAW-02 | Phase 2 | Complete |
 | DRAW-03 | Phase 2 | Complete |
 | DRAW-04 | Phase 2 | Complete |
-| RECG-01 | Phase 3 | Pending |
-| RECG-02 | Phase 3 | Pending |
+| RECG-01 | Phase 3 | Complete |
+| RECG-02 | Phase 3 | Complete |
 | RECG-03 | Phase 3 | Pending |
-| RECG-04 | Phase 3 | Pending |
+| RECG-04 | Phase 3 | Complete |
 | RECG-05 | Phase 4 | Pending |
 | ENTY-01 | Phase 4 | Pending |
 | ENTY-02 | Phase 5 | Pending |

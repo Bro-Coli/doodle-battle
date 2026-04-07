@@ -56,7 +56,7 @@ Plans:
   2. A loading indicator is visible from the moment submit is pressed until the profile arrives
   3. If the drawing is unrecognized or the API fails, the player sees a meaningful fallback message rather than a silent error
   4. The returned entity profile is validated and typed — unknown archetypes map to a default, malformed JSON does not crash the client
-**Plans:** 2 plans
+**Plans:** 1/2 plans executed
 Plans:
 - [ ] 03-01-PLAN.md — Server-side Anthropic SDK integration, validation guard, entity cache, and tests
 - [ ] 03-02-PLAN.md — Client-side spinner, result card, error toast, mock badge, and submit handler rewrite
@@ -91,6 +91,6 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 |-------|----------------|--------|-----------|
 | 1. Infrastructure | 2/2 | Complete   | 2026-04-07 |
 | 2. Drawing Canvas | 2/2 | Complete    | 2026-04-07 |
-| 3. Recognition Pipeline | 0/2 | Planned | - |
+| 3. Recognition Pipeline | 1/2 | In Progress|  |
 | 4. Entity Spawn & Rendering | 0/? | Not started | - |
 | 5. Entity Simulation | 0/? | Not started | - |
