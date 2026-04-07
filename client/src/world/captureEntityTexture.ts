@@ -11,19 +11,19 @@ import { Application, Container, Rectangle, Texture } from 'pixi.js';
  * @returns A RenderTexture with transparent background cropped to stroke bounds
  */
 export function captureEntityTexture(app: Application, strokeContainer: Container): Texture {
-  const bounds = strokeContainer.getBounds();
+  // Use getLocalBounds — generateTexture renders in the target's local space,
+  // so global getBounds() produces a misaligned frame (captures empty area).
+  const bounds = strokeContainer.getLocalBounds();
 
-  const frame = new Rectangle(
-    bounds.x,
-    bounds.y,
-    bounds.width,
-    bounds.height,
-  );
+  if (bounds.width === 0 || bounds.height === 0) {
+    // Nothing drawn — return empty texture
+    return Texture.EMPTY;
+  }
 
   const texture = app.renderer.generateTexture({
     target: strokeContainer,
-    frame,
-    resolution: 1,
+    frame: new Rectangle(bounds.x, bounds.y, bounds.width, bounds.height),
+    resolution: 2,
     antialias: true,
     clearColor: [0, 0, 0, 0],
   });

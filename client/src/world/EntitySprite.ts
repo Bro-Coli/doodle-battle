@@ -58,10 +58,11 @@ export function buildEntityContainer(
   const label = new Text({
     text: profile.name,
     style: new TextStyle({
-      fontSize: 12,
+      fontSize: 14,
       fill: '#333333',
       fontWeight: 'bold',
     }),
+    resolution: window.devicePixelRatio || 2,
   });
   label.anchor.set(0.5, 1);
   // sprite.height reflects the scale in v8
