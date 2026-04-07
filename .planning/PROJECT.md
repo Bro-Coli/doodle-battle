@@ -4,7 +4,7 @@
 
 A multiplayer browser game where players draw anything freehand and AI brings those drawings to life as autonomous entities that behave according to their real-world identity. Inspired by Harold and the Purple Crayon and Scribblenauts. Two teams compete across scenarios with asymmetric objectives — strategic thinking, not drawing skill, determines the winner.
 
-The current milestone is a **single-player proof of concept** that validates the core magic: draw something, AI recognizes it, it spawns and behaves like itself.
+v1.0 shipped a **single-player proof of concept** validating the core magic: draw something, AI recognizes it, it spawns and behaves like itself. The draw-to-life pipeline works end-to-end.
 
 ## Core Value
 
@@ -14,18 +14,26 @@ The moment you draw something and it comes alive acting like itself — a wolf t
 
 ### Validated
 
-(None yet — ship to validate)
+- ✓ Player can draw freehand on a canvas with stylus or mouse — v1.0
+- ✓ Drawing is exported as PNG and sent to Claude Haiku for recognition — v1.0
+- ✓ AI returns an entity label (open vocabulary — no fixed object list) — v1.0
+- ✓ AI generates a behavior profile (movement archetype, traits, speed) from the entity label — v1.0
+- ✓ Entity spawns on the canvas with identity-appropriate movement (wolf walks, bird flies, tree stays rooted) — v1.0
+- ✓ Multiple entities coexist on the canvas simultaneously — v1.0
+- ✓ Entity movement follows one of the defined archetypes (rooted, walking, flying, spreading, drifting, stationary) — v1.0
+- ✓ Common entity recognition results are cached to minimize API costs — v1.0
+- ✓ Server-side API proxy keeps Anthropic API key secure — v1.0
+- ✓ Mock AI mode for development (hardcoded profiles, no API calls) — v1.0
+- ✓ Browser-accessible with no login or install required — v1.0
+- ✓ Strokes render in real-time with smooth appearance — v1.0
+- ✓ Player can clear the entire drawing canvas — v1.0
+- ✓ Player can undo the last stroke — v1.0
+- ✓ Loading indicator displayed during AI processing — v1.0
+- ✓ Graceful error handling when drawing is unrecognized — v1.0
 
 ### Active
 
-- [ ] Player can draw freehand on a canvas with stylus or mouse
-- [ ] Drawing is exported as PNG and sent to Claude Haiku for recognition
-- [ ] AI returns an entity label (open vocabulary — no fixed object list)
-- [ ] AI generates a behavior profile (movement archetype, traits) from the entity label
-- [ ] Entity spawns on the canvas with identity-appropriate movement (wolf walks, bird flies, tree stays rooted)
-- [ ] Multiple entities coexist on the canvas simultaneously
-- [ ] Entity movement follows one of the defined archetypes (rooted, walking, flying, spreading, drifting, stationary)
-- [ ] Common entity recognition results are cached to minimize API costs
+(None yet — define for next milestone)
 
 ### Out of Scope
 
@@ -36,33 +44,42 @@ The moment you draw something and it comes alive acting like itself — a wolf t
 - Sound design — deferred
 - Login / authentication — web-accessible, no login
 - Island / biome map — simple flat canvas for PoC
+- Trait-influenced movement patterns — deferred from Phase 5 discussion for advanced locomotion
 
 ## Context
 
-This is a hackathon project with a **May 1, 2026 submission deadline** (~3 weeks). Code will be heavily AI-assisted. The concept doc outlines a full 4-week plan with multiplayer and multiple scenarios, but the PoC focuses on proving the draw-to-life pipeline works before layering on competitive gameplay.
+Shipped v1.0 on 2026-04-07 with 1,732 LOC TypeScript across 96 files. Built in 1 day with AI-assisted development.
 
-The full vision includes Colyseus multiplayer, asymmetric team scenarios (Population, Siege, Escort), and 50+ entities on screen. The PoC stack must be architected so multiplayer can be added without rewriting — TypeScript shared types, client/server separation even if the server is local initially.
+**Tech stack:** TypeScript + PixiJS v8 (rendering), Express v5 (API proxy), Claude Haiku (sketch recognition), Vite (bundler), pnpm workspaces (monorepo).
 
-Key technical insight from the concept: "The AI does the hard work once at spawn. The game engine runs simple, fast rules every frame." This means behavior profiles are generated once via API, then the simulation runs cheaply on generic movement archetypes.
+**Architecture:** client/server/shared monorepo. Shared TypeScript types (`EntityProfile`, `Archetype`) consumed by both sides. Behavior functions are pure (no PixiJS imports) for future Colyseus compatibility. Single shared game loop ticker in WorldStage, not per-entity.
+
+**Current state:** The core draw-to-life pipeline works. A player draws something, submits it, Claude Haiku recognizes it, an entity spawns using the player's drawing as its sprite, and it moves according to its archetype with AI-determined speed. 6 archetypes produce visibly distinct movement. 47 tests pass.
+
+The full vision includes Colyseus multiplayer, asymmetric team scenarios (Population, Siege, Escort), and 50+ entities on screen. The PoC stack is architected so multiplayer can be added without rewriting.
 
 ## Constraints
 
-- **Timeline**: May 1, 2026 hackathon deadline — ~3 weeks
-- **AI Budget**: $100 Anthropic API credit — Claude Haiku at ~$0.0001/call, caching critical
+- **Timeline**: May 1, 2026 hackathon deadline — ~3 weeks remaining
+- **AI Budget**: $100 Anthropic API credit — Claude Haiku at ~$0.0001/call, caching implemented
 - **Platform**: Browser-based, no install, no login
 - **Stack**: TypeScript + PixiJS (rendering) — chosen for GPU-accelerated 2D and shared types with future Colyseus server
-- **Multiplayer-ready**: Architecture must support adding Colyseus without rewrite
+- **Multiplayer-ready**: Architecture supports adding Colyseus without rewrite
 
 ## Key Decisions
 
 | Decision | Rationale | Outcome |
 |----------|-----------|---------|
-| Single-player PoC first | Prove core loop before adding networking complexity | — Pending |
-| PixiJS for rendering | GPU-accelerated 2D, tiny bundle, instant load | — Pending |
-| Claude Haiku for recognition | Best sketch understanding, $100 credits available | — Pending |
-| TypeScript end-to-end | Shared types between future client/server | — Pending |
-| No scenarios in PoC | General behavior proves the concept without scenario injection complexity | — Pending |
-| Cache recognition results | Minimize API costs — cache by entity label | — Pending |
+| Single-player PoC first | Prove core loop before adding networking complexity | ✓ Good — pipeline validated in 1 day |
+| PixiJS for rendering | GPU-accelerated 2D, tiny bundle, instant load | ✓ Good — smooth rendering, v8 ticker works well |
+| Claude Haiku for recognition | Best sketch understanding, $100 credits available | ✓ Good — open vocabulary works, caching saves costs |
+| TypeScript end-to-end | Shared types between future client/server | ✓ Good — EntityProfile shared cleanly |
+| No scenarios in PoC | General behavior proves the concept without scenario injection complexity | ✓ Good — 6 archetypes sufficient for demo |
+| Cache recognition results | Minimize API costs — cache by entity label | ✓ Good — implemented in Phase 3 |
+| Pure behavior functions | No PixiJS imports, (state, dt, world) => state contract | ✓ Good — testable, Colyseus-compatible |
+| AI-provided speed (1-10) | Each entity moves at identity-appropriate pace | ✓ Good — wolf faster than turtle, decided in Phase 5 |
+| Neighbor-averaging over perfect-freehand | Eliminates flickering on tight spirals | ✓ Good — switched mid-Phase 2, cleaner result |
+| Separate draw/world views | Manual toggle between drawing canvas and game world | ✓ Good — clean separation, future camera support |
 
 ---
-*Last updated: 2026-04-07 after initialization*
+*Last updated: 2026-04-07 after v1.0 milestone*
