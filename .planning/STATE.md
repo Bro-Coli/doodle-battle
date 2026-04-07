@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: planning
-stopped_at: Phase 4 planning complete — 2 plans in 2 waves
-last_updated: "2026-04-07T06:52:11.009Z"
+stopped_at: Completed 04-entity-spawn-rendering-01-PLAN.md
+last_updated: "2026-04-07T06:57:27.543Z"
 last_activity: 2026-04-07 — Roadmap created, 5 phases, 16/16 requirements mapped
 progress:
   total_phases: 5
   completed_phases: 3
   total_plans: 8
-  completed_plans: 6
+  completed_plans: 7
   percent: 0
 ---
 
@@ -56,6 +56,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 02-drawing-canvas P02 | 20 | 2 tasks | 3 files |
 | Phase 03-recognition-pipeline P01 | 22 | 2 tasks | 8 files |
 | Phase 03-recognition-pipeline P02 | 45 | 2 tasks | 5 files |
+| Phase 04-entity-spawn-rendering P01 | 18 | 2 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -83,6 +84,9 @@ Recent decisions affecting current work:
 - [Phase 03-recognition-pipeline]: Canvas clears only on card dismiss, not on submit — drawing stays visible during spinner and card reveal
 - [Phase 03-recognition-pipeline]: submitRecognition() extracted from click handler so retry button can re-invoke the full submit flow
 - [Phase 03-recognition-pipeline]: RecognitionOverlay creates elements on showX() and removes on dismiss — no persistent DOM nodes
+- [Phase 04-entity-spawn-rendering]: pixi-filters v6 uses offset: PointData instead of distance scalar for DropShadowFilter
+- [Phase 04-entity-spawn-rendering]: Entity spawned before canvas clear in card dismiss callback so texture captures live strokes
+- [Phase 04-entity-spawn-rendering]: WorldStage is the single point of view management — drawingCanvas.region reparented into worldStage.drawingRoot
 
 ### Pending Todos
 
@@ -95,6 +99,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-07T06:52:11.003Z
-Stopped at: Phase 4 planning complete — 2 plans in 2 waves
-Resume file: .planning/phases/04-entity-spawn-rendering/04-01-PLAN.md
+Last session: 2026-04-07T06:57:27.540Z
+Stopped at: Completed 04-entity-spawn-rendering-01-PLAN.md
+Resume file: None
