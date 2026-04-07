@@ -1,6 +1,7 @@
 import { Application, Container, Sprite, Text, TextStyle, Texture, Ticker } from 'pixi.js';
 import { DropShadowFilter } from 'pixi-filters';
 import { EntityProfile } from '@crayon-world/shared/src/types';
+import { showTooltip, hideTooltip } from './EntityTooltip';
 
 /**
  * Build an entity Container from a texture and profile.
@@ -24,6 +25,17 @@ export function buildEntityContainer(
   const entity = new Container();
   entity.eventMode = 'static';
   entity.cursor = 'pointer';
+
+  // Wire hover events so the tooltip follows the cursor within entity bounds
+  entity.on('pointerover', (e) => {
+    const canvasBounds = app.canvas.getBoundingClientRect();
+    showTooltip(profile, e.global.x + canvasBounds.left, e.global.y + canvasBounds.top);
+  });
+  entity.on('pointermove', (e) => {
+    const canvasBounds = app.canvas.getBoundingClientRect();
+    showTooltip(profile, e.global.x + canvasBounds.left, e.global.y + canvasBounds.top);
+  });
+  entity.on('pointerout', () => hideTooltip());
 
   // Create sprite from texture
   const sprite = new Sprite(texture);

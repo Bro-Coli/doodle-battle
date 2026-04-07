@@ -257,6 +257,31 @@ canvas {
   border-color: #555555;
 }
 
+/* ───────────── Entity tooltip ───────────── */
+
+/* Tooltip shown on hover over a world entity */
+.entity-tooltip {
+  position: fixed;
+  background: #ffffff;
+  border: 1px solid #cccccc;
+  border-radius: 6px;
+  padding: 8px 12px;
+  font-size: 13px;
+  font-family: sans-serif;
+  line-height: 1.4;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  pointer-events: none; /* tooltip never intercepts mouse events */
+  z-index: 1000;
+  max-width: 250px;
+  color: #333333;
+}
+
+/* First line: entity name + archetype — rendered bold */
+.entity-tooltip__header {
+  font-weight: 700;
+  margin-bottom: 2px;
+}
+
 /* Mock mode badge: bottom-left, subtle */
 .mock-badge {
   position: fixed;
