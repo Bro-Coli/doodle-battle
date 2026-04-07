@@ -92,14 +92,11 @@ async function init(): Promise<void> {
     syncButtonState(); // restore correct state for action buttons
   };
 
-  // Wire action buttons
-  submitBtn.addEventListener('click', () => {
+  // Submit recognition flow — extracted so retry can call it
+  const submitRecognition = (dataUrl: string): void => {
+    overlay.showSpinner();
+    disableAllToolbar();
     void (async () => {
-      const dataUrl = exportPng(app, drawingCanvas.strokeContainerRef, drawingCanvas.region);
-      if (dataUrl === null) return; // safety guard — button should be disabled when empty anyway
-      // DO NOT clear canvas here — clear on card dismiss (locked decision)
-      overlay.showSpinner();
-      disableAllToolbar();
       try {
         const profile = await recognizeDrawing(dataUrl);
         overlay.showCard(profile, () => {
@@ -107,11 +104,21 @@ async function init(): Promise<void> {
           enableAllToolbar();
         });
       } catch {
-        overlay.showError('Recognition failed. Try again.', () => {
-          enableAllToolbar();
-        });
+        overlay.showError(
+          'Recognition failed. Try again.',
+          () => { enableAllToolbar(); },
+          () => { submitRecognition(dataUrl); },
+        );
       }
     })();
+  };
+
+  // Wire action buttons
+  submitBtn.addEventListener('click', () => {
+    const dataUrl = exportPng(app, drawingCanvas.strokeContainerRef, drawingCanvas.region);
+    if (dataUrl === null) return;
+    // DO NOT clear canvas here — clear on card dismiss (locked decision)
+    submitRecognition(dataUrl);
   });
 
   clearBtn.addEventListener('click', () => {

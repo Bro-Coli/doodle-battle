@@ -103,7 +103,7 @@ export class RecognitionOverlay {
     this.cardTimeoutId = setTimeout(dismiss, 5_000);
   }
 
-  showError(message: string, onDismiss: () => void): void {
+  showError(message: string, onDismiss: () => void, onRetry?: () => void): void {
     this.hideSpinner();
 
     const dismiss = (): void => {
@@ -125,7 +125,17 @@ export class RecognitionOverlay {
     const retryBtn = document.createElement('button');
     retryBtn.className = 'error-toast__retry';
     retryBtn.textContent = 'Retry';
-    retryBtn.addEventListener('click', dismiss);
+    retryBtn.addEventListener('click', () => {
+      if (this.toastEl) {
+        this.toastEl.remove();
+        this.toastEl = null;
+      }
+      if (onRetry) {
+        onRetry();
+      } else {
+        onDismiss();
+      }
+    });
 
     const closeBtn = document.createElement('button');
     closeBtn.className = 'error-toast__close';
