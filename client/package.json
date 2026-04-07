@@ -8,6 +8,7 @@
   },
   "dependencies": {
     "@crayon-world/shared": "workspace:*",
+    "pixi-filters": "^6.1.5",
     "pixi.js": "^8.16.0"
   },
   "devDependencies": {
