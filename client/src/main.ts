@@ -2,6 +2,7 @@ import './style.css';
 import { Application } from 'pixi.js';
 import { DrawingCanvas } from './drawing/DrawingCanvas';
 import { ThicknessPreset } from './drawing/StrokeRenderer';
+import { exportPng } from './drawing/exportPng';
 
 async function init(): Promise<void> {
   // PixiJS v8 pattern: create Application, then await app.init()
@@ -62,6 +63,14 @@ async function init(): Promise<void> {
   }
 
   // Wire action buttons
+  submitBtn.addEventListener('click', () => {
+    const dataUrl = exportPng(app, drawingCanvas.strokeContainerRef, drawingCanvas.region);
+    if (dataUrl === null) return; // safety guard — button should be disabled when empty anyway
+    console.log('Exported PNG:', dataUrl.substring(0, 80) + '...');
+    // Phase 3 will POST dataUrl to /api/recognize
+    drawingCanvas.clear(); // auto-clear after export — onChange handles button state
+  });
+
   clearBtn.addEventListener('click', () => {
     drawingCanvas.clear();
   });
