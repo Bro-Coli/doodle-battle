@@ -25,7 +25,7 @@ Requirements for the single-player proof of concept. Each maps to roadmap phases
 ### Entity System
 
 - [x] **ENTY-01**: Entity spawns as a distinct visual object on the canvas after recognition
-- [ ] **ENTY-02**: Entity moves according to its archetype (walking, flying, rooted, spreading, drifting, stationary)
+- [x] **ENTY-02**: Entity moves according to its archetype (walking, flying, rooted, spreading, drifting, stationary)
 - [x] **ENTY-03**: Multiple entities coexist on the canvas simultaneously
 - [x] **ENTY-04**: Entity name label floats above its sprite
 
@@ -93,7 +93,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | RECG-04 | Phase 3 | Complete |
 | RECG-05 | Phase 4 | Complete |
 | ENTY-01 | Phase 4 | Complete |
-| ENTY-02 | Phase 5 | Pending |
+| ENTY-02 | Phase 5 | Complete |
 | ENTY-03 | Phase 4 | Complete |
 | ENTY-04 | Phase 4 | Complete |
 | INFR-01 | Phase 1 | Complete |

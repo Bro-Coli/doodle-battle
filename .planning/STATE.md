@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: planning
-stopped_at: Phase 5 context gathered
-last_updated: "2026-04-07T07:28:25.200Z"
+stopped_at: Completed 05-entity-simulation 05-02-PLAN.md
+last_updated: "2026-04-07T07:50:58.813Z"
 last_activity: 2026-04-07 — Roadmap created, 5 phases, 16/16 requirements mapped
 progress:
   total_phases: 5
   completed_phases: 4
-  total_plans: 8
-  completed_plans: 8
+  total_plans: 11
+  completed_plans: 10
   percent: 0
 ---
 
@@ -58,6 +58,8 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 03-recognition-pipeline P02 | 45 | 2 tasks | 5 files |
 | Phase 04-entity-spawn-rendering P01 | 18 | 2 tasks | 6 files |
 | Phase 04-entity-spawn-rendering P02 | 15 | 2 tasks | 4 files |
+| Phase 05-entity-simulation P01 | 2 | 2 tasks | 6 files |
+| Phase 05-entity-simulation P02 | 3 | 3 tasks | 8 files |
 
 ## Accumulated Context
 
@@ -91,6 +93,11 @@ Recent decisions affecting current work:
 - [Phase 04-entity-spawn-rendering]: Entity tooltip uses create-on-show DOM pattern (same as RecognitionOverlay) — no persistent DOM nodes
 - [Phase 04-entity-spawn-rendering]: captureEntityTexture uses getLocalBounds() not getBounds() — PixiJS generateTexture operates in local space
 - [Phase 04-entity-spawn-rendering]: Name label Text resolution set to window.devicePixelRatio for crisp rendering on retina displays
+- [Phase 05-entity-simulation]: speed field clamped and rounded server-side so simulation engine receives clean integer 1-10
+- [Phase 05-entity-simulation]: missing or non-number speed defaults to 5 (neutral) rather than rejecting the entity
+- [Phase 05-entity-simulation]: Behavior functions use (state, dt, world) => state contract — pure, no PixiJS, Colyseus-compatible
+- [Phase 05-entity-simulation]: flyingBehavior tracks bobOriginY as real Y base to prevent vertical drift from sine bob
+- [Phase 05-entity-simulation]: EntitySimulation imports @crayon-world/shared alias not relative path to match client convention and avoid rootDir tsc error
 
 ### Pending Todos
 
@@ -103,6 +110,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-07T07:28:25.197Z
-Stopped at: Phase 5 context gathered
-Resume file: .planning/phases/05-entity-simulation/05-CONTEXT.md
+Last session: 2026-04-07T07:50:58.810Z
+Stopped at: Completed 05-entity-simulation 05-02-PLAN.md
+Resume file: None
