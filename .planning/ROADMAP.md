@@ -70,7 +70,10 @@ Plans:
   2. The entity's name label floats visibly above its sprite
   3. The entity's behavior profile (traits, role) is displayed to the player at spawn time
   4. Multiple entities from multiple draws coexist on the canvas simultaneously without replacing each other
-**Plans**: TBD
+**Plans:** 2 plans
+Plans:
+- [ ] 04-01-PLAN.md — World stage infrastructure, entity sprite rendering (texture capture, labels, shadows, fade-in)
+- [ ] 04-02-PLAN.md — Hover tooltips, multi-entity coexistence verification, visual checkpoint
 
 ### Phase 5: Entity Simulation
 **Goal**: Every entity on the canvas moves in a way that matches its real-world identity — a wolf walks, a bird flies, a tree stays rooted
@@ -92,5 +95,5 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 | 1. Infrastructure | 2/2 | Complete   | 2026-04-07 |
 | 2. Drawing Canvas | 2/2 | Complete    | 2026-04-07 |
 | 3. Recognition Pipeline | 2/2 | Complete    | 2026-04-07 |
-| 4. Entity Spawn & Rendering | 0/? | Not started | - |
+| 4. Entity Spawn & Rendering | 0/2 | Planning complete | - |
 | 5. Entity Simulation | 0/? | Not started | - |
