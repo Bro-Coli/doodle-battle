@@ -12,7 +12,7 @@ Five phases that build the draw-to-life pipeline from the ground up. Phase 1 lay
 
 Decimal phases appear between their surrounding integers in numeric order.
 
-- [ ] **Phase 1: Infrastructure** - Monorepo scaffold, API proxy, mock AI mode, browser-accessible with no login
+- [x] **Phase 1: Infrastructure** - Monorepo scaffold, API proxy, mock AI mode, browser-accessible with no login (completed 2026-04-07)
 - [ ] **Phase 2: Drawing Canvas** - Freehand drawing, smooth strokes, undo, clear, PNG export
 - [ ] **Phase 3: Recognition Pipeline** - Submit drawing to Claude Haiku, receive entity profile, loading and error states
 - [ ] **Phase 4: Entity Spawn & Rendering** - Entities appear on canvas with labels and behavior profile display
@@ -28,7 +28,7 @@ Decimal phases appear between their surrounding integers in numeric order.
   1. Opening the app URL in a browser loads a blank PixiJS canvas with no install or login required
   2. A POST to the API proxy returns a valid mock entity profile when `MOCK_AI=true` is set, with no Anthropic API key in the browser bundle
   3. The client/server/shared directory structure exists with typed interfaces in `shared/types.ts`
-**Plans:** 1/2 plans executed
+**Plans:** 2/2 plans complete
 Plans:
 - [ ] 01-01-PLAN.md — Scaffold monorepo with shared types and Express mock AI server
 - [ ] 01-02-PLAN.md — PixiJS client with full-viewport canvas, toolbar, and Vite dev proxy
@@ -83,7 +83,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Infrastructure | 1/2 | In Progress|  |
+| 1. Infrastructure | 2/2 | Complete   | 2026-04-07 |
 | 2. Drawing Canvas | 0/? | Not started | - |
 | 3. Recognition Pipeline | 0/? | Not started | - |
 | 4. Entity Spawn & Rendering | 0/? | Not started | - |

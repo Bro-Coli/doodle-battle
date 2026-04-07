@@ -33,7 +33,7 @@ Requirements for the single-player proof of concept. Each maps to roadmap phases
 
 - [x] **INFR-01**: Server-side API proxy keeps Anthropic API key secure
 - [x] **INFR-02**: Mock AI mode for development (hardcoded profiles, no API calls)
-- [ ] **INFR-03**: Browser-accessible with no login or install required
+- [x] **INFR-03**: Browser-accessible with no login or install required
 
 ## v2 Requirements
 
@@ -98,7 +98,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | ENTY-04 | Phase 4 | Pending |
 | INFR-01 | Phase 1 | Complete |
 | INFR-02 | Phase 1 | Complete |
-| INFR-03 | Phase 1 | Pending |
+| INFR-03 | Phase 1 | Complete |
 
 **Coverage:**
 - v1 requirements: 16 total
