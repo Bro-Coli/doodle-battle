@@ -83,28 +83,28 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| DRAW-01 | — | Pending |
-| DRAW-02 | — | Pending |
-| DRAW-03 | — | Pending |
-| DRAW-04 | — | Pending |
-| RECG-01 | — | Pending |
-| RECG-02 | — | Pending |
-| RECG-03 | — | Pending |
-| RECG-04 | — | Pending |
-| RECG-05 | — | Pending |
-| ENTY-01 | — | Pending |
-| ENTY-02 | — | Pending |
-| ENTY-03 | — | Pending |
-| ENTY-04 | — | Pending |
-| INFR-01 | — | Pending |
-| INFR-02 | — | Pending |
-| INFR-03 | — | Pending |
+| DRAW-01 | Phase 2 | Pending |
+| DRAW-02 | Phase 2 | Pending |
+| DRAW-03 | Phase 2 | Pending |
+| DRAW-04 | Phase 2 | Pending |
+| RECG-01 | Phase 3 | Pending |
+| RECG-02 | Phase 3 | Pending |
+| RECG-03 | Phase 3 | Pending |
+| RECG-04 | Phase 3 | Pending |
+| RECG-05 | Phase 4 | Pending |
+| ENTY-01 | Phase 4 | Pending |
+| ENTY-02 | Phase 5 | Pending |
+| ENTY-03 | Phase 4 | Pending |
+| ENTY-04 | Phase 4 | Pending |
+| INFR-01 | Phase 1 | Pending |
+| INFR-02 | Phase 1 | Pending |
+| INFR-03 | Phase 1 | Pending |
 
 **Coverage:**
 - v1 requirements: 16 total
-- Mapped to phases: 0
-- Unmapped: 16 ⚠️
+- Mapped to phases: 16
+- Unmapped: 0 ✓
 
 ---
 *Requirements defined: 2026-04-07*
-*Last updated: 2026-04-07 after initial definition*
+*Last updated: 2026-04-07 after roadmap creation*
