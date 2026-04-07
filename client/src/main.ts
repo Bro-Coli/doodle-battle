@@ -3,6 +3,8 @@ import { Application } from 'pixi.js';
 import { DrawingCanvas } from './drawing/DrawingCanvas';
 import { ThicknessPreset } from './drawing/StrokeRenderer';
 import { exportPng } from './drawing/exportPng';
+import { recognizeDrawing } from './recognition/recognizeApi';
+import { RecognitionOverlay } from './recognition/RecognitionOverlay';
 
 async function init(): Promise<void> {
   // PixiJS v8 pattern: create Application, then await app.init()
@@ -18,6 +20,9 @@ async function init(): Promise<void> {
   // Create drawing canvas and add to stage
   const drawingCanvas = new DrawingCanvas(app);
   app.stage.addChild(drawingCanvas.region);
+
+  // Recognition overlay (manages spinner, result card, error toast, mock badge)
+  const overlay = new RecognitionOverlay();
 
   // Create toolbar overlay
   const toolbar = document.createElement('div');
@@ -62,13 +67,51 @@ async function init(): Promise<void> {
     thicknessToggle.appendChild(btn);
   }
 
+  // Sync button enabled/disabled state based on canvas emptiness
+  // (declared here so disableAllToolbar/enableAllToolbar can reference it)
+  const syncButtonState = (): void => {
+    const empty = drawingCanvas.isEmpty;
+    submitBtn.disabled = empty;
+    clearBtn.disabled = empty;
+    undoBtn.disabled = empty;
+  };
+
+  const disableAllToolbar = (): void => {
+    submitBtn.disabled = true;
+    clearBtn.disabled = true;
+    undoBtn.disabled = true;
+    for (const preset of thicknessPresets) {
+      thicknessButtons[preset].disabled = true;
+    }
+  };
+
+  const enableAllToolbar = (): void => {
+    for (const preset of thicknessPresets) {
+      thicknessButtons[preset].disabled = false;
+    }
+    syncButtonState(); // restore correct state for action buttons
+  };
+
   // Wire action buttons
   submitBtn.addEventListener('click', () => {
-    const dataUrl = exportPng(app, drawingCanvas.strokeContainerRef, drawingCanvas.region);
-    if (dataUrl === null) return; // safety guard — button should be disabled when empty anyway
-    console.log('Exported PNG:', dataUrl.substring(0, 80) + '...');
-    // Phase 3 will POST dataUrl to /api/recognize
-    drawingCanvas.clear(); // auto-clear after export — onChange handles button state
+    void (async () => {
+      const dataUrl = exportPng(app, drawingCanvas.strokeContainerRef, drawingCanvas.region);
+      if (dataUrl === null) return; // safety guard — button should be disabled when empty anyway
+      // DO NOT clear canvas here — clear on card dismiss (locked decision)
+      overlay.showSpinner();
+      disableAllToolbar();
+      try {
+        const profile = await recognizeDrawing(dataUrl);
+        overlay.showCard(profile, () => {
+          drawingCanvas.clear();
+          enableAllToolbar();
+        });
+      } catch {
+        overlay.showError('Recognition failed. Try again.', () => {
+          enableAllToolbar();
+        });
+      }
+    })();
   });
 
   clearBtn.addEventListener('click', () => {
@@ -79,15 +122,19 @@ async function init(): Promise<void> {
     drawingCanvas.undo();
   });
 
-  // Sync button enabled/disabled state based on canvas emptiness
-  const syncButtonState = () => {
-    const empty = drawingCanvas.isEmpty;
-    submitBtn.disabled = empty;
-    clearBtn.disabled = empty;
-    undoBtn.disabled = empty;
-  };
-
   drawingCanvas.undoStack.onChange = syncButtonState;
+
+  // Detect mock mode at page load — show badge if running without API key
+  fetch('/api/recognize/status')
+    .then((r) => r.json())
+    .then((data: unknown) => {
+      if (data && typeof data === 'object' && 'mockMode' in data && (data as { mockMode: boolean }).mockMode) {
+        overlay.showMockBadge();
+      }
+    })
+    .catch(() => {
+      // Non-critical — swallow error
+    });
 
   // Keyboard shortcut: Ctrl+Z / Cmd+Z for undo
   document.addEventListener('keydown', (e) => {

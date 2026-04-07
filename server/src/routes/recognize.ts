@@ -76,4 +76,8 @@ router.post('/', async (req, res) => {
   }
 });
 
+router.get('/status', (_req, res) => {
+  res.json({ mockMode: isMockMode() });
+});
+
 export default router;
