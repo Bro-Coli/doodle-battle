@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: planning
-stopped_at: Phase 1 context gathered
-last_updated: "2026-04-07T02:39:43.167Z"
+stopped_at: Completed 01-infrastructure-01-PLAN.md
+last_updated: "2026-04-07T02:59:35.718Z"
 last_activity: 2026-04-07 — Roadmap created, 5 phases, 16/16 requirements mapped
 progress:
   total_phases: 5
   completed_phases: 0
-  total_plans: 0
-  completed_plans: 0
+  total_plans: 2
+  completed_plans: 1
   percent: 0
 ---
 
@@ -50,6 +50,7 @@ Progress: [░░░░░░░░░░] 0%
 - Trend: —
 
 *Updated after each plan completion*
+| Phase 01-infrastructure P01 | 12 | 2 tasks | 13 files |
 
 ## Accumulated Context
 
@@ -61,6 +62,8 @@ Recent decisions affecting current work:
 - Roadmap: 5 phases derived from 16 requirements — Infrastructure, Drawing Canvas, Recognition Pipeline, Entity Spawn & Rendering, Entity Simulation
 - Architecture: client/server/shared monorepo with shared TypeScript types — multiplayer-ready from day one
 - AI: MOCK_AI mode mandatory before any AI integration work begins
+- [Phase 01-infrastructure]: isMockMode() exported as named function (not const) so tests can stub process.env without module cache issues
+- [Phase 01-infrastructure]: Shared package main/types fields point to raw .ts source — no build step needed since tsx and vite handle it natively
 
 ### Pending Todos
 
@@ -73,6 +76,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-07T02:39:43.161Z
-Stopped at: Phase 1 context gathered
-Resume file: .planning/phases/01-infrastructure/01-CONTEXT.md
+Last session: 2026-04-07T02:59:35.716Z
+Stopped at: Completed 01-infrastructure-01-PLAN.md
+Resume file: None
