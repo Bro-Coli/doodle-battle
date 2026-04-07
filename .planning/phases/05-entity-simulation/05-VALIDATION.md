@@ -2,8 +2,8 @@
 phase: 5
 slug: entity-simulation
 status: draft
-nyquist_compliant: false
-wave_0_complete: false
+nyquist_compliant: true
+wave_0_complete: true
 created: 2026-04-07
 ---
 
@@ -40,9 +40,9 @@ created: 2026-04-07
 |---------|------|------|-------------|-----------|-------------------|-------------|--------|
 | 05-01-01 | 01 | 1 | ENTY-02 | unit | `pnpm run test -- --reporter=verbose tests/validateProfile.test.ts` | ✅ (extend) | ⬜ pending |
 | 05-01-02 | 01 | 1 | ENTY-02 | unit | `pnpm run test -- --reporter=verbose tests/mock.test.ts` | ✅ (extend) | ⬜ pending |
-| 05-02-01 | 02 | 1 | ENTY-02 | unit | `pnpm run test -- --reporter=verbose tests/behaviors.test.ts` | ❌ W0 | ⬜ pending |
-| 05-02-02 | 02 | 1 | ENTY-02 | unit | `pnpm run test -- --reporter=verbose tests/behaviors.test.ts` | ❌ W0 | ⬜ pending |
-| 05-02-03 | 02 | 1 | ENTY-02 | unit | `pnpm run test -- --reporter=verbose tests/behaviors.test.ts` | ❌ W0 | ⬜ pending |
+| 05-02-00 | 02 | 1 | ENTY-02 | unit | `pnpm run test -- tests/behaviors.test.ts` | ✅ (Wave 0 task creates it) | ⬜ pending |
+| 05-02-01 | 02 | 1 | ENTY-02 | type | `npx tsc --noEmit --project client/tsconfig.json` | ✅ (task creates it) | ⬜ pending |
+| 05-02-02 | 02 | 1 | ENTY-02 | unit | `pnpm run test -- tests/behaviors.test.ts --reporter=verbose` | ✅ (Wave 0) | ⬜ pending |
 
 *Status: ⬜ pending · ✅ green · ❌ red · ⚠️ flaky*
 
@@ -50,9 +50,9 @@ created: 2026-04-07
 
 ## Wave 0 Requirements
 
-- [ ] `server/tests/behaviors.test.ts` — stubs for behavior function tests (walking wander, flying arcs, spreading copy flag, wrap-around utility, drifting sine pattern)
-- [ ] Extend `server/tests/validateProfile.test.ts` — add test cases for `speed` field (valid, invalid, missing, out-of-range)
-- [ ] Extend `server/tests/mock.test.ts` — add assertion that all 6 mock entities have `speed` in [1, 10]
+- [x] `server/tests/behaviors.test.ts` — Plan 05-02 Task 0 creates this file with tests for: wrapPosition at all 4 edges, rooted originX no-drift, flying bobOriginY no-drift, spreading isACopy suppresses pendingSpawn, stationary returns same state reference, walking pauseTimer/walkTimer state machine transitions
+- [ ] Extend `server/tests/validateProfile.test.ts` — Plan 05-01 Task 2 adds test cases for `speed` field (valid, invalid, missing, out-of-range)
+- [ ] Extend `server/tests/mock.test.ts` — Plan 05-01 Task 2 adds assertion that all 6 mock entities have `speed` in [1, 10]
 
 ---
 
@@ -68,11 +68,11 @@ created: 2026-04-07
 
 ## Validation Sign-Off
 
-- [ ] All tasks have `<automated>` verify or Wave 0 dependencies
-- [ ] Sampling continuity: no 3 consecutive tasks without automated verify
-- [ ] Wave 0 covers all MISSING references
-- [ ] No watch-mode flags
-- [ ] Feedback latency < 5s
-- [ ] `nyquist_compliant: true` set in frontmatter
+- [x] All tasks have `<automated>` verify or Wave 0 dependencies
+- [x] Sampling continuity: no 3 consecutive tasks without automated verify
+- [x] Wave 0 covers all MISSING references
+- [x] No watch-mode flags
+- [x] Feedback latency < 5s
+- [x] `nyquist_compliant: true` set in frontmatter
 
 **Approval:** pending
