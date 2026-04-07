@@ -60,7 +60,10 @@ async function init(): Promise<void> {
     medium: 'Medium',
     thick: 'Thick',
   };
-  const thicknessButtons: Record<ThicknessPreset, HTMLButtonElement> = {} as Record<ThicknessPreset, HTMLButtonElement>;
+  const thicknessButtons: Record<ThicknessPreset, HTMLButtonElement> = {} as Record<
+    ThicknessPreset,
+    HTMLButtonElement
+  >;
 
   for (const preset of thicknessPresets) {
     const btn = document.createElement('button');
@@ -118,8 +121,12 @@ async function init(): Promise<void> {
       } catch {
         overlay.showError(
           'Recognition failed. Try again.',
-          () => { enableAllToolbar(); },
-          () => { submitRecognition(dataUrl); },
+          () => {
+            enableAllToolbar();
+          },
+          () => {
+            submitRecognition(dataUrl);
+          },
         );
       }
     })();
@@ -161,7 +168,12 @@ async function init(): Promise<void> {
   fetch('/api/recognize/status')
     .then((r) => r.json())
     .then((data: unknown) => {
-      if (data && typeof data === 'object' && 'mockMode' in data && (data as { mockMode: boolean }).mockMode) {
+      if (
+        data &&
+        typeof data === 'object' &&
+        'mockMode' in data &&
+        (data as { mockMode: boolean }).mockMode
+      ) {
         overlay.showMockBadge();
       }
     })

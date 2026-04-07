@@ -18,7 +18,9 @@ export function isMockMode(): boolean {
 router.post('/', async (req, res) => {
   // --- Mock mode ---
   if (isMockMode()) {
-    const entity = MOCK_ENTITIES[Math.floor(Math.random() * MOCK_ENTITIES.length)] satisfies EntityProfile;
+    const entity = MOCK_ENTITIES[
+      Math.floor(Math.random() * MOCK_ENTITIES.length)
+    ] satisfies EntityProfile;
     res.json(entity);
     return;
   }
@@ -42,13 +44,17 @@ router.post('/', async (req, res) => {
       messages: [
         {
           role: 'user',
-          content: buildUserContent(base64) as Parameters<typeof client.messages.create>[0]['messages'][0]['content'],
+          content: buildUserContent(base64) as Parameters<
+            typeof client.messages.create
+          >[0]['messages'][0]['content'],
         },
       ],
     });
 
     const rawText =
-      message.content[0]?.type === 'text' ? (message.content[0] as { type: 'text'; text: string }).text : '';
+      message.content[0]?.type === 'text'
+        ? (message.content[0] as { type: 'text'; text: string }).text
+        : '';
 
     // Try to extract JSON block in case of any preamble (pitfall 4)
     let parsed: unknown;

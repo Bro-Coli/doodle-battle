@@ -6,11 +6,7 @@ import { wrapPosition } from '../EntitySimulation';
  * Patrol wander: walk, pause, change direction.
  * Pure function — no mutation, no PixiJS imports.
  */
-export function updateWalking(
-  state: WalkingState,
-  dt: number,
-  world: WorldBounds,
-): WalkingState {
+export function updateWalking(state: WalkingState, dt: number, world: WorldBounds): WalkingState {
   const dtMs = dt * 1000;
 
   // Pausing — just decrement timer

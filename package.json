@@ -1,9 +1,23 @@
 {
   "name": "@crayon-world/root",
   "private": true,
+  "type": "module",
   "scripts": {
     "dev:client": "pnpm --filter @crayon-world/client dev",
     "dev:server": "pnpm --filter @crayon-world/server dev",
-    "test": "pnpm -r test --run"
+    "test": "pnpm -r test --run",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@vitest/eslint-plugin": "^1.6.14",
+    "eslint": "^10.2.0",
+    "eslint-config-prettier": "^10.1.8",
+    "globals": "^17.4.0",
+    "prettier": "^3.8.1",
+    "typescript-eslint": "^8.58.0"
   }
 }

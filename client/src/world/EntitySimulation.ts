@@ -103,12 +103,7 @@ export function mapSpeed(profileSpeed: number, minPx: number, maxPx: number): nu
 /**
  * Wrap a position inside world bounds (torus topology).
  */
-export function wrapPosition(
-  x: number,
-  y: number,
-  w: number,
-  h: number,
-): { x: number; y: number } {
+export function wrapPosition(x: number, y: number, w: number, h: number): { x: number; y: number } {
   return {
     x: x < 0 ? x + w : x > w ? x - w : x,
     y: y < 0 ? y + h : y > h ? y - h : y,
@@ -218,11 +213,7 @@ export function initEntityState(
  * Dispatch to the correct behavior function by archetype.
  * dt is in seconds (ticker.deltaMS / 1000).
  */
-export function dispatchBehavior(
-  state: EntityState,
-  dt: number,
-  world: WorldBounds,
-): EntityState {
+export function dispatchBehavior(state: EntityState, dt: number, world: WorldBounds): EntityState {
   switch (state.archetype) {
     case 'walking':
       return updateWalking(state, dt, world);

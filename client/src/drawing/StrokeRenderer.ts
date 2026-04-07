@@ -9,10 +9,7 @@ export const THICKNESS_PRESETS = {
 export type ThicknessPreset = keyof typeof THICKNESS_PRESETS;
 
 /** Smooth points by blending each with its neighbors. strength 0 = raw, 1 = max. */
-function smoothPoints(
-  pts: [number, number][],
-  strength: number,
-): [number, number][] {
+function smoothPoints(pts: [number, number][], strength: number): [number, number][] {
   if (strength <= 0 || pts.length < 3) return pts;
   const t = Math.min(strength, 1);
   const out: [number, number][] = [pts[0]];

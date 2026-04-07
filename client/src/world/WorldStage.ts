@@ -1,13 +1,8 @@
 import { Application, Container, Ticker, Texture } from 'pixi.js';
 import { EntityProfile } from '@crayon-world/shared/src/types';
 import { captureEntityTexture } from './captureEntityTexture';
-import { buildEntityContainer, EntityBuildResult } from './EntitySprite';
-import {
-  EntityState,
-  SpreadingState,
-  initEntityState,
-  dispatchBehavior,
-} from './EntitySimulation';
+import { buildEntityContainer } from './EntitySprite';
+import { EntityState, SpreadingState, initEntityState, dispatchBehavior } from './EntitySimulation';
 
 /**
  * WorldStage manages the dual-container architecture: draw mode / world mode.
@@ -116,7 +111,8 @@ export class WorldStage {
       // Horizontal flip for left/right, tilt up to ±45° for vertical movement.
       if (newState.archetype === 'walking' || newState.archetype === 'flying') {
         if (Math.abs(newState.vx) > 0.01) {
-          container.scale.x = newState.vx < 0 ? -Math.abs(container.scale.x) : Math.abs(container.scale.x);
+          container.scale.x =
+            newState.vx < 0 ? -Math.abs(container.scale.x) : Math.abs(container.scale.x);
         }
         const speed = Math.sqrt(newState.vx * newState.vx + newState.vy * newState.vy);
         if (speed > 0.01) {
@@ -160,7 +156,11 @@ export class WorldStage {
     const copyY = parentState.y + Math.sin(angle) * dist;
 
     // Build a copy using existing buildEntityContainer
-    const { entity: copyContainer, label: copyLabel, spriteHeight: copySpriteH } = buildEntityContainer(texture, profile, this._app);
+    const {
+      entity: copyContainer,
+      label: copyLabel,
+      spriteHeight: copySpriteH,
+    } = buildEntityContainer(texture, profile, this._app);
     copyContainer.x = copyX;
     copyContainer.y = copyY;
     copyLabel.x = copyX;

@@ -39,10 +39,7 @@ export function validateEntityProfile(raw: unknown): EntityProfile | null {
 
   // Speed: valid number in 1-10 clamped and rounded; non-number defaults to 5
   const rawSpeed = obj['speed'];
-  const speed =
-    typeof rawSpeed === 'number'
-      ? Math.round(Math.max(1, Math.min(10, rawSpeed)))
-      : 5;
+  const speed = typeof rawSpeed === 'number' ? Math.round(Math.max(1, Math.min(10, rawSpeed))) : 5;
 
   return {
     name: obj['name'] as string,

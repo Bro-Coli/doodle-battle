@@ -46,7 +46,10 @@ canvas {
   color: #aaaaaa;
   cursor: not-allowed;
   opacity: 0.55;
-  transition: background 0.15s, color 0.15s, opacity 0.15s;
+  transition:
+    background 0.15s,
+    color 0.15s,
+    opacity 0.15s;
   user-select: none;
 }
 
@@ -248,7 +251,10 @@ canvas {
   color: #ffffff;
   cursor: pointer;
   opacity: 1;
-  transition: background 0.15s, color 0.15s, border-color 0.15s;
+  transition:
+    background 0.15s,
+    color 0.15s,
+    border-color 0.15s;
   user-select: none;
 }
 

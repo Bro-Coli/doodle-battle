@@ -31,8 +31,7 @@ export function showTooltip(profile: EntityProfile, x: number, y: number): void 
     activeTooltip = el;
   }
 
-  const archetype =
-    profile.archetype.charAt(0).toUpperCase() + profile.archetype.slice(1);
+  const archetype = profile.archetype.charAt(0).toUpperCase() + profile.archetype.slice(1);
 
   // Build content
   const header = document.createElement('div');

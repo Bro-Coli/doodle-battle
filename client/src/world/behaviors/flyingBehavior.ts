@@ -6,17 +6,12 @@ import { wrapPosition } from '../EntitySimulation';
  * Smooth arcs with sine bob. bobOriginY tracks real Y without bob.
  * Pure function — no mutation, no PixiJS imports.
  */
-export function updateFlying(
-  state: FlyingState,
-  dt: number,
-  world: WorldBounds,
-): FlyingState {
+export function updateFlying(state: FlyingState, dt: number, world: WorldBounds): FlyingState {
   // Gradually turn
-  let heading = state.heading + state.angularVelocity * dt;
+  const heading = state.heading + state.angularVelocity * dt;
 
   // Occasionally flip arc direction (~every 3 seconds at 60fps)
-  const angularVelocity =
-    Math.random() < 0.005 ? -state.angularVelocity : state.angularVelocity;
+  const angularVelocity = Math.random() < 0.005 ? -state.angularVelocity : state.angularVelocity;
 
   // Update velocity from new heading
   const vx = Math.cos(heading) * state.speed;

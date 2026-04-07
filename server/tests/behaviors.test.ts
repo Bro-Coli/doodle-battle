@@ -1,9 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import {
-  wrapPosition,
-  initEntityState,
-  dispatchBehavior,
-} from '../../client/src/world/EntitySimulation';
+import { wrapPosition } from '../../client/src/world/EntitySimulation';
 import type {
   WalkingState,
   FlyingState,
