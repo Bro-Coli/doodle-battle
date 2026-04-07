@@ -3,25 +3,34 @@ import { DropShadowFilter } from 'pixi-filters';
 import { EntityProfile } from '@crayon-world/shared/src/types';
 import { showTooltip, hideTooltip } from './EntityTooltip';
 
+export interface EntityBuildResult {
+  entity: Container;
+  label: Container;
+  spriteHeight: number;
+}
+
 /**
- * Build an entity Container from a texture and profile.
+ * Build an entity Container and a separate label Container from a texture and profile.
  *
- * The returned Container owns:
+ * The entity Container owns:
  *  - A Sprite scaled to ~1:5 of original size (minimum 30px on smallest dimension)
  *  - A DropShadowFilter on the sprite for depth
- *  - A floating name label above the sprite
  *  - A fade-in animation over ~300ms
+ *
+ * The label Container is returned separately so it can be added as a sibling
+ * in the world root — it follows the entity position but is never affected by
+ * the entity's rotation or flip.
  *
  * @param texture - Transparent texture from captureEntityTexture
  * @param profile - Entity identity from the recognition pipeline
  * @param app - The PixiJS Application (needed for ticker)
- * @returns A Container ready to be added to the world
+ * @returns Entity container, label container, and sprite height for positioning
  */
 export function buildEntityContainer(
   texture: Texture,
   profile: EntityProfile,
   app: Application,
-): Container {
+): EntityBuildResult {
   const entity = new Container();
   entity.eventMode = 'static';
   entity.cursor = 'pointer';
@@ -54,8 +63,9 @@ export function buildEntityContainer(
 
   entity.addChild(sprite);
 
-  // Floating name label — positioned above the scaled sprite
-  const label = new Text({
+  // Floating name label — separate container, not a child of entity
+  const label = new Container();
+  const labelText = new Text({
     text: profile.name,
     style: new TextStyle({
       fontSize: 14,
@@ -64,25 +74,27 @@ export function buildEntityContainer(
     }),
     resolution: window.devicePixelRatio || 2,
   });
-  label.anchor.set(0.5, 1);
-  // sprite.height reflects the scale in v8
-  label.y = -(sprite.height / 2) - 6;
+  labelText.anchor.set(0.5, 1);
+  label.addChild(labelText);
 
-  entity.addChild(label);
+  const spriteHeight = sprite.height;
 
-  // Fade-in over ~300ms using app.ticker
+  // Fade-in over ~300ms using app.ticker — fade both entity and label together
   entity.alpha = 0;
+  label.alpha = 0;
   let elapsed = 0;
 
   const fadeIn = (ticker: Ticker): void => {
     elapsed += ticker.deltaMS;
-    entity.alpha = Math.min(1, elapsed / 300);
-    if (entity.alpha >= 1) {
+    const alpha = Math.min(1, elapsed / 300);
+    entity.alpha = alpha;
+    label.alpha = alpha;
+    if (alpha >= 1) {
       app.ticker.remove(fadeIn);
     }
   };
 
   app.ticker.add(fadeIn);
 
-  return entity;
+  return { entity, label, spriteHeight };
 }

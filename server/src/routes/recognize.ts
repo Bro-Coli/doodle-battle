@@ -71,7 +71,8 @@ router.post('/', async (req, res) => {
     }
     profileCache.set(cacheKey, profile);
     res.json(profile);
-  } catch {
+  } catch (err) {
+    console.error('Recognition error:', err);
     res.status(502).json({ error: 'Recognition failed' });
   }
 });
