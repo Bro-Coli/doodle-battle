@@ -16,24 +16,24 @@ import { updateStationary } from '../../client/src/world/behaviors/stationaryBeh
 const world = { width: 800, height: 600 };
 
 describe('wrapPosition', () => {
-  it('wraps x below 0 to x + width', () => {
+  it('clamps x below 0 to 0', () => {
     const result = wrapPosition(-10, 50, 800, 600);
-    expect(result).toEqual({ x: 790, y: 50 });
+    expect(result).toEqual({ x: 0, y: 50 });
   });
 
-  it('wraps x above width to x - width', () => {
+  it('clamps x above width to width', () => {
     const result = wrapPosition(810, 50, 800, 600);
-    expect(result).toEqual({ x: 10, y: 50 });
+    expect(result).toEqual({ x: 800, y: 50 });
   });
 
-  it('wraps y below 0 to y + height', () => {
+  it('clamps y below 0 to 0', () => {
     const result = wrapPosition(50, -10, 800, 600);
-    expect(result).toEqual({ x: 50, y: 590 });
+    expect(result).toEqual({ x: 50, y: 0 });
   });
 
-  it('wraps y above height to y - height', () => {
+  it('clamps y above height to height', () => {
     const result = wrapPosition(50, 610, 800, 600);
-    expect(result).toEqual({ x: 50, y: 10 });
+    expect(result).toEqual({ x: 50, y: 600 });
   });
 
   it('leaves values within bounds unchanged', () => {

@@ -101,14 +101,18 @@ export function mapSpeed(profileSpeed: number, minPx: number, maxPx: number): nu
 }
 
 /**
- * Wrap a position inside world bounds (torus topology).
+ * Clamp a position inside world bounds (solid borders).
+ * Entities stop at screen edges instead of wrapping around.
  */
-export function wrapPosition(x: number, y: number, w: number, h: number): { x: number; y: number } {
+export function clampPosition(x: number, y: number, w: number, h: number): { x: number; y: number } {
   return {
-    x: x < 0 ? x + w : x > w ? x - w : x,
-    y: y < 0 ? y + h : y > h ? y - h : y,
+    x: Math.max(0, Math.min(w, x)),
+    y: Math.max(0, Math.min(h, y)),
   };
 }
+
+/** @deprecated Use clampPosition instead. Kept for test compatibility. */
+export const wrapPosition = clampPosition;
 
 // ---------------------------------------------------------------------------
 // Factory

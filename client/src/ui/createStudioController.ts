@@ -28,6 +28,27 @@ export function createStudioController({
     isSubmitting: false,
     isMockMode: false,
     selectedThickness: 'medium',
+    roundPhase: worldStage.roundPhase,
+    entityCount: worldStage.entityCount,
+    roundOutcome: null,
+  };
+
+  // Wire round phase changes from WorldStage into React state
+  worldStage.onRoundPhaseChange = (phase) => {
+    if (phase === 'idle' && worldStage.lastOutcome) {
+      // Round just ended — show outcome card (stay in world view)
+      setState({
+        roundPhase: phase,
+        roundOutcome: worldStage.lastOutcome,
+        entityCount: worldStage.entityCount,
+      });
+    } else {
+      setState({
+        roundPhase: phase,
+        roundOutcome: null,
+        entityCount: worldStage.entityCount,
+      });
+    }
   };
 
   const emit = (): void => {
@@ -42,7 +63,7 @@ export function createStudioController({
   };
 
   const syncCanvasState = (): void => {
-    setState({ isCanvasEmpty: drawingCanvas.isEmpty });
+    setState({ isCanvasEmpty: drawingCanvas.isEmpty, entityCount: worldStage.entityCount });
   };
 
   const executeRecognition = (dataUrl: string): void => {
@@ -130,6 +151,26 @@ export function createStudioController({
 
       drawingCanvas.setThickness(preset);
       setState({ selectedThickness: preset });
+    },
+
+    startRound(): void {
+      if (state.roundPhase !== 'idle' || state.entityCount === 0) return;
+
+      // Auto-switch to world view
+      if (!state.isWorldMode) {
+        worldStage.toggle();
+        setState({ isWorldMode: true });
+      }
+
+      void worldStage.startRound();
+    },
+
+    dismissOutcome(): void {
+      // Switch back to draw mode and clear the outcome
+      if (state.isWorldMode) {
+        worldStage.toggle();
+      }
+      setState({ isWorldMode: false, roundOutcome: null, entityCount: worldStage.entityCount });
     },
 
     setMockMode(enabled: boolean): void {

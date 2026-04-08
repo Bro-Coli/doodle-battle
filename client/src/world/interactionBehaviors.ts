@@ -5,10 +5,13 @@ import type { InteractionMatrix, InteractionType } from '@crayon-world/shared/sr
 // Constants
 // ---------------------------------------------------------------------------
 
-export const DETECTION_RANGE = 200;
-export const FIGHT_PROXIMITY_PX = 30;
+/** Detection range as fraction of world diagonal (0.3 = 30% of diagonal) */
+export const DETECTION_RANGE_FRACTION = 0.3;
+/** Fight proximity as fraction of world diagonal */
+export const FIGHT_PROXIMITY_FRACTION = 0.02;
 export const FIGHT_COOLDOWN_MS = 2000;
-export const BEFRIEND_ARRIVE_RADIUS = 60;
+/** Befriend arrival damping radius as fraction of world diagonal */
+export const BEFRIEND_ARRIVE_FRACTION = 0.05;
 
 // ---------------------------------------------------------------------------
 // Steering result type
@@ -113,7 +116,7 @@ export function befriendPosition(
   ty: number,
   speed: number,
   dt: number,
-  arriveRadius: number = BEFRIEND_ARRIVE_RADIUS,
+  arriveRadius: number,
 ): SteeringResult {
   const dx = tx - sx;
   const dy = ty - sy;
@@ -243,6 +246,7 @@ export function applyInteractionSteering<T>(
   resolved: ResolvedInteraction<T>,
   targetState: EntityState,
   dt: number,
+  worldDiagonal: number,
 ): EntityState {
   // Extract speed — walking and flying have speed, others don't
   const speed = 'speed' in state && typeof (state as { speed?: unknown }).speed === 'number'
@@ -262,7 +266,7 @@ export function applyInteractionSteering<T>(
       steering = seekPosition(state.x, state.y, targetState.x, targetState.y, speed, dt);
       break;
     case 'befriend':
-      steering = befriendPosition(state.x, state.y, targetState.x, targetState.y, speed * 0.5, dt);
+      steering = befriendPosition(state.x, state.y, targetState.x, targetState.y, speed * 0.5, dt, worldDiagonal * BEFRIEND_ARRIVE_FRACTION);
       break;
     case 'ignore':
       // No steering for ignore

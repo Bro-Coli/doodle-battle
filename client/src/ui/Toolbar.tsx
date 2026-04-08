@@ -8,13 +8,16 @@ interface ToolbarProps {
   canUndo: boolean;
   canClear: boolean;
   canChangeThickness: boolean;
+  canStartRound: boolean;
   isWorldMode: boolean;
+  isRoundActive: boolean;
   isMockMode: boolean;
   selectedThickness: ThicknessPreset;
   onSubmit: () => void;
   onUndo: () => void;
   onClear: () => void;
   onToggleView: () => void;
+  onStartRound: () => void;
   onSetThickness: (preset: ThicknessPreset) => void;
 }
 
@@ -23,13 +26,16 @@ export function Toolbar({
   canUndo,
   canClear,
   canChangeThickness,
+  canStartRound,
   isWorldMode,
+  isRoundActive,
   isMockMode,
   selectedThickness,
   onSubmit,
   onUndo,
   onClear,
   onToggleView,
+  onStartRound,
   onSetThickness,
 }: ToolbarProps) {
   return (
@@ -38,11 +44,14 @@ export function Toolbar({
         canSubmit={canSubmit}
         canUndo={canUndo}
         canClear={canClear}
+        canStartRound={canStartRound}
         isWorldMode={isWorldMode}
+        isRoundActive={isRoundActive}
         onSubmit={onSubmit}
         onUndo={onUndo}
         onClear={onClear}
         onToggleView={onToggleView}
+        onStartRound={onStartRound}
       />
       <ThicknessToggle
         disabled={!canChangeThickness}

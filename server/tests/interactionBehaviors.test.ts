@@ -1,9 +1,9 @@
 import { describe, it, expect } from 'vitest';
 import {
-  DETECTION_RANGE,
-  FIGHT_PROXIMITY_PX,
+  DETECTION_RANGE_FRACTION,
+  FIGHT_PROXIMITY_FRACTION,
   FIGHT_COOLDOWN_MS,
-  BEFRIEND_ARRIVE_RADIUS,
+  BEFRIEND_ARRIVE_FRACTION,
   seekPosition,
   fleePosition,
   befriendPosition,
@@ -33,20 +33,20 @@ function makeMatrix(entries: Array<{ entityId: string; relationships: Record<str
 // ---------------------------------------------------------------------------
 
 describe('interactionBehaviors — constants', () => {
-  it('DETECTION_RANGE is 200', () => {
-    expect(DETECTION_RANGE).toBe(200);
+  it('DETECTION_RANGE_FRACTION is 0.3', () => {
+    expect(DETECTION_RANGE_FRACTION).toBe(0.3);
   });
 
-  it('FIGHT_PROXIMITY_PX is 30', () => {
-    expect(FIGHT_PROXIMITY_PX).toBe(30);
+  it('FIGHT_PROXIMITY_FRACTION is 0.02', () => {
+    expect(FIGHT_PROXIMITY_FRACTION).toBe(0.02);
   });
 
   it('FIGHT_COOLDOWN_MS is 2000', () => {
     expect(FIGHT_COOLDOWN_MS).toBe(2000);
   });
 
-  it('BEFRIEND_ARRIVE_RADIUS is 60', () => {
-    expect(BEFRIEND_ARRIVE_RADIUS).toBe(60);
+  it('BEFRIEND_ARRIVE_FRACTION is 0.05', () => {
+    expect(BEFRIEND_ARRIVE_FRACTION).toBe(0.05);
   });
 });
 
@@ -130,7 +130,7 @@ describe('fleePosition', () => {
 describe('befriendPosition', () => {
   it('moves toward target at full speed when far away', () => {
     // Distance = 200, arriveRadius = 60 => full speed
-    const result = befriendPosition(0, 0, 200, 0, 100, 1.0);
+    const result = befriendPosition(0, 0, 200, 0, 100, 1.0, 60);
     const seekResult = seekPosition(0, 0, 200, 0, 100, 1.0);
     // x should match seek (full speed)
     expect(result.x).toBeCloseTo(seekResult.x, 0);
@@ -139,7 +139,7 @@ describe('befriendPosition', () => {
   it('moves toward target at reduced speed when close (within arriveRadius)', () => {
     // Distance = 30, arriveRadius = 60 => speed scaled to 30/60 = 0.5
     const seek = seekPosition(0, 0, 30, 0, 100, 1.0);
-    const befriend = befriendPosition(0, 0, 30, 0, 100, 1.0);
+    const befriend = befriendPosition(0, 0, 30, 0, 100, 1.0, 60);
     // befriend x should be closer to 0 than seek x (slower movement)
     expect(befriend.x).toBeLessThan(seek.x);
     expect(befriend.x).toBeGreaterThan(0); // still moves toward target
@@ -154,7 +154,7 @@ describe('befriendPosition', () => {
   });
 
   it('returns zero velocity when at same position', () => {
-    const result = befriendPosition(50, 50, 50, 50, 100, 1.0);
+    const result = befriendPosition(50, 50, 50, 50, 100, 1.0, 60);
     expect(result.vx).toBe(0);
     expect(result.vy).toBe(0);
   });
@@ -409,35 +409,35 @@ describe('applyInteractionSteering', () => {
 
   it('chase uses seekPosition at entity speed', () => {
     const resolved = { type: 'chase' as InteractionType, targetContainer: {}, distance: 100 };
-    const result = applyInteractionSteering(walkingState, resolved, targetWalkingState, 1.0);
+    const result = applyInteractionSteering(walkingState, resolved, targetWalkingState, 1.0, 1000);
     const expectedSeek = seekPosition(0, 0, 100, 0, 80, 1.0);
     expect(result.x).toBeCloseTo(expectedSeek.x, 1);
   });
 
   it('flee uses fleePosition at entity speed * 1.1', () => {
     const resolved = { type: 'flee' as InteractionType, targetContainer: {}, distance: 100 };
-    const result = applyInteractionSteering(walkingState, resolved, targetWalkingState, 1.0);
+    const result = applyInteractionSteering(walkingState, resolved, targetWalkingState, 1.0, 1000);
     const expectedFlee = fleePosition(0, 0, 100, 0, 80 * 1.1, 1.0);
     expect(result.x).toBeCloseTo(expectedFlee.x, 1);
   });
 
   it('fight uses seekPosition at entity speed', () => {
     const resolved = { type: 'fight' as InteractionType, targetContainer: {}, distance: 100 };
-    const result = applyInteractionSteering(walkingState, resolved, targetWalkingState, 1.0);
+    const result = applyInteractionSteering(walkingState, resolved, targetWalkingState, 1.0, 1000);
     const expectedSeek = seekPosition(0, 0, 100, 0, 80, 1.0);
     expect(result.x).toBeCloseTo(expectedSeek.x, 1);
   });
 
   it('befriend uses befriendPosition at entity speed * 0.5', () => {
     const resolved = { type: 'befriend' as InteractionType, targetContainer: {}, distance: 100 };
-    const result = applyInteractionSteering(walkingState, resolved, targetWalkingState, 1.0);
-    const expectedBefriend = befriendPosition(0, 0, 100, 0, 80 * 0.5, 1.0);
+    const result = applyInteractionSteering(walkingState, resolved, targetWalkingState, 1.0, 1000);
+    const expectedBefriend = befriendPosition(0, 0, 100, 0, 80 * 0.5, 1.0, 1000 * 0.05);
     expect(result.x).toBeCloseTo(expectedBefriend.x, 1);
   });
 
   it('preserves archetype-specific fields', () => {
     const resolved = { type: 'chase' as InteractionType, targetContainer: {}, distance: 100 };
-    const result = applyInteractionSteering(walkingState, resolved, targetWalkingState, 1.0);
+    const result = applyInteractionSteering(walkingState, resolved, targetWalkingState, 1.0, 1000);
     const walkResult = result as WalkingState;
     expect(walkResult.archetype).toBe('walking');
     expect(walkResult.speed).toBe(80);
@@ -448,7 +448,7 @@ describe('applyInteractionSteering', () => {
 
   it('updates vx and vy for walking state', () => {
     const resolved = { type: 'chase' as InteractionType, targetContainer: {}, distance: 100 };
-    const result = applyInteractionSteering(walkingState, resolved, targetWalkingState, 1.0);
+    const result = applyInteractionSteering(walkingState, resolved, targetWalkingState, 1.0, 1000);
     const walkResult = result as WalkingState;
     expect(walkResult.vx).toBeCloseTo(80, 0); // chasing right at speed=80
     expect(walkResult.vy).toBeCloseTo(0, 1);
@@ -464,7 +464,7 @@ describe('applyInteractionSteering', () => {
     };
     const targetState: StationaryState = { archetype: 'stationary', x: 100, y: 0 };
     const resolved = { type: 'chase' as InteractionType, targetContainer: {}, distance: 100 };
-    const result = applyInteractionSteering(rootedState, resolved, targetState, 1.0);
+    const result = applyInteractionSteering(rootedState, resolved, targetState, 1.0, 1000);
     const seekResult = seekPosition(0, 0, 100, 0, 80, 1.0);
     expect(result.x).toBeCloseTo(seekResult.x, 1);
   });
@@ -484,7 +484,7 @@ describe('applyInteractionSteering', () => {
     };
     const targetState: StationaryState = { archetype: 'stationary', x: 100, y: 0 };
     const resolved = { type: 'chase' as InteractionType, targetContainer: {}, distance: 100 };
-    const result = applyInteractionSteering(flyingState, resolved, targetState, 1.0);
+    const result = applyInteractionSteering(flyingState, resolved, targetState, 1.0, 1000);
     const flyResult = result as FlyingState;
     expect(flyResult.vx).toBeCloseTo(100, 0);
     expect(flyResult.vy).toBeCloseTo(0, 1);
