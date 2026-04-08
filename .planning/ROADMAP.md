@@ -25,7 +25,7 @@ Full details: `.planning/milestones/v1.0-ROADMAP.md`
 **Milestone Goal:** Entities interact with each other based on AI-determined relationships, driven by a round-based system. The core loop becomes: draw entities, start round, watch them interact, survive, repeat.
 
 - [x] **Phase 6: Shared Types & Interaction Server Route** - New shared types and POST /api/interactions route with mock path (completed 2026-04-08)
-- [ ] **Phase 7: Round State Machine & Entity Removal** - RoundPhase enum, round lifecycle, safe entity removal infrastructure
+- [x] **Phase 7: Round State Machine & Entity Removal** - RoundPhase enum, round lifecycle, safe entity removal infrastructure (completed 2026-04-08)
 - [ ] **Phase 8: Interaction Behaviors** - Chase/flee/symbiosis/fight pure functions wired into the WorldStage game tick
 - [ ] **Phase 9: Round UI & End-to-End Integration** - InteractionOverlay with Start Round button, countdown, and outcome card
 
@@ -55,7 +55,7 @@ Plans:
   3. Calling `removeEntity()` on a defeated entity removes it from the PixiJS stage, all five WorldStage maps, and releases GPU texture references with no leaked state
   4. Entities marked as dying stop moving and no longer participate in interaction resolution
   5. Surviving entities remain in the world after a round ends and are present at the start of the next round
-**Plans:** 1/2 plans executed
+**Plans:** 2/2 plans complete
 Plans:
 - [ ] 07-01-PLAN.md — RoundPhase state machine, entity removal, fetchInteractions helper, RoundOverlay
 - [ ] 07-02-PLAN.md — Start Round button wiring, toolbar gating, view auto-switching, visual verification
@@ -93,6 +93,6 @@ Plans:
 | 4. Entity Spawn & Rendering | v1.0 | 2/2 | Complete | 2026-04-07 |
 | 5. Entity Simulation | v1.0 | 3/3 | Complete | 2026-04-07 |
 | 6. Shared Types & Interaction Server Route | 2/2 | Complete   | 2026-04-08 | - |
-| 7. Round State Machine & Entity Removal | 1/2 | In Progress|  | - |
+| 7. Round State Machine & Entity Removal | 2/2 | Complete   | 2026-04-08 | - |
 | 8. Interaction Behaviors | v1.1 | 0/? | Not started | - |
 | 9. Round UI & End-to-End Integration | v1.1 | 0/? | Not started | - |

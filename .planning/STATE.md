@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Entity Interactions & Rounds
 status: planning
-stopped_at: Completed 07-01-PLAN.md
-last_updated: "2026-04-08T05:20:23.201Z"
+stopped_at: "Checkpoint: Task 2 human-verify — 07-02-PLAN.md"
+last_updated: "2026-04-08T05:23:48.854Z"
 last_activity: 2026-04-07 — v1.1 roadmap created (Phases 6-9)
 progress:
   total_phases: 4
-  completed_phases: 1
+  completed_phases: 2
   total_plans: 4
-  completed_plans: 3
+  completed_plans: 4
   percent: 0
 ---
 
@@ -50,6 +50,7 @@ Progress: [░░░░░░░░░░] 0% (v1.1)
 | Phase 06-shared-types-interaction-server-route P01 | 10 | 2 tasks | 4 files |
 | Phase 06-shared-types-interaction-server-route P02 | 2min | 2 tasks | 3 files |
 | Phase 07-round-state-machine-entity-removal P01 | 2 | 2 tasks | 3 files |
+| Phase 07-round-state-machine-entity-removal P02 | 5 | 1 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -70,6 +71,8 @@ Key v1.1 decisions (from research):
 - [Phase 07-round-state-machine-entity-removal]: RoundPhase has no done state — _endRound() transitions simulating directly to idle
 - [Phase 07-round-state-machine-entity-removal]: removeEntity() deletes from all 5 maps before destroy() to prevent leaked GPU texture references
 - [Phase 07-round-state-machine-entity-removal]: fetchInteractions failure produces empty-entries fallback (all-ignore) rather than blocking the round
+- [Phase 07-round-state-machine-entity-removal]: viewToggleBtn locked during analyzing only — player can peek at draw mode during simulation
+- [Phase 07-round-state-machine-entity-removal]: syncStartRoundBtn called in both enableAllToolbar and card dismiss callback to cover all enable paths
 
 ### Pending Todos
 
@@ -83,6 +86,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-04-08T05:20:23.199Z
-Stopped at: Completed 07-01-PLAN.md
+Last session: 2026-04-08T05:23:48.852Z
+Stopped at: Checkpoint: Task 2 human-verify — 07-02-PLAN.md
 Resume file: None
