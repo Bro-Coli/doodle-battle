@@ -3,10 +3,14 @@ html,
 body {
   margin: 0;
   padding: 0;
-  overflow: hidden;
   width: 100vw;
   height: 100vh;
   background: #ffffff;
+}
+
+#app {
+  width: 100vw;
+  height: 100vh;
 }
 
 /* PixiJS canvas fills the full viewport */
@@ -14,6 +18,38 @@ canvas {
   display: block;
   width: 100vw;
   height: 100vh;
+}
+
+.game-root {
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.lobby {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  background: #ffffff;
+}
+
+.lobby__button {
+  border: 1px solid #b0b0b0;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #333333;
+  padding: 12px 20px;
+  font-family: sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.lobby__button:hover {
+  background: #f3f4f6;
 }
 
 /* Toolbar overlay */
