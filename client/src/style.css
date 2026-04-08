@@ -288,6 +288,51 @@ canvas {
   margin-bottom: 2px;
 }
 
+/* ───────────── Round UI ───────────── */
+
+/* Start Round button — green to stand out from standard toolbar buttons */
+#start-round {
+  background: #4a9;
+  color: white;
+  border: none;
+  padding: 6px 14px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 14px;
+  font-family: sans-serif;
+  letter-spacing: 0.03em;
+  opacity: 1;
+  transition: background 0.15s, opacity 0.15s;
+}
+
+#start-round:hover:not(:disabled) {
+  background: #3a8;
+}
+
+#start-round:disabled {
+  background: #ccc;
+  color: #888;
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+/* Round countdown badge — top-right corner during simulation */
+#round-countdown {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  background: rgba(0, 0, 0, 0.75);
+  color: white;
+  padding: 6px 14px;
+  border-radius: 6px;
+  font-family: sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  z-index: 100;
+  user-select: none;
+}
+
 /* Mock mode badge: bottom-left, subtle */
 .mock-badge {
   position: fixed;

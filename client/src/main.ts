@@ -5,7 +5,7 @@ import { ThicknessPreset } from './drawing/StrokeRenderer';
 import { exportPng } from './drawing/exportPng';
 import { recognizeDrawing } from './recognition/recognizeApi';
 import { RecognitionOverlay } from './recognition/RecognitionOverlay';
-import { WorldStage } from './world/WorldStage';
+import { WorldStage, RoundPhase } from './world/WorldStage';
 
 async function init(): Promise<void> {
   // PixiJS v8 pattern: create Application, then await app.init()
@@ -50,6 +50,12 @@ async function init(): Promise<void> {
   viewToggleBtn.textContent = 'World';
   viewToggleBtn.disabled = false;
 
+  // Start Round button — enabled only when entities exist and phase is idle
+  const startRoundBtn = document.createElement('button');
+  startRoundBtn.id = 'start-round';
+  startRoundBtn.textContent = 'Start Round';
+  startRoundBtn.disabled = true; // disabled until entities exist
+
   // Thickness toggle buttons
   const thicknessToggle = document.createElement('div');
   thicknessToggle.id = 'thickness-toggle';
@@ -89,10 +95,16 @@ async function init(): Promise<void> {
     undoBtn.disabled = empty;
   };
 
+  // Sync Start Round button — enabled only when entities exist and phase is idle
+  const syncStartRoundBtn = (): void => {
+    startRoundBtn.disabled = worldStage.entityCount === 0 || worldStage.roundPhase !== 'idle';
+  };
+
   const disableAllToolbar = (): void => {
     submitBtn.disabled = true;
     clearBtn.disabled = true;
     undoBtn.disabled = true;
+    startRoundBtn.disabled = true;
     for (const preset of thicknessPresets) {
       thicknessButtons[preset].disabled = true;
     }
@@ -103,6 +115,7 @@ async function init(): Promise<void> {
       thicknessButtons[preset].disabled = false;
     }
     syncButtonState(); // restore correct state for action buttons
+    syncStartRoundBtn(); // restore start round button based on entity count and phase
   };
 
   // Submit recognition flow — extracted so retry can call it
@@ -117,6 +130,7 @@ async function init(): Promise<void> {
           worldStage.spawnEntity(app, drawingCanvas.strokeContainerRef, profile);
           drawingCanvas.clear();
           enableAllToolbar();
+          syncStartRoundBtn(); // enable Start Round once first entity exists
         });
       } catch {
         overlay.showError(
@@ -162,6 +176,41 @@ async function init(): Promise<void> {
     }
   });
 
+  // Start Round click handler — triggers round lifecycle
+  startRoundBtn.addEventListener('click', () => {
+    if (worldStage.roundPhase !== 'idle' || worldStage.entityCount === 0) return;
+    startRoundBtn.disabled = true; // immediately disable to prevent double-click
+    // Auto-switch to world view per locked decision
+    if (!worldStage.inWorld) {
+      worldStage.toggle();
+      viewToggleBtn.textContent = 'Draw';
+    }
+    disableAllToolbar();
+    void worldStage.startRound();
+  });
+
+  // Wire round phase changes to UI — toolbar gating, view switching, button states
+  worldStage.onRoundPhaseChange = (phase: RoundPhase) => {
+    if (phase === 'idle') {
+      // Round ended — auto-switch back to draw mode per locked decision
+      if (worldStage.inWorld) {
+        worldStage.toggle();
+        viewToggleBtn.textContent = 'World';
+      }
+      viewToggleBtn.disabled = false;
+      enableAllToolbar();
+      syncStartRoundBtn();
+    }
+    // During analyzing: lock the view toggle so spinner stays visible
+    if (phase === 'analyzing') {
+      viewToggleBtn.disabled = true;
+    }
+    // During simulating: player can peek at draw mode
+    if (phase === 'simulating') {
+      viewToggleBtn.disabled = false;
+    }
+  };
+
   drawingCanvas.undoStack.onChange = syncButtonState;
 
   // Detect mock mode at page load — show badge if running without API key
@@ -195,6 +244,7 @@ async function init(): Promise<void> {
   toolbar.appendChild(clearBtn);
   toolbar.appendChild(undoBtn);
   toolbar.appendChild(viewToggleBtn);
+  toolbar.appendChild(startRoundBtn);
   toolbar.appendChild(thicknessToggle);
   document.body.appendChild(toolbar);
 }
