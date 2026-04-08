@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Multiplayer
 status: planning
-stopped_at: Completed 10-01-PLAN.md
-last_updated: "2026-04-08T14:13:59.718Z"
+stopped_at: Completed 10-02-PLAN.md
+last_updated: "2026-04-08T14:30:35.589Z"
 last_activity: 2026-04-08 — v2.0 roadmap written, 22 requirements mapped across 5 phases
 progress:
   total_phases: 12
-  completed_phases: 3
+  completed_phases: 4
   total_plans: 8
-  completed_plans: 7
+  completed_plans: 8
   percent: 0
 ---
 
@@ -50,6 +50,7 @@ Progress: [░░░░░░░░░░] 0%
 | 13. Game Phase Lifecycle & Draw Relay | v2.0 | TBD |
 | 14. Win Condition & End-to-End | v2.0 | TBD |
 | Phase 10 P01 | 175 | 3 tasks | 16 files |
+| Phase 10-networking-infrastructure P02 | 60 | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -63,6 +64,8 @@ Recent decisions affecting current work:
 - Architecture explicitly designed for Colyseus without rewrite (confirmed in PROJECT.md)
 - [Phase 10]: Simulation behavior functions moved to shared/ making them importable by both server and client without refactor
 - [Phase 10]: Colyseus 0.17 integrated via Server class + WebSocketTransport sharing port 3001 with Express; experimentalDecorators only in server/tsconfig.json
+- [Phase 10-networking-infrastructure]: Colyseus 0.17: use onStateChange (not state.listen) and manual matchmake route (not defineServer) to avoid tsx class-name stripping bug
+- [Phase 10-networking-infrastructure]: CORS must use regex localhost pattern with credentials: true for Colyseus HTTP upgrade handshake in cross-origin dev
 
 ### Pending Todos
 
@@ -75,6 +78,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-08T14:13:59.715Z
-Stopped at: Completed 10-01-PLAN.md
+Last session: 2026-04-08T14:30:35.587Z
+Stopped at: Completed 10-02-PLAN.md
 Resume file: None

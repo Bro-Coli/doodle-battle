@@ -120,7 +120,7 @@ Plans:
 
 **Milestone Goal:** Turn the single-player PoC into a real-time multiplayer game with lobbies, teams, synchronized draw/simulate phases, and server-authoritative simulation via Colyseus.
 
-- [ ] **Phase 10: Networking Infrastructure** - Colyseus server integrated alongside Express; shared simulation module; state sync via binary patches
+- [x] **Phase 10: Networking Infrastructure** - Colyseus server integrated alongside Express; shared simulation module; state sync via binary patches (completed 2026-04-08)
 - [ ] **Phase 11: Lobby & Players** - Players create/join rooms with a 4-char code, see connected players, get auto-assigned to balanced teams, and host can start when ready
 - [ ] **Phase 12: Server-Authoritative Simulation** - Entity simulation moves to the Colyseus server; clients render from Schema patches without running local simulation
 - [ ] **Phase 13: Game Phase Lifecycle & Draw Relay** - Synchronized draw/simulate phases with countdown timer; drawings submitted and hidden until reveal; all entities revealed simultaneously
@@ -136,7 +136,7 @@ Plans:
   1. Opening the app while the server runs shows a browser connection to Colyseus without errors, and existing `/api/recognize` routes still respond correctly
   2. A Colyseus room Schema update on the server produces a binary patch that a connected client receives and applies without writing custom serialization code
   3. Behavior functions from `shared/` can be imported by both the Colyseus server simulation loop and the client rendering code without circular dependency errors
-**Plans:** 1/2 plans executed
+**Plans:** 2/2 plans complete
 Plans:
 - [ ] 10-01-PLAN.md — Move simulation to shared package, install Colyseus, rewire server
 - [ ] 10-02-PLAN.md — Client Colyseus SDK connection and binary patch sync verification
@@ -199,7 +199,7 @@ Phases execute in numeric order: 10 → 11 → 12 → 13 → 14
 | 5. Entity Simulation | v1.0 | 3/3 | Complete | 2026-04-07 |
 | 6. React Control Surface | v1.2 | 1/2 | Complete | 2026-04-08 |
 | 7. React Overlay Parity | v1.2 | 0/0 | Complete | 2026-04-08 |
-| 10. Networking Infrastructure | 1/2 | In Progress|  | — |
+| 10. Networking Infrastructure | 2/2 | Complete   | 2026-04-08 | — |
 | 11. Lobby & Players | v2.0 | 0/TBD | Not started | — |
 | 12. Server-Authoritative Simulation | v2.0 | 0/TBD | Not started | — |
 | 13. Game Phase Lifecycle & Draw Relay | v2.0 | 0/TBD | Not started | — |

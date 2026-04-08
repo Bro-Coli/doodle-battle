@@ -10,7 +10,7 @@ Requirements for Colyseus multiplayer. Each maps to roadmap phases.
 ### Networking Infrastructure
 
 - [x] **NTWK-01**: Colyseus server runs alongside Express on the same port, existing `/api/recognize` and `/api/interactions` routes still work
-- [ ] **NTWK-02**: Schema state syncs from server to all connected clients via Colyseus binary patches
+- [x] **NTWK-02**: Schema state syncs from server to all connected clients via Colyseus binary patches
 - [x] **NTWK-03**: Behavior functions live in `shared/` and are importable by both server simulation and client code
 
 ### Lobby & Matchmaking
@@ -86,7 +86,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | Requirement | Phase | Status |
 |-------------|-------|--------|
 | NTWK-01 | Phase 10 | Complete |
-| NTWK-02 | Phase 10 | Pending |
+| NTWK-02 | Phase 10 | Complete |
 | NTWK-03 | Phase 10 | Complete |
 | LBBY-01 | Phase 11 | Pending |
 | LBBY-02 | Phase 11 | Pending |
