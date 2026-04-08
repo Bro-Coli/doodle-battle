@@ -136,7 +136,7 @@ Plans:
   1. Opening the app while the server runs shows a browser connection to Colyseus without errors, and existing `/api/recognize` routes still respond correctly
   2. A Colyseus room Schema update on the server produces a binary patch that a connected client receives and applies without writing custom serialization code
   3. Behavior functions from `shared/` can be imported by both the Colyseus server simulation loop and the client rendering code without circular dependency errors
-**Plans:** 2 plans
+**Plans:** 1/2 plans executed
 Plans:
 - [ ] 10-01-PLAN.md — Move simulation to shared package, install Colyseus, rewire server
 - [ ] 10-02-PLAN.md — Client Colyseus SDK connection and binary patch sync verification
@@ -199,7 +199,7 @@ Phases execute in numeric order: 10 → 11 → 12 → 13 → 14
 | 5. Entity Simulation | v1.0 | 3/3 | Complete | 2026-04-07 |
 | 6. React Control Surface | v1.2 | 1/2 | Complete | 2026-04-08 |
 | 7. React Overlay Parity | v1.2 | 0/0 | Complete | 2026-04-08 |
-| 10. Networking Infrastructure | v2.0 | 0/2 | Not started | — |
+| 10. Networking Infrastructure | 1/2 | In Progress|  | — |
 | 11. Lobby & Players | v2.0 | 0/TBD | Not started | — |
 | 12. Server-Authoritative Simulation | v2.0 | 0/TBD | Not started | — |
 | 13. Game Phase Lifecycle & Draw Relay | v2.0 | 0/TBD | Not started | — |
