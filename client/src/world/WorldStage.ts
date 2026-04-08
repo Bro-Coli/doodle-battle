@@ -5,6 +5,7 @@ import { buildEntityContainer } from './EntitySprite';
 import { EntityState, SpreadingState, initEntityState, dispatchBehavior } from './EntitySimulation';
 import { fetchInteractions } from './fetchInteractions';
 import { RoundOverlay } from './RoundOverlay';
+import { resolveInteraction, applyInteractionSteering, DETECTION_RANGE, FIGHT_PROXIMITY_PX, FIGHT_COOLDOWN_MS } from './interactionBehaviors';
 
 /**
  * Round lifecycle phases.
@@ -45,6 +46,9 @@ export class WorldStage {
   private readonly _entityProfiles = new Map<Container, EntityProfile>();
   private readonly _entityLabels = new Map<Container, Container>();
   private readonly _entitySpriteHeights = new Map<Container, number>();
+  private readonly _entityHp = new Map<Container, number>();
+  private readonly _nameIdMap = new Map<string, string>();
+  private readonly _fightCooldowns = new Map<string, number>();
 
   constructor(app: Application) {
     this._app = app;
@@ -131,6 +135,7 @@ export class WorldStage {
     this._entityProfiles.set(entity, profile);
     this._entityLabels.set(entity, label);
     this._entitySpriteHeights.set(entity, spriteHeight);
+    this._entityHp.set(entity, 1);
   }
 
   /**
@@ -144,11 +149,48 @@ export class WorldStage {
     const dt = ticker.deltaMS / 1000;
     const world = { width: this._app.screen.width, height: this._app.screen.height };
 
+    // Decrement fight cooldowns
+    for (const [key, remaining] of this._fightCooldowns) {
+      const next = remaining - ticker.deltaMS;
+      if (next <= 0) this._fightCooldowns.delete(key);
+      else this._fightCooldowns.set(key, next);
+    }
+
     for (const [container, state] of this._entityStates) {
       // Skip dying entities — they are handled by their own fade-out ticker callback
       if (this._dyingEntities.has(container)) continue;
 
-      const newState = dispatchBehavior(state, dt, world);
+      const isMovable = state.archetype !== 'rooted' && state.archetype !== 'stationary';
+
+      const resolved = (this._interactionMatrix && isMovable)
+        ? resolveInteraction(
+            container,
+            this._entityStates,
+            this._entityProfiles,
+            this._dyingEntities,
+            this._interactionMatrix,
+            this._nameIdMap,
+            DETECTION_RANGE,
+          )
+        : null;
+
+      let newState: EntityState;
+
+      if (resolved) {
+        const targetState = this._entityStates.get(resolved.targetContainer);
+        if (targetState) {
+          newState = applyInteractionSteering(state, resolved, targetState, dt);
+
+          // Fight contact check — 'chase' means predator caught prey; 'fight' means hostile contact
+          if ((resolved.type === 'fight' || resolved.type === 'chase') && resolved.distance < FIGHT_PROXIMITY_PX) {
+            this._handleFightContact(container, resolved.targetContainer);
+          }
+        } else {
+          newState = dispatchBehavior(state, dt, world);
+        }
+      } else {
+        newState = dispatchBehavior(state, dt, world);
+      }
 
       // Write position to container
       container.x = newState.x;
@@ -226,6 +268,51 @@ export class WorldStage {
     this._entityProfiles.set(copyContainer, profile);
     this._entityLabels.set(copyContainer, copyLabel);
     this._entitySpriteHeights.set(copyContainer, copySpriteH);
+    this._entityHp.set(copyContainer, 1);
+  }
+
+  // ─── Interaction helpers ──────────────────────────────────────────────────
+
+  /**
+   * Build a stable name→ID map for all unique entity profiles currently in the world.
+   * Called after the interaction matrix is fetched so IDs match what AI assigned.
+   */
+  private _buildNameIdMap(profiles: EntityProfile[]): void {
+    const seen = new Set<string>();
+    const unique: EntityProfile[] = [];
+    for (const p of profiles) {
+      if (!seen.has(p.name)) { seen.add(p.name); unique.push(p); }
+    }
+    this._nameIdMap.clear();
+    unique.forEach((p, i) => this._nameIdMap.set(p.name, String(i)));
+  }
+
+  /**
+   * Resolve a fight contact between attacker and target.
+   * Reduces target HP by 1; if HP reaches 0, removes target.
+   * Applies a cooldown per attacker-target pair to prevent instant multi-hits.
+   */
+  private _handleFightContact(attackerContainer: Container, targetContainer: Container): void {
+    const attackerProfile = this._entityProfiles.get(attackerContainer);
+    const targetProfile = this._entityProfiles.get(targetContainer);
+    if (!attackerProfile || !targetProfile) return;
+
+    const attackerId = this._nameIdMap.get(attackerProfile.name);
+    const targetId = this._nameIdMap.get(targetProfile.name);
+    if (!attackerId || !targetId) return;
+
+    const cooldownKey = `${attackerId}:${targetId}`;
+    if (this._fightCooldowns.has(cooldownKey)) return; // on cooldown
+
+    const currentHp = this._entityHp.get(targetContainer) ?? 1;
+    const newHp = currentHp - 1;
+    this._entityHp.set(targetContainer, newHp);
+
+    if (newHp <= 0) {
+      this.removeEntity(targetContainer);
+    }
+
+    this._fightCooldowns.set(cooldownKey, FIGHT_COOLDOWN_MS);
   }
 
   // ─── Round lifecycle ──────────────────────────────────────────────────────
@@ -251,9 +338,13 @@ export class WorldStage {
     try {
       const matrix = await fetchInteractions(profiles);
       this._interactionMatrix = matrix;
+      this._buildNameIdMap(profiles);
+      this._fightCooldowns.clear();
     } catch (err) {
       console.warn('[WorldStage] fetchInteractions failed, using empty fallback:', err);
       this._interactionMatrix = { entries: [] };
+      this._buildNameIdMap(profiles);
+      this._fightCooldowns.clear();
     }
 
     this._roundOverlay.hideAnalyzingSpinner();
@@ -275,6 +366,8 @@ export class WorldStage {
     }
     this._roundOverlay.stopCountdown();
     this._interactionMatrix = null;
+    this._nameIdMap.clear();
+    this._fightCooldowns.clear();
     this._roundPhase = 'idle';
     this._onRoundPhaseChange?.(this._roundPhase);
   }
@@ -309,12 +402,13 @@ export class WorldStage {
       if (alpha <= 0) {
         this._app.ticker.remove(fadeOut);
 
-        // Delete from all 5 maps BEFORE destroy() to prevent leaked texture references
+        // Delete from all maps BEFORE destroy() to prevent leaked texture references
         this._entityStates.delete(container);
         this._entityTextures.delete(container);
         this._entityProfiles.delete(container);
         this._entityLabels.delete(container);
         this._entitySpriteHeights.delete(container);
+        this._entityHp.delete(container);
         this._dyingEntities.delete(container);
 
         label?.destroy({ children: true });
