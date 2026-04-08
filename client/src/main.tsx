@@ -8,6 +8,9 @@ import { initStyle } from './style';
 
 import './style.css';
 
+// Side-effect import: registers window.__verifyColyseusSync for Phase 10 verification
+import './network/ColyseusClient';
+
 /* --------------------------------------------------
  *   Initializing Phase
  * ----------------------------------------------- */

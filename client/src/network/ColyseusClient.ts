@@ -20,9 +20,11 @@ export async function connectToRoom(roomName: string = 'game_room'): Promise<Roo
 export async function verifySync(): Promise<void> {
   const room = await connectToRoom();
   console.log('[Colyseus] Connected to room:', room.id);
+  console.log('[Colyseus] Initial state:', JSON.stringify(room.state));
 
-  room.state.listen('tick', (value: number) => {
-    console.log('[Colyseus] tick:', value);
+  // Try multiple listener approaches for 0.17 compatibility
+  room.onStateChange((state: any) => {
+    console.log('[Colyseus] state changed — tick:', state?.tick);
   });
 
   // Auto-leave after 10 seconds
