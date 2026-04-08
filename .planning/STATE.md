@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Entity Interactions & Rounds
 status: planning
-stopped_at: Phase 9 context gathered
-last_updated: "2026-04-08T07:41:53.697Z"
+stopped_at: Completed 09-01-PLAN.md
+last_updated: "2026-04-08T08:18:55.812Z"
 last_activity: 2026-04-07 — v1.1 roadmap created (Phases 6-9)
 progress:
   total_phases: 4
-  completed_phases: 3
-  total_plans: 6
-  completed_plans: 6
+  completed_phases: 4
+  total_plans: 7
+  completed_plans: 7
   percent: 0
 ---
 
@@ -53,6 +53,7 @@ Progress: [░░░░░░░░░░] 0% (v1.1)
 | Phase 07-round-state-machine-entity-removal P02 | 5 | 1 tasks | 2 files |
 | Phase 08-interaction-behaviors P01 | 2 | 3 tasks | 2 files |
 | Phase 08-interaction-behaviors P02 | 30 | 2 tasks | 1 files |
+| Phase 09-round-ui-end-to-end-integration P01 | 25 | 3 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -82,6 +83,9 @@ Key v1.1 decisions (from research):
 - [Phase 08-interaction-behaviors]: Solid bounce-off-edge walls replace wrap-around — entities stay in view and interactions are visually legible
 - [Phase 08-interaction-behaviors]: All distance constants converted to world-diagonal fractions for scale-independence across canvas sizes
 - [Phase 08-interaction-behaviors]: 0.5s bounce cooldown suppresses interaction steering after wall collision to prevent corner trapping
+- [Phase 09-round-ui-end-to-end-integration]: Outcome card uses no auto-dismiss timer — player reads at their own pace
+- [Phase 09-round-ui-end-to-end-integration]: WorldStage.showRoundOutcome() encapsulates overlay — main.ts never holds a RoundOverlay reference
+- [Phase 09-round-ui-end-to-end-integration]: All toolbar re-enable logic deferred into dismiss callback — toolbar stays locked during outcome card display
 
 ### Pending Todos
 
@@ -95,6 +99,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-04-08T07:41:53.694Z
-Stopped at: Phase 9 context gathered
-Resume file: .planning/phases/09-round-ui-end-to-end-integration/09-CONTEXT.md
+Last session: 2026-04-08T08:18:55.810Z
+Stopped at: Completed 09-01-PLAN.md
+Resume file: None

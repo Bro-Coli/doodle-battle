@@ -27,7 +27,7 @@ Full details: `.planning/milestones/v1.0-ROADMAP.md`
 - [x] **Phase 6: Shared Types & Interaction Server Route** - New shared types and POST /api/interactions route with mock path (completed 2026-04-08)
 - [x] **Phase 7: Round State Machine & Entity Removal** - RoundPhase enum, round lifecycle, safe entity removal infrastructure (completed 2026-04-08)
 - [x] **Phase 8: Interaction Behaviors** - Chase/flee/symbiosis/fight pure functions wired into the WorldStage game tick (completed 2026-04-08)
-- [ ] **Phase 9: Round UI & End-to-End Integration** - InteractionOverlay with Start Round button, countdown, and outcome card
+- [x] **Phase 9: Round UI & End-to-End Integration** - InteractionOverlay with Start Round button, countdown, and outcome card (completed 2026-04-08)
 
 ## Phase Details
 
@@ -84,7 +84,7 @@ Plans:
   2. The UI clearly shows each round phase — a spinner during AI analysis, a countdown timer during simulation, and a summary card at round end
   3. The complete loop is playable: draw → start round → analyze → simulate → outcome → draw more → start round again
   4. Double-clicking Start Round does not trigger multiple analysis calls
-**Plans:** 1 plan
+**Plans:** 1/1 plans complete
 Plans:
 - [ ] 09-01-PLAN.md — Outcome card, delayed draw-mode switch, E2E round lifecycle verification
 
@@ -100,4 +100,4 @@ Plans:
 | 6. Shared Types & Interaction Server Route | 2/2 | Complete   | 2026-04-08 | - |
 | 7. Round State Machine & Entity Removal | 2/2 | Complete   | 2026-04-08 | - |
 | 8. Interaction Behaviors | 2/2 | Complete   | 2026-04-08 | - |
-| 9. Round UI & End-to-End Integration | v1.1 | 0/1 | Planning | - |
+| 9. Round UI & End-to-End Integration | 1/1 | Complete   | 2026-04-08 | - |
