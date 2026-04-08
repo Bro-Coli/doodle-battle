@@ -192,14 +192,16 @@ async function init(): Promise<void> {
   // Wire round phase changes to UI — toolbar gating, view switching, button states
   worldStage.onRoundPhaseChange = (phase: RoundPhase) => {
     if (phase === 'idle') {
-      // Round ended — auto-switch back to draw mode per locked decision
-      if (worldStage.inWorld) {
-        worldStage.toggle();
-        viewToggleBtn.textContent = 'World';
-      }
-      viewToggleBtn.disabled = false;
-      enableAllToolbar();
-      syncStartRoundBtn();
+      // Show outcome card; defer mode switch + toolbar re-enable to dismiss
+      worldStage.showRoundOutcome(() => {
+        if (worldStage.inWorld) {
+          worldStage.toggle();
+          viewToggleBtn.textContent = 'World';
+        }
+        viewToggleBtn.disabled = false;
+        enableAllToolbar();
+        syncStartRoundBtn();
+      });
     }
     // During analyzing: lock the view toggle so spinner stays visible
     if (phase === 'analyzing') {
