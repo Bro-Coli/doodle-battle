@@ -12,15 +12,16 @@ export class RecognitionOverlay {
     if (this.spinnerEl) return;
 
     const overlay = document.createElement('div');
-    overlay.className = 'spinner-overlay';
+    overlay.className =
+      'fixed inset-0 z-20 flex flex-col items-center justify-center gap-4 bg-white/65';
 
     const spinner = document.createElement('div');
-    spinner.className = 'spinner';
+    spinner.className =
+      'h-10 w-10 animate-spin rounded-full border-4 border-neutral-300 border-t-neutral-800';
 
     const timeoutMsg = document.createElement('div');
-    timeoutMsg.className = 'spinner-timeout-msg';
+    timeoutMsg.className = 'hidden text-[13px] text-neutral-500';
     timeoutMsg.textContent = 'Taking longer than expected...';
-    timeoutMsg.style.display = 'none';
 
     overlay.appendChild(spinner);
     overlay.appendChild(timeoutMsg);
@@ -30,7 +31,7 @@ export class RecognitionOverlay {
 
     // Soft timeout: show message after 10 seconds
     this.spinnerTimeoutId = setTimeout(() => {
-      timeoutMsg.style.display = 'block';
+      timeoutMsg.classList.remove('hidden');
     }, 10_000);
   }
 
@@ -64,28 +65,30 @@ export class RecognitionOverlay {
     };
 
     const card = document.createElement('div');
-    card.className = 'result-card';
+    card.className =
+      'fixed top-1/2 left-1/2 z-30 min-w-[260px] max-w-[400px] -translate-x-1/2 -translate-y-1/2 cursor-pointer rounded-xl border border-neutral-300 bg-white px-9 py-7 text-center shadow-[0_8px_32px_rgba(0,0,0,0.18)] select-none';
     card.setAttribute('role', 'dialog');
     card.setAttribute('aria-label', `Entity: ${profile.name}`);
 
     const nameEl = document.createElement('div');
-    nameEl.className = 'result-card__name';
+    nameEl.className = 'mb-2.5 text-2xl font-bold text-neutral-950';
     nameEl.textContent = profile.name;
 
     const archetypeEl = document.createElement('div');
-    archetypeEl.className = 'result-card__archetype';
+    archetypeEl.className =
+      'mb-3.5 inline-block rounded bg-neutral-800 px-2.5 py-0.5 text-[0.7em] font-bold tracking-[0.1em] text-white uppercase';
     archetypeEl.textContent = profile.archetype.toUpperCase();
 
     const traitsEl = document.createElement('div');
-    traitsEl.className = 'result-card__traits';
+    traitsEl.className = 'mb-2.5 text-[0.9em] italic text-neutral-600';
     traitsEl.textContent = profile.traits.join(', ');
 
     const roleEl = document.createElement('div');
-    roleEl.className = 'result-card__role';
+    roleEl.className = 'mb-4 text-[0.95em] text-neutral-700';
     roleEl.textContent = profile.role;
 
     const hintEl = document.createElement('div');
-    hintEl.className = 'result-card__hint';
+    hintEl.className = 'text-xs text-neutral-400';
     hintEl.textContent = 'Click to dismiss';
 
     card.appendChild(nameEl);
@@ -115,15 +118,17 @@ export class RecognitionOverlay {
     };
 
     const toast = document.createElement('div');
-    toast.className = 'error-toast';
+    toast.className =
+      'fixed top-20 left-1/2 z-30 flex max-w-[480px] -translate-x-1/2 items-center gap-3 rounded-lg bg-red-600/92 px-4 py-2.5 text-sm text-white shadow-[0_4px_16px_rgba(0,0,0,0.18)]';
     toast.setAttribute('role', 'alert');
 
     const msgEl = document.createElement('span');
-    msgEl.className = 'error-toast__msg';
+    msgEl.className = 'flex-1';
     msgEl.textContent = message;
 
     const retryBtn = document.createElement('button');
-    retryBtn.className = 'error-toast__retry';
+    retryBtn.className =
+      'cursor-pointer rounded border border-white/40 bg-white/20 px-2.5 py-1 text-[13px] text-white transition hover:bg-white/35';
     retryBtn.textContent = 'Retry';
     retryBtn.addEventListener('click', () => {
       if (this.toastEl) {
@@ -138,7 +143,8 @@ export class RecognitionOverlay {
     });
 
     const closeBtn = document.createElement('button');
-    closeBtn.className = 'error-toast__close';
+    closeBtn.className =
+      'cursor-pointer rounded border border-white/40 bg-white/20 px-2.5 py-1 text-[13px] text-white transition hover:bg-white/35';
     closeBtn.textContent = '✕';
     closeBtn.setAttribute('aria-label', 'Dismiss');
     closeBtn.addEventListener('click', dismiss);
@@ -155,7 +161,8 @@ export class RecognitionOverlay {
     if (this.mockBadgeEl) return;
 
     const badge = document.createElement('div');
-    badge.className = 'mock-badge';
+    badge.className =
+      'fixed bottom-4 left-4 z-10 rounded bg-black/12 px-2.5 py-1 text-[11px] tracking-[0.05em] text-neutral-500 select-none';
     badge.textContent = 'Mock Mode';
     document.body.appendChild(badge);
 

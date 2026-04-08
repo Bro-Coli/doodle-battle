@@ -26,7 +26,8 @@ export function showTooltip(profile: EntityProfile, x: number, y: number): void 
   // Reuse existing tooltip if already visible; otherwise create a new one
   if (!activeTooltip) {
     const el = document.createElement('div');
-    el.className = 'entity-tooltip';
+    el.className =
+      'pointer-events-none fixed z-[1000] max-w-[250px] rounded-md border border-neutral-300 bg-white px-3 py-2 text-[13px] leading-5 text-neutral-700 shadow-[0_2px_8px_rgba(0,0,0,0.15)]';
     document.body.appendChild(el);
     activeTooltip = el;
   }
@@ -35,7 +36,7 @@ export function showTooltip(profile: EntityProfile, x: number, y: number): void 
 
   // Build content
   const header = document.createElement('div');
-  header.className = 'entity-tooltip__header';
+  header.className = 'mb-0.5 font-bold';
   header.textContent = `${profile.name} \u2014 ${archetype}`;
 
   const traits = document.createElement('div');

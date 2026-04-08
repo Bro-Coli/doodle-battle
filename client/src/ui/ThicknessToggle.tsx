@@ -20,13 +20,22 @@ export function ThicknessToggle({
   onSelect,
 }: ThicknessToggleProps) {
   return (
-    <div className="toolbar__group" id="thickness-toggle" aria-label="Brush thickness">
+    <div
+      className="flex flex-wrap items-center justify-center gap-1 md:gap-3"
+      aria-label="Brush thickness"
+    >
       {PRESETS.map((preset) => (
         <button
           key={preset}
           type="button"
           data-preset={preset}
-          className={selected === preset ? 'active' : undefined}
+          className={`rounded border px-[10px] py-1 text-xs transition ${
+            disabled
+              ? 'cursor-not-allowed border-neutral-400 bg-white text-neutral-700 opacity-55'
+              : selected === preset
+                ? 'cursor-pointer border-neutral-800 bg-neutral-800 text-white'
+                : 'cursor-pointer border-neutral-400 bg-white text-neutral-700 hover:bg-neutral-200'
+          }`}
           disabled={disabled}
           onClick={() => onSelect(preset)}
         >

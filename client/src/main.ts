@@ -22,6 +22,7 @@ async function initGame(host: HTMLElement): Promise<() => void> {
     background: '#FFFFFF',
   });
 
+  app.canvas.className = 'block h-screen w-screen';
   host.appendChild(app.canvas);
 
   const worldStage = new WorldStage(app);
@@ -81,11 +82,15 @@ async function initGame(host: HTMLElement): Promise<() => void> {
 function LobbyScreen(): React.JSX.Element {
   return createElement(
     'main',
-    { className: 'lobby' },
+    {
+      className:
+        'flex h-screen w-screen items-center justify-center bg-[url("./assets/main-bg.png")] bg-cover bg-center bg-no-repeat',
+    },
     createElement(
       'button',
       {
-        className: 'lobby__button',
+        className:
+          'cursor-pointer rounded-lg border border-white/70 bg-white/90 px-5 py-3 text-[15px] font-bold text-slate-800 shadow-[0_10px_30px_rgba(24,24,48,0.18)] transition hover:-translate-y-px hover:bg-white',
         type: 'button',
         onClick: () => navigate('/game'),
       },
@@ -110,7 +115,10 @@ function GameScreen(): React.JSX.Element {
     };
   }, []);
 
-  return createElement('div', { id: 'game-root', className: 'game-root' });
+  return createElement('div', {
+    id: 'game-root',
+    className: 'h-screen w-screen overflow-hidden',
+  });
 }
 
 function App(): React.JSX.Element {
@@ -137,5 +145,9 @@ const rootElement = document.getElementById('app');
 if (!rootElement) {
   throw new Error('App root element not found.');
 }
+
+document.documentElement.className = 'h-full bg-white';
+document.body.className = 'h-full bg-white';
+rootElement.className = 'h-full w-full';
 
 createRoot(rootElement).render(createElement(App));

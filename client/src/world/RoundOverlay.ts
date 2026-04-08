@@ -27,27 +27,17 @@ export class RoundOverlay {
     if (this._spinnerEl) return; // already visible
 
     const overlay = document.createElement('div');
-    overlay.id = 'round-spinner';
-    overlay.style.cssText = [
-      'position:fixed',
-      'inset:0',
-      'display:flex',
-      'flex-direction:column',
-      'align-items:center',
-      'justify-content:center',
-      'background:rgba(255,255,255,0.65)',
-      'z-index:40',
-      'gap:16px',
-      'font-family:sans-serif',
-    ].join(';');
+    overlay.className =
+      'fixed inset-0 z-40 flex flex-col items-center justify-center gap-4 bg-white/65';
 
     const ring = document.createElement('div');
-    ring.className = 'spinner'; // reuse existing spin animation from style.css
+    ring.className =
+      'h-10 w-10 animate-spin rounded-full border-4 border-neutral-300 border-t-neutral-800';
     overlay.appendChild(ring);
 
     const label = document.createElement('div');
     label.textContent = 'Analyzing...';
-    label.style.cssText = 'font-size:15px;color:#555555;font-weight:600;';
+    label.className = 'text-[15px] font-semibold text-neutral-600';
     overlay.appendChild(label);
 
     document.body.appendChild(overlay);
@@ -76,21 +66,8 @@ export class RoundOverlay {
     let remaining = seconds;
 
     const badge = document.createElement('div');
-    badge.id = 'round-countdown';
-    badge.style.cssText = [
-      'position:fixed',
-      'top:16px',
-      'right:16px',
-      'background:rgba(0,0,0,0.75)',
-      'color:#ffffff',
-      'border-radius:6px',
-      'padding:6px 14px',
-      'font-family:sans-serif',
-      'font-size:14px',
-      'font-weight:700',
-      'z-index:10',
-      'user-select:none',
-    ].join(';');
+    badge.className =
+      'fixed top-4 right-4 z-10 rounded-md bg-black/75 px-3.5 py-1.5 text-sm font-bold text-white select-none';
 
     const updateLabel = (): void => {
       badge.textContent = `${remaining}s`;
@@ -145,25 +122,26 @@ export class RoundOverlay {
     };
 
     const card = document.createElement('div');
-    card.id = 'round-outcome';
+    card.className =
+      'fixed top-1/2 left-1/2 z-50 min-w-[260px] max-w-[400px] -translate-x-1/2 -translate-y-1/2 cursor-pointer rounded-xl border border-neutral-300 bg-white px-9 py-7 text-center shadow-[0_8px_32px_rgba(0,0,0,0.18)] select-none';
 
     const heading = document.createElement('div');
-    heading.className = 'round-outcome__heading';
+    heading.className = 'mb-4 text-[1.4em] font-bold text-neutral-900';
     heading.textContent = `Round ${data.roundNumber} Complete`;
     card.appendChild(heading);
 
     const survivorsEl = document.createElement('div');
-    survivorsEl.className = 'round-outcome__section';
+    survivorsEl.className = 'mb-2 text-[0.95em] leading-6 text-neutral-700';
     survivorsEl.textContent = `Survived: ${data.survivors.length > 0 ? data.survivors.join(', ') : 'None'}`;
     card.appendChild(survivorsEl);
 
     const removedEl = document.createElement('div');
-    removedEl.className = 'round-outcome__section';
+    removedEl.className = 'mb-2 text-[0.95em] leading-6 text-neutral-700';
     removedEl.textContent = `Eliminated: ${data.removed.length > 0 ? data.removed.join(', ') : 'None'}`;
     card.appendChild(removedEl);
 
     const hint = document.createElement('div');
-    hint.className = 'round-outcome__hint';
+    hint.className = 'mt-4 text-xs text-neutral-400';
     hint.textContent = 'Click to continue drawing';
     card.appendChild(hint);
 
