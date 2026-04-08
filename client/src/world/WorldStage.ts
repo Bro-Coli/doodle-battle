@@ -2,10 +2,10 @@ import { Application, Container, Ticker, Texture } from 'pixi.js';
 import { EntityProfile, InteractionMatrix } from '@crayon-world/shared/src/types';
 import { captureEntityTexture } from './captureEntityTexture';
 import { buildEntityContainer } from './EntitySprite';
-import { EntityState, SpreadingState, initEntityState, dispatchBehavior } from './EntitySimulation';
+import { EntityState, SpreadingState, initEntityState, dispatchBehavior } from '@crayon-world/shared/src/simulation/EntitySimulation';
 import { fetchInteractions } from './fetchInteractions';
 import { RoundOverlay, RoundOutcome } from './RoundOverlay';
-import { resolveInteraction, applyInteractionSteering, DETECTION_RANGE_FRACTION, FIGHT_PROXIMITY_FRACTION, FIGHT_COOLDOWN_MS } from './interactionBehaviors';
+import { resolveInteraction, applyInteractionSteering, DETECTION_RANGE_FRACTION, FIGHT_PROXIMITY_FRACTION, FIGHT_COOLDOWN_MS } from '@crayon-world/shared/src/simulation/interactionBehaviors';
 
 /**
  * Round lifecycle phases.

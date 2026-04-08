@@ -1,17 +1,17 @@
 import { describe, it, expect } from 'vitest';
-import { wrapPosition } from '../../client/src/world/EntitySimulation';
+import { wrapPosition } from '@crayon-world/shared/src/simulation/EntitySimulation';
 import type {
   WalkingState,
   FlyingState,
   RootedState,
   SpreadingState,
   StationaryState,
-} from '../../client/src/world/EntitySimulation';
-import { updateWalking } from '../../client/src/world/behaviors/walkingBehavior';
-import { updateFlying } from '../../client/src/world/behaviors/flyingBehavior';
-import { updateRooted } from '../../client/src/world/behaviors/rootedBehavior';
-import { updateSpreading } from '../../client/src/world/behaviors/spreadingBehavior';
-import { updateStationary } from '../../client/src/world/behaviors/stationaryBehavior';
+} from '@crayon-world/shared/src/simulation/EntitySimulation';
+import { updateWalking } from '@crayon-world/shared/src/simulation/behaviors/walkingBehavior';
+import { updateFlying } from '@crayon-world/shared/src/simulation/behaviors/flyingBehavior';
+import { updateRooted } from '@crayon-world/shared/src/simulation/behaviors/rootedBehavior';
+import { updateSpreading } from '@crayon-world/shared/src/simulation/behaviors/spreadingBehavior';
+import { updateStationary } from '@crayon-world/shared/src/simulation/behaviors/stationaryBehavior';
 
 const world = { width: 800, height: 600 };
 

@@ -9,13 +9,13 @@ import {
   befriendPosition,
   resolveInteraction,
   applyInteractionSteering,
-} from '../../client/src/world/interactionBehaviors';
+} from '@crayon-world/shared/src/simulation/interactionBehaviors';
 import type {
   WalkingState,
   FlyingState,
   RootedState,
   StationaryState,
-} from '../../client/src/world/EntitySimulation';
+} from '@crayon-world/shared/src/simulation/EntitySimulation';
 import type { InteractionMatrix, InteractionType } from '@crayon-world/shared/src/types';
 
 // ---------------------------------------------------------------------------
