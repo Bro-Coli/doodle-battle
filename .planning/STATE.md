@@ -4,7 +4,7 @@ milestone: v1.1
 milestone_name: Entity Interactions & Rounds
 status: planning
 stopped_at: Completed 09-01-PLAN.md
-last_updated: "2026-04-08T08:18:55.812Z"
+last_updated: "2026-04-08T08:22:37.908Z"
 last_activity: 2026-04-07 — v1.1 roadmap created (Phases 6-9)
 progress:
   total_phases: 4
