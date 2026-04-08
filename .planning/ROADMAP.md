@@ -26,7 +26,7 @@ Full details: `.planning/milestones/v1.0-ROADMAP.md`
 
 - [x] **Phase 6: Shared Types & Interaction Server Route** - New shared types and POST /api/interactions route with mock path (completed 2026-04-08)
 - [x] **Phase 7: Round State Machine & Entity Removal** - RoundPhase enum, round lifecycle, safe entity removal infrastructure (completed 2026-04-08)
-- [ ] **Phase 8: Interaction Behaviors** - Chase/flee/symbiosis/fight pure functions wired into the WorldStage game tick
+- [x] **Phase 8: Interaction Behaviors** - Chase/flee/symbiosis/fight pure functions wired into the WorldStage game tick (completed 2026-04-08)
 - [ ] **Phase 9: Round UI & End-to-End Integration** - InteractionOverlay with Start Round button, countdown, and outcome card
 
 ## Phase Details
@@ -70,7 +70,7 @@ Plans:
   3. When two hostile entities come within proximity range, the slower one fades out and is removed from the world
   4. Symbiotic entities drift toward each other and remain near each other during simulation
   5. Entities with no relationship to any other entity continue their archetype movement undisturbed
-**Plans:** 1/2 plans executed
+**Plans:** 2/2 plans complete
 Plans:
 - [ ] 08-01-PLAN.md — TDD: Pure interaction behavior functions (steering, resolution, state application) with tests
 - [ ] 08-02-PLAN.md — WorldStage integration: HP map, name-ID map, fight cooldowns, _gameTick wiring, visual verification
@@ -97,5 +97,5 @@ Plans:
 | 5. Entity Simulation | v1.0 | 3/3 | Complete | 2026-04-07 |
 | 6. Shared Types & Interaction Server Route | 2/2 | Complete   | 2026-04-08 | - |
 | 7. Round State Machine & Entity Removal | 2/2 | Complete   | 2026-04-08 | - |
-| 8. Interaction Behaviors | 1/2 | In Progress|  | - |
+| 8. Interaction Behaviors | 2/2 | Complete   | 2026-04-08 | - |
 | 9. Round UI & End-to-End Integration | v1.1 | 0/? | Not started | - |

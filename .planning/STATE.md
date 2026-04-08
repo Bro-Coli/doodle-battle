@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Entity Interactions & Rounds
 status: planning
-stopped_at: Completed 08-01-PLAN.md
-last_updated: "2026-04-08T05:53:48.896Z"
+stopped_at: Completed 08-02-PLAN.md
+last_updated: "2026-04-08T07:34:57.259Z"
 last_activity: 2026-04-07 — v1.1 roadmap created (Phases 6-9)
 progress:
   total_phases: 4
-  completed_phases: 2
+  completed_phases: 3
   total_plans: 6
-  completed_plans: 5
+  completed_plans: 6
   percent: 0
 ---
 
@@ -52,6 +52,7 @@ Progress: [░░░░░░░░░░] 0% (v1.1)
 | Phase 07-round-state-machine-entity-removal P01 | 2 | 2 tasks | 3 files |
 | Phase 07-round-state-machine-entity-removal P02 | 5 | 1 tasks | 2 files |
 | Phase 08-interaction-behaviors P01 | 2 | 3 tasks | 2 files |
+| Phase 08-interaction-behaviors P02 | 30 | 2 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -78,6 +79,9 @@ Key v1.1 decisions (from research):
 - [Phase 08-interaction-behaviors]: Generic container type T used for interactionBehaviors — allows testing without PixiJS
 - [Phase 08-interaction-behaviors]: befriendPosition linear damping: factor = dist/arriveRadius when dist < arriveRadius
 - [Phase 08-interaction-behaviors]: Speed defaults to 80 for archetypes without speed field (rooted, spreading, stationary)
+- [Phase 08-interaction-behaviors]: Solid bounce-off-edge walls replace wrap-around — entities stay in view and interactions are visually legible
+- [Phase 08-interaction-behaviors]: All distance constants converted to world-diagonal fractions for scale-independence across canvas sizes
+- [Phase 08-interaction-behaviors]: 0.5s bounce cooldown suppresses interaction steering after wall collision to prevent corner trapping
 
 ### Pending Todos
 
@@ -91,6 +95,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-04-08T05:53:48.894Z
-Stopped at: Completed 08-01-PLAN.md
+Last session: 2026-04-08T07:34:57.257Z
+Stopped at: Completed 08-02-PLAN.md
 Resume file: None
