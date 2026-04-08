@@ -6,6 +6,16 @@ A multiplayer browser game where players draw anything freehand and AI brings th
 
 v1.0 shipped a **single-player proof of concept** validating the core magic: draw something, AI recognizes it, it spawns and behaves like itself. The draw-to-life pipeline works end-to-end.
 
+## Current Milestone: v1.2 React Client Integration
+
+**Goal:** Convert the client from a Pixi-only app into a React-based application shell while keeping Pixi focused on the interactive game canvas and simulation.
+
+**Target features:**
+- React owns the client entrypoint and top-level screen structure
+- Pixi mounts inside React as the game canvas/runtime layer
+- UI shell, overlays, and controls move to React-managed components
+- Existing draw-to-life and world simulation behavior remains intact during the migration
+
 ## Core Value
 
 The moment you draw something and it comes alive acting like itself — a wolf that hunts, a bird that flies, a tree that grows. That recognition-to-behavior pipeline is the entire game.
@@ -33,30 +43,16 @@ The moment you draw something and it comes alive acting like itself — a wolf t
 
 ### Active
 
-- [ ] Batch interaction analysis — one Haiku call determines relationships between all entities
-- [ ] Round system — "Start Round" triggers interaction analysis, timed simulation (~30s)
-- [ ] Chase/flee behavior — predators pursue prey, prey runs away
-- [ ] Fight/destroy behavior — hostile entities eliminate each other (loser removed)
-- [ ] Symbiosis behavior — friendly entities benefit each other
-- [ ] Surviving entities persist between rounds — world accumulates
-- [ ] Entity removal — defeated entities fade out and are cleaned up
-
-## Current Milestone: v1.1 Entity Interactions & Rounds
-
-**Goal:** Entities interact with each other based on AI-determined relationships, driven by a round-based system.
-
-**Target features:**
-- Batch Haiku call for interaction analysis
-- Round system (draw → start → simulate → repeat)
-- Four interaction types: chase/flee, fight/destroy, symbiosis, ignore
-- Entity removal on defeat
-- Survivors persist across rounds
+- [ ] Client boots through a React entrypoint instead of imperative DOM assembly
+- [ ] Pixi game lifecycle is encapsulated behind a React-consumable boundary
+- [ ] UI shell, overlays, and controls are rendered through React components
+- [ ] Existing drawing, recognition, spawning, and simulation flows continue to work after the React migration
 
 ### Out of Scope
 
 - Multiplayer / networking — deferred to next milestone, but stack must not block it
 - Scenario system / team objectives — general behavior only for PoC
-- Entity-vs-entity interaction (chasing, combat) — moved to v1.1 Active
+- Entity-vs-entity interaction (chasing, combat) — entities move independently for now
 - Crayon aesthetic / paper texture — visual polish deferred
 - Sound design — deferred
 - Login / authentication — web-accessible, no login
@@ -98,5 +94,21 @@ The full vision includes Colyseus multiplayer, asymmetric team scenarios (Popula
 | Neighbor-averaging over perfect-freehand | Eliminates flickering on tight spirals | ✓ Good — switched mid-Phase 2, cleaner result |
 | Separate draw/world views | Manual toggle between drawing canvas and game world | ✓ Good — clean separation, future camera support |
 
+## Evolution
+
+This document evolves at phase transitions and milestone boundaries.
+
+**After each phase transition** (via `/gsd-transition`):
+1. Requirements invalidated? → Move to Out of Scope with reason
+2. Requirements validated? → Move to Validated with phase reference
+3. New requirements emerged? → Add to Active
+4. Decisions to log? → Add to Key Decisions
+5. "What This Is" still accurate? → Update if drifted
+
+**After each milestone** (via `/gsd-complete-milestone`):
+1. Full review of all sections
+2. Core Value check — still the right priority?
+3. Audit Out of Scope — reasons still valid?
+4. Update Context with current state
 ---
-*Last updated: 2026-04-07 after v1.1 milestone start*
+*Last updated: 2026-04-07 after starting milestone v1.2*

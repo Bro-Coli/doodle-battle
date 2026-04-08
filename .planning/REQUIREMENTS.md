@@ -1,98 +1,52 @@
 # Requirements: Crayon World
 
 **Defined:** 2026-04-07
-**Core Value:** The moment you draw something and it comes alive acting like itself — and now interacting with other entities based on their real-world identities.
+**Core Value:** The moment you draw something and it comes alive acting like itself — a wolf that hunts, a bird that flies, a tree that grows. That recognition-to-behavior pipeline is the entire game.
 
-## v1.1 Requirements
+## v1 Requirements
 
-Requirements for entity interactions and round-based gameplay. Each maps to roadmap phases.
+Requirements for milestone v1.2 React Client Integration.
 
-### Round System
+### UI Migration
 
-- [x] **ROUND-01**: Player can press "Start Round" to begin a round after drawing entities
-- [x] **ROUND-02**: Round runs for a timed duration (~30 seconds) then ends automatically
-- [x] **ROUND-03**: Surviving entities persist into the next round — world accumulates
-- [x] **ROUND-04**: UI clearly indicates current round phase (drawing, analyzing, simulating, done)
-
-### Batch AI Analysis
-
-- [x] **BATC-01**: Pressing "Start Round" sends all entity profiles to a single Haiku call that returns interaction relationships
-- [x] **BATC-02**: Interaction response classifies each entity pair as chase/flee, fight, symbiosis, or ignore
-- [x] **BATC-03**: Mock mode returns canned interaction relationships for development without API calls
-
-### Entity Interactions
-
-- [x] **INTR-01**: Predator entities chase prey entities using steering behavior
-- [x] **INTR-02**: Prey entities flee from their predators
-- [x] **INTR-03**: Hostile entity pairs fight when in proximity — loser is removed from world
-- [x] **INTR-04**: Symbiotic entities move toward each other and coexist beneficially
-- [x] **INTR-05**: Neutral entities ignore each other and continue their archetype behavior
-
-### Entity Removal
-
-- [x] **REMV-01**: Defeated entities fade out and are fully removed (container, state, label, texture references)
-- [x] **REMV-02**: Entities in "dying" state do not participate in further interactions
+- [ ] **UIM-01**: User can use a React-rendered toolbar for submit, undo, clear, and draw/world mode switching.
+- [ ] **UIM-02**: User can see recognition loading, result, and error states through React-rendered overlays.
+- [ ] **UIM-03**: User can change brush thickness through React-rendered controls.
+- [ ] **UIM-04**: User can keep the existing draw mode and world mode flow after the UI migration.
+- [ ] **UIM-05**: User can still draw, recognize, spawn, and simulate entities after the React UI migration without regression to the core draw-to-life loop.
 
 ## v2 Requirements
 
-Deferred to future milestones. Tracked but not in current roadmap.
+### React Architecture
 
-### Multiplayer
-
-- **MULT-01**: Real-time multiplayer via Colyseus with room creation and join-by-code
-- **MULT-02**: Authoritative server-side simulation
-- **MULT-03**: Two teams with asymmetric objectives
-
-### Scenarios
-
-- **SCEN-01**: Scenario system with context injection into AI recognition
-- **SCEN-02**: Population scenario (count living entities at round end)
-- **SCEN-03**: Siege scenario (destroy/defend structure)
-- **SCEN-04**: Turn-based draw phases with simultaneous reveals
-
-### Polish
-
-- **POLH-01**: Crayon aesthetic with paper texture and multiply blend
-- **POLH-02**: Sound design
-- **POLH-03**: Spawn animation (pencil lines animate into entity)
+- **RARC-01**: Client boots through a fully React-owned application shell and screen structure.
+- **RARC-02**: Pixi lifecycle is encapsulated behind a reusable React-friendly controller boundary.
 
 ## Out of Scope
 
 | Feature | Reason |
 |---------|--------|
-| HP / health system | Binary fight resolution — loser removed, no damage tracking |
-| Per-pair API calls | Budget killer — single batch call is cost-viable |
-| Entity-initiated round start | Player controls rounds manually for PoC |
-| Pathfinding / obstacles | Flat canvas with steering behaviors is sufficient |
-| Symbiosis visual effects | Cosmetic polish — deferred to future milestone |
-| Entity trading / economics | Too complex for interaction PoC |
+| Full client architecture rewrite around React | Deferred because this milestone is scoped to visible UI migration only |
+| Routing system | Not required to validate React adoption for the client |
+| Global state management library | Current milestone does not justify extra state tooling |
+| Full visual redesign | Migration should preserve existing core behavior rather than expand design scope |
+| Multiplayer or lobby flow expansion | Separate product scope from React UI migration |
 
 ## Traceability
 
-Which phases cover which requirements. Updated during roadmap creation.
-
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| ROUND-01 | Phase 7 | Complete |
-| ROUND-02 | Phase 7 | Complete |
-| ROUND-03 | Phase 7 | Complete |
-| ROUND-04 | Phase 9 | Complete |
-| BATC-01 | Phase 6 | Complete |
-| BATC-02 | Phase 6 | Complete |
-| BATC-03 | Phase 6 | Complete |
-| INTR-01 | Phase 8 | Complete |
-| INTR-02 | Phase 8 | Complete |
-| INTR-03 | Phase 8 | Complete |
-| INTR-04 | Phase 8 | Complete |
-| INTR-05 | Phase 8 | Complete |
-| REMV-01 | Phase 7 | Complete |
-| REMV-02 | Phase 7 | Complete |
+| UIM-01 | Phase 6 | Pending |
+| UIM-02 | Phase 7 | Pending |
+| UIM-03 | Phase 6 | Pending |
+| UIM-04 | Phase 6 | Pending |
+| UIM-05 | Phase 7 | Pending |
 
 **Coverage:**
-- v1.1 requirements: 14 total
-- Mapped to phases: 14
-- Unmapped: 0
+- v1 requirements: 5 total
+- Mapped to phases: 5
+- Unmapped: 0 ✓
 
 ---
 *Requirements defined: 2026-04-07*
-*Last updated: 2026-04-07 after v1.1 roadmap creation*
+*Last updated: 2026-04-07 after roadmap creation for milestone v1.2*

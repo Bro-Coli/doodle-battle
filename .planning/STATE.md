@@ -1,17 +1,17 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.1
-milestone_name: Entity Interactions & Rounds
+milestone: v1.0
+milestone_name: milestone
 status: planning
-stopped_at: Completed 09-01-PLAN.md
-last_updated: "2026-04-08T08:22:37.908Z"
-last_activity: 2026-04-07 — v1.1 roadmap created (Phases 6-9)
+stopped_at: Phase 6 browser verification pending
+last_updated: "2026-04-08T00:20:00.000Z"
+last_activity: 2026-04-08 — Phase 6 Wave 1 executed, Wave 2 browser verification pending
 progress:
-  total_phases: 4
-  completed_phases: 4
-  total_plans: 7
-  completed_plans: 7
-  percent: 0
+  total_phases: 7
+  completed_phases: 0
+  total_plans: 2
+  completed_plans: 1
+  percent: 50
 ---
 
 # Project State
@@ -20,85 +20,58 @@ progress:
 
 See: .planning/PROJECT.md (updated 2026-04-07)
 
-**Core value:** Draw something and it comes alive acting like itself — a wolf that hunts, a bird that flies, a tree that grows. Now entities interact with each other based on AI-determined relationships.
-**Current focus:** v1.1 Entity Interactions & Rounds — Phase 6
+**Core value:** Draw something and it comes alive acting like itself — a wolf that hunts, a bird that flies, a tree that grows.
+**Current focus:** Phase 6 React Control Surface
 
 ## Current Position
 
-Phase: 6 of 9 (Shared Types & Interaction Server Route)
-Plan: — of — in current phase
-Status: Ready to plan
-Last activity: 2026-04-07 — v1.1 roadmap created (Phases 6-9)
+Phase: 6 React Control Surface
+Plan: —
+Status: Executing — browser checkpoint pending
+Last activity: 2026-04-08 — Phase 6 Wave 1 executed, Wave 2 browser verification pending
 
-Progress: [░░░░░░░░░░] 0% (v1.1)
+Progress: [█████░░░░░] 50%
 
 ## Performance Metrics
 
-**Velocity (v1.0):**
-- Total plans completed: 11
-- Timeline: 1 day (2026-04-07)
+**Velocity:**
 
-**By Phase (v1.0):**
+- Previous milestone plans completed: 11
+- Previous milestone timeline: 1 day (2026-04-07)
+
+**By Phase:**
 
 | Phase | Plans | Files |
 |-------|-------|-------|
-| 1. Infrastructure | 2 | 13+4 |
-| 2. Drawing Canvas | 2 | 6+3 |
-| 3. Recognition Pipeline | 2 | 8+5 |
-| 4. Entity Spawn & Rendering | 2 | 6+4 |
-| 5. Entity Simulation | 3 | 6+8+1 |
-| Phase 06-shared-types-interaction-server-route P01 | 10 | 2 tasks | 4 files |
-| Phase 06-shared-types-interaction-server-route P02 | 2min | 2 tasks | 3 files |
-| Phase 07-round-state-machine-entity-removal P01 | 2 | 2 tasks | 3 files |
-| Phase 07-round-state-machine-entity-removal P02 | 5 | 1 tasks | 2 files |
-| Phase 08-interaction-behaviors P01 | 2 | 3 tasks | 2 files |
-| Phase 08-interaction-behaviors P02 | 30 | 2 tasks | 1 files |
-| Phase 09-round-ui-end-to-end-integration P01 | 25 | 3 tasks | 4 files |
+| Phase 01-infrastructure P01 | 2 tasks | 13 files |
+| Phase 01-infrastructure P02 | 2 tasks | 4 files |
+| Phase 02-drawing-canvas P01 | 2 tasks | 6 files |
+| Phase 02-drawing-canvas P02 | 2 tasks | 3 files |
+| Phase 03-recognition-pipeline P01 | 2 tasks | 8 files |
+| Phase 03-recognition-pipeline P02 | 2 tasks | 5 files |
+| Phase 04-entity-spawn-rendering P01 | 2 tasks | 6 files |
+| Phase 04-entity-spawn-rendering P02 | 2 tasks | 4 files |
+| Phase 05-entity-simulation P01 | 2 tasks | 6 files |
+| Phase 05-entity-simulation P02 | 3 tasks | 8 files |
+| Phase 05-entity-simulation P03 | 2 tasks | 1 files |
 
 ## Accumulated Context
 
 ### Decisions
 
-Full v1.0 decision log in `.planning/milestones/v1.0-ROADMAP.md` and PROJECT.md Key Decisions.
-
-Key v1.1 decisions (from research):
-- Use stable integer IDs (not entity names) as keys in the batch interaction prompt — Haiku rewrites names
-- `_removeEntity()` is the single legal removal path — prevents five-map leaks
-- `RoundPhase` string enum replaces ad-hoc boolean flags — prevents race conditions on double-click
-- Entity cap: ~8-10 entities per round for the batch prompt (combinatorial explosion risk above that)
-- Single `messages.create` call (not Batches API) — Batches API is async/24h, incompatible with real-time
-- [Phase 06-shared-types-interaction-server-route]: Integer IDs as matrix keys — Haiku rewrites entity names, stable IDs prevent lookup failures
-- [Phase 06-shared-types-interaction-server-route]: ignoreFallback produces safe all-ignore matrix when both AI retry attempts fail
-- [Phase 06-shared-types-interaction-server-route]: Deduplication reducing to 1 unique entity triggers empty-entries short-circuit — consistent semantics regardless of duplicate source
-- [Phase 06-shared-types-interaction-server-route]: Route mirrors recognize.ts: mock check after dedup, 2-attempt retry loop, catch returns 502
-- [Phase 07-round-state-machine-entity-removal]: RoundPhase has no done state — _endRound() transitions simulating directly to idle
-- [Phase 07-round-state-machine-entity-removal]: removeEntity() deletes from all 5 maps before destroy() to prevent leaked GPU texture references
-- [Phase 07-round-state-machine-entity-removal]: fetchInteractions failure produces empty-entries fallback (all-ignore) rather than blocking the round
-- [Phase 07-round-state-machine-entity-removal]: viewToggleBtn locked during analyzing only — player can peek at draw mode during simulation
-- [Phase 07-round-state-machine-entity-removal]: syncStartRoundBtn called in both enableAllToolbar and card dismiss callback to cover all enable paths
-- [Phase 07-round-state-machine-entity-removal]: Human verified complete round lifecycle end-to-end: start, analyze spinner, 30s countdown, auto-end, entity persistence across rounds
-- [Phase 08-interaction-behaviors]: Generic container type T used for interactionBehaviors — allows testing without PixiJS
-- [Phase 08-interaction-behaviors]: befriendPosition linear damping: factor = dist/arriveRadius when dist < arriveRadius
-- [Phase 08-interaction-behaviors]: Speed defaults to 80 for archetypes without speed field (rooted, spreading, stationary)
-- [Phase 08-interaction-behaviors]: Solid bounce-off-edge walls replace wrap-around — entities stay in view and interactions are visually legible
-- [Phase 08-interaction-behaviors]: All distance constants converted to world-diagonal fractions for scale-independence across canvas sizes
-- [Phase 08-interaction-behaviors]: 0.5s bounce cooldown suppresses interaction steering after wall collision to prevent corner trapping
-- [Phase 09-round-ui-end-to-end-integration]: Outcome card uses no auto-dismiss timer — player reads at their own pace
-- [Phase 09-round-ui-end-to-end-integration]: WorldStage.showRoundOutcome() encapsulates overlay — main.ts never holds a RoundOverlay reference
-- [Phase 09-round-ui-end-to-end-integration]: All toolbar re-enable logic deferred into dismiss callback — toolbar stays locked during outcome card display
+Full decision log archived in `.planning/milestones/v1.0-ROADMAP.md`.
+Key decisions documented in PROJECT.md Key Decisions table.
 
 ### Pending Todos
 
-None.
+None yet.
 
 ### Blockers/Concerns
 
-- Interaction blend factor (chase/flee velocity weight) is unspecified — determine empirically in Phase 8
-- Fight resolution metric (speed comparison) may need tuning — architecture supports swapping without changing sim loop
-- Symbiosis UX (drift strength, threshold) is underspecified — defer fine-tuning to post-demo
+None identified yet.
 
 ## Session Continuity
 
-Last session: 2026-04-08T08:18:55.810Z
-Stopped at: Completed 09-01-PLAN.md
-Resume file: None
+Last session: 2026-04-07T14:31:35.092Z
+Stopped at: Phase 6 browser verification pending
+Resume file: .planning/phases/06-react-control-surface/06-02-PLAN.md
