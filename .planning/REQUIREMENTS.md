@@ -10,8 +10,8 @@ Requirements for entity interactions and round-based gameplay. Each maps to road
 ### Round System
 
 - [ ] **ROUND-01**: Player can press "Start Round" to begin a round after drawing entities
-- [ ] **ROUND-02**: Round runs for a timed duration (~30 seconds) then ends automatically
-- [ ] **ROUND-03**: Surviving entities persist into the next round — world accumulates
+- [x] **ROUND-02**: Round runs for a timed duration (~30 seconds) then ends automatically
+- [x] **ROUND-03**: Surviving entities persist into the next round — world accumulates
 - [ ] **ROUND-04**: UI clearly indicates current round phase (drawing, analyzing, simulating, done)
 
 ### Batch AI Analysis
@@ -30,8 +30,8 @@ Requirements for entity interactions and round-based gameplay. Each maps to road
 
 ### Entity Removal
 
-- [ ] **REMV-01**: Defeated entities fade out and are fully removed (container, state, label, texture references)
-- [ ] **REMV-02**: Entities in "dying" state do not participate in further interactions
+- [x] **REMV-01**: Defeated entities fade out and are fully removed (container, state, label, texture references)
+- [x] **REMV-02**: Entities in "dying" state do not participate in further interactions
 
 ## v2 Requirements
 
@@ -74,8 +74,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | Requirement | Phase | Status |
 |-------------|-------|--------|
 | ROUND-01 | Phase 7 | Pending |
-| ROUND-02 | Phase 7 | Pending |
-| ROUND-03 | Phase 7 | Pending |
+| ROUND-02 | Phase 7 | Complete |
+| ROUND-03 | Phase 7 | Complete |
 | ROUND-04 | Phase 9 | Pending |
 | BATC-01 | Phase 6 | Complete |
 | BATC-02 | Phase 6 | Complete |
@@ -85,8 +85,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | INTR-03 | Phase 8 | Pending |
 | INTR-04 | Phase 8 | Pending |
 | INTR-05 | Phase 8 | Pending |
-| REMV-01 | Phase 7 | Pending |
-| REMV-02 | Phase 7 | Pending |
+| REMV-01 | Phase 7 | Complete |
+| REMV-02 | Phase 7 | Complete |
 
 **Coverage:**
 - v1.1 requirements: 14 total

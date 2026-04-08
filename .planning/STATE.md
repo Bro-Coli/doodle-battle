@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Entity Interactions & Rounds
 status: planning
-stopped_at: Phase 7 context gathered
-last_updated: "2026-04-08T04:58:39.606Z"
+stopped_at: Completed 07-01-PLAN.md
+last_updated: "2026-04-08T05:20:23.201Z"
 last_activity: 2026-04-07 — v1.1 roadmap created (Phases 6-9)
 progress:
   total_phases: 4
   completed_phases: 1
-  total_plans: 2
-  completed_plans: 2
+  total_plans: 4
+  completed_plans: 3
   percent: 0
 ---
 
@@ -49,6 +49,7 @@ Progress: [░░░░░░░░░░] 0% (v1.1)
 | 5. Entity Simulation | 3 | 6+8+1 |
 | Phase 06-shared-types-interaction-server-route P01 | 10 | 2 tasks | 4 files |
 | Phase 06-shared-types-interaction-server-route P02 | 2min | 2 tasks | 3 files |
+| Phase 07-round-state-machine-entity-removal P01 | 2 | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -66,6 +67,9 @@ Key v1.1 decisions (from research):
 - [Phase 06-shared-types-interaction-server-route]: ignoreFallback produces safe all-ignore matrix when both AI retry attempts fail
 - [Phase 06-shared-types-interaction-server-route]: Deduplication reducing to 1 unique entity triggers empty-entries short-circuit — consistent semantics regardless of duplicate source
 - [Phase 06-shared-types-interaction-server-route]: Route mirrors recognize.ts: mock check after dedup, 2-attempt retry loop, catch returns 502
+- [Phase 07-round-state-machine-entity-removal]: RoundPhase has no done state — _endRound() transitions simulating directly to idle
+- [Phase 07-round-state-machine-entity-removal]: removeEntity() deletes from all 5 maps before destroy() to prevent leaked GPU texture references
+- [Phase 07-round-state-machine-entity-removal]: fetchInteractions failure produces empty-entries fallback (all-ignore) rather than blocking the round
 
 ### Pending Todos
 
@@ -79,6 +83,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-04-08T04:58:39.604Z
-Stopped at: Phase 7 context gathered
-Resume file: .planning/phases/07-round-state-machine-entity-removal/07-CONTEXT.md
+Last session: 2026-04-08T05:20:23.199Z
+Stopped at: Completed 07-01-PLAN.md
+Resume file: None
