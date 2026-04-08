@@ -40,7 +40,7 @@ Full details: `.planning/milestones/v1.0-ROADMAP.md`
   2. Mock mode (`MOCK_AI=true`) returns canned relationship data without calling the Anthropic API
   3. The server route can be exercised with a test HTTP call and returns a valid, parseable response for 2-8 entities
   4. `InteractionType`, `EntityRelationship`, and `InteractionMatrix` are exported from `shared/src/types.ts` and importable by both client and server
-**Plans:** 2 plans
+**Plans:** 1/2 plans executed
 Plans:
 - [ ] 06-01-PLAN.md — Shared interaction types, prompt builder, response validator, mock matrix
 - [ ] 06-02-PLAN.md — POST /api/interactions route, Express registration, test suite
@@ -89,7 +89,7 @@ Plans:
 | 3. Recognition Pipeline | v1.0 | 2/2 | Complete | 2026-04-07 |
 | 4. Entity Spawn & Rendering | v1.0 | 2/2 | Complete | 2026-04-07 |
 | 5. Entity Simulation | v1.0 | 3/3 | Complete | 2026-04-07 |
-| 6. Shared Types & Interaction Server Route | v1.1 | 0/2 | Planning | - |
+| 6. Shared Types & Interaction Server Route | 1/2 | In Progress|  | - |
 | 7. Round State Machine & Entity Removal | v1.1 | 0/? | Not started | - |
 | 8. Interaction Behaviors | v1.1 | 0/? | Not started | - |
 | 9. Round UI & End-to-End Integration | v1.1 | 0/? | Not started | - |

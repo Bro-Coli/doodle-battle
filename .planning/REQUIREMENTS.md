@@ -17,8 +17,8 @@ Requirements for entity interactions and round-based gameplay. Each maps to road
 ### Batch AI Analysis
 
 - [ ] **BATC-01**: Pressing "Start Round" sends all entity profiles to a single Haiku call that returns interaction relationships
-- [ ] **BATC-02**: Interaction response classifies each entity pair as chase/flee, fight, symbiosis, or ignore
-- [ ] **BATC-03**: Mock mode returns canned interaction relationships for development without API calls
+- [x] **BATC-02**: Interaction response classifies each entity pair as chase/flee, fight, symbiosis, or ignore
+- [x] **BATC-03**: Mock mode returns canned interaction relationships for development without API calls
 
 ### Entity Interactions
 
@@ -78,8 +78,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | ROUND-03 | Phase 7 | Pending |
 | ROUND-04 | Phase 9 | Pending |
 | BATC-01 | Phase 6 | Pending |
-| BATC-02 | Phase 6 | Pending |
-| BATC-03 | Phase 6 | Pending |
+| BATC-02 | Phase 6 | Complete |
+| BATC-03 | Phase 6 | Complete |
 | INTR-01 | Phase 8 | Pending |
 | INTR-02 | Phase 8 | Pending |
 | INTR-03 | Phase 8 | Pending |
