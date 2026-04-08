@@ -22,11 +22,11 @@ Requirements for entity interactions and round-based gameplay. Each maps to road
 
 ### Entity Interactions
 
-- [ ] **INTR-01**: Predator entities chase prey entities using steering behavior
-- [ ] **INTR-02**: Prey entities flee from their predators
-- [ ] **INTR-03**: Hostile entity pairs fight when in proximity — loser is removed from world
-- [ ] **INTR-04**: Symbiotic entities move toward each other and coexist beneficially
-- [ ] **INTR-05**: Neutral entities ignore each other and continue their archetype behavior
+- [x] **INTR-01**: Predator entities chase prey entities using steering behavior
+- [x] **INTR-02**: Prey entities flee from their predators
+- [x] **INTR-03**: Hostile entity pairs fight when in proximity — loser is removed from world
+- [x] **INTR-04**: Symbiotic entities move toward each other and coexist beneficially
+- [x] **INTR-05**: Neutral entities ignore each other and continue their archetype behavior
 
 ### Entity Removal
 
@@ -80,11 +80,11 @@ Which phases cover which requirements. Updated during roadmap creation.
 | BATC-01 | Phase 6 | Complete |
 | BATC-02 | Phase 6 | Complete |
 | BATC-03 | Phase 6 | Complete |
-| INTR-01 | Phase 8 | Pending |
-| INTR-02 | Phase 8 | Pending |
-| INTR-03 | Phase 8 | Pending |
-| INTR-04 | Phase 8 | Pending |
-| INTR-05 | Phase 8 | Pending |
+| INTR-01 | Phase 8 | Complete |
+| INTR-02 | Phase 8 | Complete |
+| INTR-03 | Phase 8 | Complete |
+| INTR-04 | Phase 8 | Complete |
+| INTR-05 | Phase 8 | Complete |
 | REMV-01 | Phase 7 | Complete |
 | REMV-02 | Phase 7 | Complete |
 

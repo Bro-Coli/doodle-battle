@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Entity Interactions & Rounds
 status: planning
-stopped_at: Phase 8 context gathered
-last_updated: "2026-04-08T05:38:58.680Z"
+stopped_at: Completed 08-01-PLAN.md
+last_updated: "2026-04-08T05:53:48.896Z"
 last_activity: 2026-04-07 — v1.1 roadmap created (Phases 6-9)
 progress:
   total_phases: 4
   completed_phases: 2
-  total_plans: 4
-  completed_plans: 4
+  total_plans: 6
+  completed_plans: 5
   percent: 0
 ---
 
@@ -51,6 +51,7 @@ Progress: [░░░░░░░░░░] 0% (v1.1)
 | Phase 06-shared-types-interaction-server-route P02 | 2min | 2 tasks | 3 files |
 | Phase 07-round-state-machine-entity-removal P01 | 2 | 2 tasks | 3 files |
 | Phase 07-round-state-machine-entity-removal P02 | 5 | 1 tasks | 2 files |
+| Phase 08-interaction-behaviors P01 | 2 | 3 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -74,6 +75,9 @@ Key v1.1 decisions (from research):
 - [Phase 07-round-state-machine-entity-removal]: viewToggleBtn locked during analyzing only — player can peek at draw mode during simulation
 - [Phase 07-round-state-machine-entity-removal]: syncStartRoundBtn called in both enableAllToolbar and card dismiss callback to cover all enable paths
 - [Phase 07-round-state-machine-entity-removal]: Human verified complete round lifecycle end-to-end: start, analyze spinner, 30s countdown, auto-end, entity persistence across rounds
+- [Phase 08-interaction-behaviors]: Generic container type T used for interactionBehaviors — allows testing without PixiJS
+- [Phase 08-interaction-behaviors]: befriendPosition linear damping: factor = dist/arriveRadius when dist < arriveRadius
+- [Phase 08-interaction-behaviors]: Speed defaults to 80 for archetypes without speed field (rooted, spreading, stationary)
 
 ### Pending Todos
 
@@ -87,6 +91,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-04-08T05:38:58.677Z
-Stopped at: Phase 8 context gathered
-Resume file: .planning/phases/08-interaction-behaviors/08-CONTEXT.md
+Last session: 2026-04-08T05:53:48.894Z
+Stopped at: Completed 08-01-PLAN.md
+Resume file: None
