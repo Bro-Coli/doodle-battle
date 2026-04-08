@@ -4,8 +4,8 @@ import { captureEntityTexture } from './captureEntityTexture';
 import { buildEntityContainer } from './EntitySprite';
 import { EntityState, SpreadingState, initEntityState, dispatchBehavior } from './EntitySimulation';
 import { fetchInteractions } from './fetchInteractions';
-import { RoundOverlay } from './RoundOverlay';
-import { resolveInteraction, applyInteractionSteering, DETECTION_RANGE, FIGHT_PROXIMITY_PX, FIGHT_COOLDOWN_MS } from './interactionBehaviors';
+import { RoundOverlay, RoundOutcome } from './RoundOverlay';
+import { resolveInteraction, applyInteractionSteering, DETECTION_RANGE_FRACTION, FIGHT_PROXIMITY_FRACTION, FIGHT_COOLDOWN_MS } from './interactionBehaviors';
 
 /**
  * Round lifecycle phases.
@@ -35,10 +35,16 @@ export class WorldStage {
   // Round state machine
   private _roundPhase: RoundPhase = 'idle';
   private _dyingEntities = new Set<Container>();
+  private _bounceCooldowns = new Map<Container, number>(); // ms remaining after wall bounce
   private _interactionMatrix: InteractionMatrix | null = null;
   private _roundTimer: number | null = null;
   private readonly _roundOverlay: RoundOverlay;
   private _onRoundPhaseChange: ((phase: RoundPhase) => void) | null = null;
+
+  // Round outcome tracking
+  private _roundNumber = 0;
+  private _namesAtRoundStart = new Set<string>();
+  private _lastOutcome: RoundOutcome | null = null;
 
   // Simulation state maps — keyed by entity container
   private readonly _entityStates = new Map<Container, EntityState>();
@@ -91,6 +97,22 @@ export class WorldStage {
   /** Interaction matrix from the last completed AI call; null between rounds. */
   get interactionMatrix(): InteractionMatrix | null {
     return this._interactionMatrix;
+  }
+
+  /** Outcome data from the most recently completed round; null before first round. */
+  get lastOutcome(): RoundOutcome | null {
+    return this._lastOutcome;
+  }
+
+  /**
+   * Show the round outcome card using the most recent outcome data.
+   * Delegates to the internal RoundOverlay instance.
+   *
+   * @param onDismiss - Callback fired when the player clicks to dismiss the card
+   */
+  showRoundOutcome(onDismiss: () => void): void {
+    if (!this._lastOutcome) return;
+    this._roundOverlay.showOutcome(this._lastOutcome, onDismiss);
   }
 
   /** Register a callback invoked whenever the round phase changes. */
@@ -148,12 +170,20 @@ export class WorldStage {
 
     const dt = ticker.deltaMS / 1000;
     const world = { width: this._app.screen.width, height: this._app.screen.height };
+    const worldDiag = Math.sqrt(world.width * world.width + world.height * world.height);
+    const detectionRange = worldDiag * DETECTION_RANGE_FRACTION;
+    const fightProximity = worldDiag * FIGHT_PROXIMITY_FRACTION;
 
-    // Decrement fight cooldowns
+    // Decrement cooldowns
     for (const [key, remaining] of this._fightCooldowns) {
       const next = remaining - ticker.deltaMS;
       if (next <= 0) this._fightCooldowns.delete(key);
       else this._fightCooldowns.set(key, next);
+    }
+    for (const [container, remaining] of this._bounceCooldowns) {
+      const next = remaining - ticker.deltaMS;
+      if (next <= 0) this._bounceCooldowns.delete(container);
+      else this._bounceCooldowns.set(container, next);
     }
 
     for (const [container, state] of this._entityStates) {
@@ -161,8 +191,11 @@ export class WorldStage {
       if (this._dyingEntities.has(container)) continue;
 
       const isMovable = state.archetype !== 'rooted' && state.archetype !== 'stationary';
+      const isBouncing = this._bounceCooldowns.has(container);
 
-      const resolved = (this._interactionMatrix && isMovable)
+      // During bounce cooldown, use archetype behavior (which respects the bounced velocity)
+      // instead of interaction steering (which would override it and push back into the wall)
+      const resolved = (this._interactionMatrix && isMovable && !isBouncing)
         ? resolveInteraction(
             container,
             this._entityStates,
@@ -170,7 +203,7 @@ export class WorldStage {
             this._dyingEntities,
             this._interactionMatrix,
             this._nameIdMap,
-            DETECTION_RANGE,
+            detectionRange,
           )
         : null;
 
@@ -179,10 +212,10 @@ export class WorldStage {
       if (resolved) {
         const targetState = this._entityStates.get(resolved.targetContainer);
         if (targetState) {
-          newState = applyInteractionSteering(state, resolved, targetState, dt);
+          newState = applyInteractionSteering(state, resolved, targetState, dt, worldDiag);
 
           // Fight contact check — 'chase' means predator caught prey; 'fight' means hostile contact
-          if ((resolved.type === 'fight' || resolved.type === 'chase') && resolved.distance < FIGHT_PROXIMITY_PX) {
+          if ((resolved.type === 'fight' || resolved.type === 'chase') && resolved.distance < fightProximity) {
             this._handleFightContact(container, resolved.targetContainer);
           }
         } else {
@@ -190,6 +223,41 @@ export class WorldStage {
         }
       } else {
         newState = dispatchBehavior(state, dt, world);
+      }
+
+      // Bounce off screen edges — account for sprite half-size so edges touch border
+      const entitySize = this._entitySpriteHeights.get(container) ?? 0;
+      const halfW = entitySize * 0.5;
+      const halfH = entitySize * 0.5;
+      const minX = halfW;
+      const maxX = world.width - halfW;
+      const minY = halfH;
+      const maxY = world.height - halfH;
+      let bounced = false;
+
+      if (newState.x < minX) {
+        newState.x = minX;
+        if ('vx' in newState) (newState as { vx: number }).vx *= -1;
+        bounced = true;
+      } else if (newState.x > maxX) {
+        newState.x = maxX;
+        if ('vx' in newState) (newState as { vx: number }).vx *= -1;
+        bounced = true;
+      }
+      if (newState.y < minY) {
+        newState.y = minY;
+        if ('vy' in newState) (newState as { vy: number }).vy *= -1;
+        bounced = true;
+      } else if (newState.y > maxY) {
+        newState.y = maxY;
+        if ('vy' in newState) (newState as { vy: number }).vy *= -1;
+        bounced = true;
+      }
+
+      // After a bounce, suppress interaction steering briefly so the entity
+      // travels away from the wall before flee/chase can redirect it back
+      if (bounced) {
+        this._bounceCooldowns.set(container, 500); // 0.5s cooldown
       }
 
       // Write position to container
@@ -330,6 +398,10 @@ export class WorldStage {
     if (this._roundPhase !== 'idle') return;
     if (this._entityStates.size === 0) return;
 
+    // Increment round number and snapshot entity names BEFORE async work (avoid off-by-one)
+    this._roundNumber += 1;
+    this._namesAtRoundStart = new Set(Array.from(this._entityProfiles.values()).map(p => p.name));
+
     this._roundPhase = 'analyzing';
     this._onRoundPhaseChange?.(this._roundPhase);
     this._roundOverlay.showAnalyzingSpinner();
@@ -346,6 +418,10 @@ export class WorldStage {
       this._buildNameIdMap(profiles);
       this._fightCooldowns.clear();
     }
+
+    console.log('[WorldStage] Interaction matrix:', JSON.stringify(this._interactionMatrix, null, 2));
+    console.log('[WorldStage] Name-ID map:', Object.fromEntries(this._nameIdMap));
+    console.log('[WorldStage] Entity profiles:', profiles.map(p => p.name));
 
     this._roundOverlay.hideAnalyzingSpinner();
     this._roundPhase = 'simulating';
@@ -368,6 +444,16 @@ export class WorldStage {
     this._interactionMatrix = null;
     this._nameIdMap.clear();
     this._fightCooldowns.clear();
+
+    // Compute outcome BEFORE transitioning to idle so lastOutcome is populated
+    // when the phase-change callback fires and main.ts reads it.
+    const namesNow = new Set(Array.from(this._entityProfiles.values()).map(p => p.name));
+    this._lastOutcome = {
+      roundNumber: this._roundNumber,
+      survivors: [...namesNow],
+      removed: [...this._namesAtRoundStart].filter(n => !namesNow.has(n)),
+    };
+
     this._roundPhase = 'idle';
     this._onRoundPhaseChange?.(this._roundPhase);
   }

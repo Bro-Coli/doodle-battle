@@ -333,6 +333,46 @@ canvas {
   user-select: none;
 }
 
+/* Round outcome card — centered overlay after round ends */
+#round-outcome {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: #ffffff;
+  border: 1px solid #d0d0d0;
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18);
+  padding: 28px 36px;
+  z-index: 50;
+  min-width: 260px;
+  max-width: 400px;
+  text-align: center;
+  cursor: pointer;
+  font-family: sans-serif;
+  user-select: none;
+}
+
+.round-outcome__heading {
+  font-size: 1.4em;
+  font-weight: 700;
+  color: #111111;
+  margin-bottom: 16px;
+}
+
+.round-outcome__section {
+  font-size: 0.95em;
+  color: #333333;
+  margin-bottom: 8px;
+  line-height: 1.4;
+}
+
+.round-outcome__hint {
+  font-size: 0.75em;
+  color: #aaaaaa;
+  margin-top: 16px;
+}
+
 /* Mock mode badge: bottom-left, subtle */
 .mock-badge {
   position: fixed;
