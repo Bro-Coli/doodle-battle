@@ -10,3 +10,18 @@ export interface EntityProfile {
   role: string; // e.g. "Apex predator"
   speed: number; // 1-10 scale from Claude, maps to pixels/second in simulation
 }
+
+// Interaction types — what one entity wants to do toward another
+export type InteractionType = 'chase' | 'flee' | 'fight' | 'befriend' | 'ignore';
+
+// One entity's relationships toward all other entities
+// entityId is the integer ID assigned by the batch prompt (as string)
+export interface EntityRelationship {
+  entityId: string;
+  relationships: Record<string, InteractionType>; // key: other entity's integer ID as string
+}
+
+// Full matrix of relationships for a set of entities
+export interface InteractionMatrix {
+  entries: EntityRelationship[];
+}
