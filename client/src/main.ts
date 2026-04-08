@@ -2,6 +2,8 @@ import './style.css';
 import { createElement, useEffect, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { Application } from 'pixi.js';
+import mainBackground from './assets/main-bg.png';
+import mainTitle from './assets/main-title.png';
 import { DrawingCanvas } from './drawing/DrawingCanvas';
 import { RecognitionOverlay } from './recognition/RecognitionOverlay';
 import { StudioControlsApp } from './ui/StudioControlsApp';
@@ -84,17 +86,32 @@ function LobbyScreen(): React.JSX.Element {
     'main',
     {
       className:
-        'flex h-screen w-screen items-center justify-center bg-[url("./assets/main-bg.png")] bg-cover bg-center bg-no-repeat',
+        'flex h-screen w-screen items-center justify-center bg-cover bg-center bg-no-repeat px-6',
+      style: {
+        backgroundImage: `url(${mainBackground})`,
+      },
     },
     createElement(
-      'button',
+      'div',
       {
-        className:
-          'cursor-pointer rounded-lg border border-white/70 bg-white/90 px-5 py-3 text-[15px] font-bold text-slate-800 shadow-[0_10px_30px_rgba(24,24,48,0.18)] transition hover:-translate-y-px hover:bg-white',
-        type: 'button',
-        onClick: () => navigate('/game'),
+        className: 'flex w-full max-w-5xl flex-col items-center gap-8 pt-6 sm:gap-10 sm:pt-0',
       },
-      'Quick Start',
+      createElement('img', {
+        src: mainTitle,
+        alt: 'Doodle Battle',
+        className:
+          'w-full max-w-[820px] object-contain drop-shadow-[0_18px_40px_rgba(28,20,78,0.45)]',
+      }),
+      createElement(
+        'button',
+        {
+          className:
+            'cursor-pointer rounded-lg border border-white/70 bg-white/90 px-5 py-3 text-[15px] font-bold text-slate-800 shadow-[0_10px_30px_rgba(24,24,48,0.18)] transition hover:-translate-y-px hover:bg-white',
+          type: 'button',
+          onClick: () => navigate('/game'),
+        },
+        'Quick Start',
+      ),
     ),
   );
 }
@@ -135,9 +152,7 @@ function App(): React.JSX.Element {
     };
   }, []);
 
-  return pathname === '/game'
-    ? createElement(GameScreen)
-    : createElement(LobbyScreen);
+  return pathname === '/game' ? createElement(GameScreen) : createElement(LobbyScreen);
 }
 
 const rootElement = document.getElementById('app');
