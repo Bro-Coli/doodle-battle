@@ -55,7 +55,10 @@ Plans:
   3. Calling `removeEntity()` on a defeated entity removes it from the PixiJS stage, all five WorldStage maps, and releases GPU texture references with no leaked state
   4. Entities marked as dying stop moving and no longer participate in interaction resolution
   5. Surviving entities remain in the world after a round ends and are present at the start of the next round
-**Plans**: TBD
+**Plans:** 2 plans
+Plans:
+- [ ] 07-01-PLAN.md — RoundPhase state machine, entity removal, fetchInteractions helper, RoundOverlay
+- [ ] 07-02-PLAN.md — Start Round button wiring, toolbar gating, view auto-switching, visual verification
 
 ### Phase 8: Interaction Behaviors
 **Goal**: Entities actively respond to their AI-determined relationships — predators chase, prey flees, hostiles fight, allies drift together, and neutral entities ignore each other
@@ -90,6 +93,6 @@ Plans:
 | 4. Entity Spawn & Rendering | v1.0 | 2/2 | Complete | 2026-04-07 |
 | 5. Entity Simulation | v1.0 | 3/3 | Complete | 2026-04-07 |
 | 6. Shared Types & Interaction Server Route | 2/2 | Complete   | 2026-04-08 | - |
-| 7. Round State Machine & Entity Removal | v1.1 | 0/? | Not started | - |
+| 7. Round State Machine & Entity Removal | v1.1 | 0/2 | Planning complete | - |
 | 8. Interaction Behaviors | v1.1 | 0/? | Not started | - |
 | 9. Round UI & End-to-End Integration | v1.1 | 0/? | Not started | - |
