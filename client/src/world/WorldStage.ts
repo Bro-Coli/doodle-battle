@@ -1,8 +1,20 @@
 import { Application, Container, Ticker, Texture } from 'pixi.js';
-import { EntityProfile } from '@crayon-world/shared/src/types';
+import { EntityProfile, InteractionMatrix } from '@crayon-world/shared/src/types';
 import { captureEntityTexture } from './captureEntityTexture';
 import { buildEntityContainer } from './EntitySprite';
 import { EntityState, SpreadingState, initEntityState, dispatchBehavior } from './EntitySimulation';
+import { fetchInteractions } from './fetchInteractions';
+import { RoundOverlay } from './RoundOverlay';
+
+/**
+ * Round lifecycle phases.
+ * - idle: no active round; entities are frozen
+ * - analyzing: waiting for AI interaction matrix (spinner shown)
+ * - simulating: entities moving and interacting; 30s countdown active
+ *
+ * No intermediate 'done' state — _endRound() transitions directly simulating -> idle.
+ */
+export type RoundPhase = 'idle' | 'analyzing' | 'simulating';
 
 /**
  * WorldStage manages the dual-container architecture: draw mode / world mode.
@@ -19,6 +31,14 @@ export class WorldStage {
   private readonly _app: Application;
   private _inWorld = false;
 
+  // Round state machine
+  private _roundPhase: RoundPhase = 'idle';
+  private _dyingEntities = new Set<Container>();
+  private _interactionMatrix: InteractionMatrix | null = null;
+  private _roundTimer: number | null = null;
+  private readonly _roundOverlay: RoundOverlay;
+  private _onRoundPhaseChange: ((phase: RoundPhase) => void) | null = null;
+
   // Simulation state maps — keyed by entity container
   private readonly _entityStates = new Map<Container, EntityState>();
   private readonly _entityTextures = new Map<Container, Texture>();
@@ -30,6 +50,7 @@ export class WorldStage {
     this._app = app;
     this._drawingRoot = new Container();
     this._worldRoot = new Container();
+    this._roundOverlay = new RoundOverlay();
 
     app.stage.addChild(this._drawingRoot);
     app.stage.addChild(this._worldRoot);
@@ -51,6 +72,26 @@ export class WorldStage {
 
   get inWorld(): boolean {
     return this._inWorld;
+  }
+
+  /** Number of active (non-dying) entities in the world. */
+  get entityCount(): number {
+    return this._entityStates.size;
+  }
+
+  /** Current round phase. */
+  get roundPhase(): RoundPhase {
+    return this._roundPhase;
+  }
+
+  /** Interaction matrix from the last completed AI call; null between rounds. */
+  get interactionMatrix(): InteractionMatrix | null {
+    return this._interactionMatrix;
+  }
+
+  /** Register a callback invoked whenever the round phase changes. */
+  set onRoundPhaseChange(cb: ((phase: RoundPhase) => void) | null) {
+    this._onRoundPhaseChange = cb;
   }
 
   /** Toggle between draw mode and world mode. */
@@ -97,10 +138,16 @@ export class WorldStage {
    * Registered once in the constructor; iterates all entity states.
    */
   private readonly _gameTick = (ticker: Ticker): void => {
+    // Freeze all entities when not in simulation phase (idle or analyzing)
+    if (this._roundPhase !== 'simulating') return;
+
     const dt = ticker.deltaMS / 1000;
     const world = { width: this._app.screen.width, height: this._app.screen.height };
 
     for (const [container, state] of this._entityStates) {
+      // Skip dying entities — they are handled by their own fade-out ticker callback
+      if (this._dyingEntities.has(container)) continue;
+
       const newState = dispatchBehavior(state, dt, world);
 
       // Write position to container
@@ -179,5 +226,102 @@ export class WorldStage {
     this._entityProfiles.set(copyContainer, profile);
     this._entityLabels.set(copyContainer, copyLabel);
     this._entitySpriteHeights.set(copyContainer, copySpriteH);
+  }
+
+  // ─── Round lifecycle ──────────────────────────────────────────────────────
+
+  /**
+   * Start a new round: analyze entities, then simulate for 30 seconds.
+   *
+   * Guards:
+   * - Does nothing if a round is already in progress (idle guard).
+   * - Does nothing if there are no entities to interact.
+   *
+   * Phase flow: idle → analyzing → simulating → (auto-end after 30s) → idle
+   */
+  async startRound(): Promise<void> {
+    if (this._roundPhase !== 'idle') return;
+    if (this._entityStates.size === 0) return;
+
+    this._roundPhase = 'analyzing';
+    this._onRoundPhaseChange?.(this._roundPhase);
+    this._roundOverlay.showAnalyzingSpinner();
+
+    const profiles = Array.from(this._entityProfiles.values());
+    try {
+      const matrix = await fetchInteractions(profiles);
+      this._interactionMatrix = matrix;
+    } catch (err) {
+      console.warn('[WorldStage] fetchInteractions failed, using empty fallback:', err);
+      this._interactionMatrix = { entries: [] };
+    }
+
+    this._roundOverlay.hideAnalyzingSpinner();
+    this._roundPhase = 'simulating';
+    this._onRoundPhaseChange?.(this._roundPhase);
+    this._roundOverlay.startCountdown(30);
+    this._roundTimer = window.setTimeout(() => this._endRound(), 30_000);
+  }
+
+  /**
+   * End the current round: clear timer, stop countdown, transition to idle.
+   * Surviving entities remain in all maps — they are NOT removed at round end.
+   * Called automatically after 30s, or manually (e.g. from a UI button).
+   */
+  private _endRound(): void {
+    if (this._roundTimer !== null) {
+      clearTimeout(this._roundTimer);
+      this._roundTimer = null;
+    }
+    this._roundOverlay.stopCountdown();
+    this._interactionMatrix = null;
+    this._roundPhase = 'idle';
+    this._onRoundPhaseChange?.(this._roundPhase);
+  }
+
+  // ─── Entity removal ───────────────────────────────────────────────────────
+
+  /**
+   * Fade out an entity over 0.5s then remove it from all 5 maps, destroy label
+   * and container GPU resources.
+   *
+   * Idempotent: calling removeEntity() on a container that is already dying is
+   * a no-op.
+   *
+   * Public so Phase 8 fight resolution can call it directly.
+   *
+   * @param container - The entity's root Container (used as map key)
+   */
+  removeEntity(container: Container): void {
+    if (this._dyingEntities.has(container)) return; // already dying
+    this._dyingEntities.add(container);
+
+    const label = this._entityLabels.get(container);
+    const fadeDuration = 500; // 0.5s
+    let elapsed = 0;
+
+    const fadeOut = (ticker: Ticker): void => {
+      elapsed += ticker.deltaMS;
+      const alpha = Math.max(0, 1 - elapsed / fadeDuration);
+      container.alpha = alpha;
+      if (label) label.alpha = alpha;
+
+      if (alpha <= 0) {
+        this._app.ticker.remove(fadeOut);
+
+        // Delete from all 5 maps BEFORE destroy() to prevent leaked texture references
+        this._entityStates.delete(container);
+        this._entityTextures.delete(container);
+        this._entityProfiles.delete(container);
+        this._entityLabels.delete(container);
+        this._entitySpriteHeights.delete(container);
+        this._dyingEntities.delete(container);
+
+        label?.destroy({ children: true });
+        container.destroy({ children: true });
+      }
+    };
+
+    this._app.ticker.add(fadeOut);
   }
 }
