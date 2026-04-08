@@ -1,5 +1,4 @@
-import './style.css';
-import { createElement, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { Application } from 'pixi.js';
 import mainBackground from './assets/main-bg.png';
@@ -44,7 +43,7 @@ async function initGame(host: HTMLElement): Promise<() => void> {
   host.appendChild(uiRoot);
 
   const uiRootRenderer = createRoot(uiRoot);
-  uiRootRenderer.render(createElement(StudioControlsApp, { controller }));
+  uiRootRenderer.render(<StudioControlsApp controller={controller} />);
 
   fetch('/api/recognize/status')
     .then((response) => response.json())
@@ -82,37 +81,26 @@ async function initGame(host: HTMLElement): Promise<() => void> {
 }
 
 function LobbyScreen(): React.JSX.Element {
-  return createElement(
-    'main',
-    {
-      className:
-        'flex h-screen w-screen items-center justify-center bg-cover bg-center bg-no-repeat px-6',
-      style: {
-        backgroundImage: `url(${mainBackground})`,
-      },
-    },
-    createElement(
-      'div',
-      {
-        className: 'flex w-full max-w-5xl flex-col items-center gap-8 pt-6 sm:gap-10 sm:pt-0',
-      },
-      createElement('img', {
-        src: mainTitle,
-        alt: 'Doodle Battle',
-        className:
-          'w-full max-w-[820px] object-contain drop-shadow-[0_18px_40px_rgba(28,20,78,0.45)]',
-      }),
-      createElement(
-        'button',
-        {
-          className:
-            'cursor-pointer rounded-lg border border-white/70 bg-white/90 px-5 py-3 text-[15px] font-bold text-slate-800 shadow-[0_10px_30px_rgba(24,24,48,0.18)] transition hover:-translate-y-px hover:bg-white',
-          type: 'button',
-          onClick: () => navigate('/game'),
-        },
-        'Quick Start',
-      ),
-    ),
+  return (
+    <main
+      className="flex h-screen w-screen items-center justify-center bg-cover bg-center bg-no-repeat px-6"
+      style={{ backgroundImage: `url(${mainBackground})` }}
+    >
+      <div className="flex w-full max-w-5xl flex-col items-center gap-8 pt-6 sm:gap-10 sm:pt-0">
+        <img
+          src={mainTitle}
+          alt="Doodle Battle"
+          className="w-full max-w-[820px] object-contain drop-shadow-[0_18px_40px_rgba(28,20,78,0.45)]"
+        />
+        <button
+          className="cursor-pointer rounded-lg border border-white/70 bg-white/90 px-5 py-3 text-[15px] font-bold text-slate-800 shadow-[0_10px_30px_rgba(24,24,48,0.18)] transition hover:-translate-y-px hover:bg-white"
+          type="button"
+          onClick={() => navigate('/game')}
+        >
+          Quick Start
+        </button>
+      </div>
+    </main>
   );
 }
 
@@ -132,13 +120,10 @@ function GameScreen(): React.JSX.Element {
     };
   }, []);
 
-  return createElement('div', {
-    id: 'game-root',
-    className: 'h-screen w-screen overflow-hidden',
-  });
+  return <div id="game-root" className="h-screen w-screen overflow-hidden" />;
 }
 
-function App(): React.JSX.Element {
+export function App(): React.JSX.Element {
   const [pathname, setPathname] = useState(window.location.pathname);
 
   useEffect(() => {
@@ -152,17 +137,5 @@ function App(): React.JSX.Element {
     };
   }, []);
 
-  return pathname === '/game' ? createElement(GameScreen) : createElement(LobbyScreen);
+  return pathname === '/game' ? <GameScreen /> : <LobbyScreen />;
 }
-
-const rootElement = document.getElementById('app');
-
-if (!rootElement) {
-  throw new Error('App root element not found.');
-}
-
-document.documentElement.className = 'h-full bg-white';
-document.body.className = 'h-full bg-white';
-rootElement.className = 'h-full w-full';
-
-createRoot(rootElement).render(createElement(App));
