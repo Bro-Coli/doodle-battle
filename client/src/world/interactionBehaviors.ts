@@ -1,0 +1,290 @@
+import type { EntityState } from './EntitySimulation';
+import type { InteractionMatrix, InteractionType } from '@crayon-world/shared/src/types';
+
+// ---------------------------------------------------------------------------
+// Constants
+// ---------------------------------------------------------------------------
+
+export const DETECTION_RANGE = 200;
+export const FIGHT_PROXIMITY_PX = 30;
+export const FIGHT_COOLDOWN_MS = 2000;
+export const BEFRIEND_ARRIVE_RADIUS = 60;
+
+// ---------------------------------------------------------------------------
+// Steering result type
+// ---------------------------------------------------------------------------
+
+export interface SteeringResult {
+  x: number;
+  y: number;
+  vx: number;
+  vy: number;
+}
+
+// ---------------------------------------------------------------------------
+// Resolved interaction type (generic container T)
+// ---------------------------------------------------------------------------
+
+export interface ResolvedInteraction<T> {
+  type: InteractionType;
+  targetContainer: T;
+  distance: number;
+}
+
+// ---------------------------------------------------------------------------
+// Pure steering functions
+// ---------------------------------------------------------------------------
+
+/**
+ * Move from (sx, sy) toward (tx, ty) at the given speed (px/s) scaled by dt (seconds).
+ * Returns {x, y, vx, vy}. When distance < 1, returns original position with zero velocity.
+ */
+export function seekPosition(
+  sx: number,
+  sy: number,
+  tx: number,
+  ty: number,
+  speed: number,
+  dt: number,
+): SteeringResult {
+  const dx = tx - sx;
+  const dy = ty - sy;
+  const dist = Math.sqrt(dx * dx + dy * dy);
+
+  if (dist < 1) {
+    return { x: sx, y: sy, vx: 0, vy: 0 };
+  }
+
+  const nx = dx / dist;
+  const ny = dy / dist;
+  const vx = nx * speed;
+  const vy = ny * speed;
+
+  return {
+    x: sx + vx * dt,
+    y: sy + vy * dt,
+    vx,
+    vy,
+  };
+}
+
+/**
+ * Move from (sx, sy) AWAY from (tx, ty) at the given speed (px/s) scaled by dt.
+ * Returns {x, y, vx, vy}. When distance < 1, returns original position with zero velocity.
+ */
+export function fleePosition(
+  sx: number,
+  sy: number,
+  tx: number,
+  ty: number,
+  speed: number,
+  dt: number,
+): SteeringResult {
+  const dx = sx - tx; // reversed direction
+  const dy = sy - ty;
+  const dist = Math.sqrt(dx * dx + dy * dy);
+
+  if (dist < 1) {
+    return { x: sx, y: sy, vx: 0, vy: 0 };
+  }
+
+  const nx = dx / dist;
+  const ny = dy / dist;
+  const vx = nx * speed;
+  const vy = ny * speed;
+
+  return {
+    x: sx + vx * dt,
+    y: sy + vy * dt,
+    vx,
+    vy,
+  };
+}
+
+/**
+ * Move toward (tx, ty) like seekPosition but damp speed linearly when within arriveRadius.
+ * At distance >= arriveRadius: full speed. At distance = 0: speed = 0.
+ * Returns {x, y, vx, vy}.
+ */
+export function befriendPosition(
+  sx: number,
+  sy: number,
+  tx: number,
+  ty: number,
+  speed: number,
+  dt: number,
+  arriveRadius: number = BEFRIEND_ARRIVE_RADIUS,
+): SteeringResult {
+  const dx = tx - sx;
+  const dy = ty - sy;
+  const dist = Math.sqrt(dx * dx + dy * dy);
+
+  if (dist < 1) {
+    return { x: sx, y: sy, vx: 0, vy: 0 };
+  }
+
+  // Linear damping within arriveRadius
+  const factor = dist < arriveRadius ? dist / arriveRadius : 1;
+  const effectiveSpeed = speed * factor;
+
+  const nx = dx / dist;
+  const ny = dy / dist;
+  const vx = nx * effectiveSpeed;
+  const vy = ny * effectiveSpeed;
+
+  return {
+    x: sx + vx * dt,
+    y: sy + vy * dt,
+    vx,
+    vy,
+  };
+}
+
+// ---------------------------------------------------------------------------
+// Interaction resolution
+// ---------------------------------------------------------------------------
+
+/**
+ * Minimal profile shape needed for resolveInteraction — just requires name.
+ */
+interface HasName {
+  name: string;
+}
+
+/**
+ * Find the nearest non-ignore entity within detectionRange for selfContainer.
+ *
+ * @param selfContainer       The entity doing the searching
+ * @param entityStates        Map from container to EntityState (has x, y)
+ * @param entityProfiles      Map from container to EntityProfile (has name)
+ * @param dyingEntities       Set of containers currently dying (skip as targets)
+ * @param matrix              InteractionMatrix from AI
+ * @param nameIdMap           Map from entity name -> integer ID string
+ * @param detectionRange      Max pixel distance to consider
+ *
+ * @returns ResolvedInteraction or null
+ */
+export function resolveInteraction<T>(
+  selfContainer: T,
+  entityStates: Map<T, EntityState>,
+  entityProfiles: Map<T, HasName>,
+  dyingEntities: Set<T>,
+  matrix: InteractionMatrix,
+  nameIdMap: Map<string, string>,
+  detectionRange: number,
+): ResolvedInteraction<T> | null {
+  const selfProfile = entityProfiles.get(selfContainer);
+  if (!selfProfile) return null;
+
+  const selfId = nameIdMap.get(selfProfile.name);
+  if (!selfId) return null;
+
+  const selfEntry = matrix.entries.find((e) => e.entityId === selfId);
+  if (!selfEntry) return null;
+
+  const selfState = entityStates.get(selfContainer);
+  if (!selfState) return null;
+
+  let nearestDistance = Infinity;
+  let nearestContainer: T | null = null;
+  let nearestType: InteractionType | null = null;
+
+  for (const [container, state] of entityStates) {
+    // Skip self
+    if (container === selfContainer) continue;
+
+    // Skip dying entities
+    if (dyingEntities.has(container)) continue;
+
+    const profile = entityProfiles.get(container);
+    if (!profile) continue;
+
+    const otherId = nameIdMap.get(profile.name);
+    if (otherId === undefined) continue;
+
+    const relType = selfEntry.relationships[otherId];
+    if (!relType || relType === 'ignore') continue;
+
+    // Calculate distance
+    const dx = state.x - selfState.x;
+    const dy = state.y - selfState.y;
+    const dist = Math.sqrt(dx * dx + dy * dy);
+
+    if (dist > detectionRange) continue;
+
+    if (dist < nearestDistance) {
+      nearestDistance = dist;
+      nearestContainer = container;
+      nearestType = relType;
+    }
+  }
+
+  if (nearestContainer === null || nearestType === null) return null;
+
+  return {
+    type: nearestType,
+    targetContainer: nearestContainer,
+    distance: nearestDistance,
+  };
+}
+
+// ---------------------------------------------------------------------------
+// Steering application
+// ---------------------------------------------------------------------------
+
+/**
+ * Apply interaction steering to an entity state, returning an updated state spread.
+ * Preserves all archetype-specific fields.
+ *
+ * Speed extraction: uses state.speed if present (walking/flying), else defaults to 80.
+ */
+export function applyInteractionSteering<T>(
+  state: EntityState,
+  resolved: ResolvedInteraction<T>,
+  targetState: EntityState,
+  dt: number,
+): EntityState {
+  // Extract speed — walking and flying have speed, others don't
+  const speed = 'speed' in state && typeof (state as { speed?: unknown }).speed === 'number'
+    ? (state as { speed: number }).speed
+    : 80;
+
+  let steering: SteeringResult;
+
+  switch (resolved.type) {
+    case 'chase':
+      steering = seekPosition(state.x, state.y, targetState.x, targetState.y, speed, dt);
+      break;
+    case 'flee':
+      steering = fleePosition(state.x, state.y, targetState.x, targetState.y, speed * 1.1, dt);
+      break;
+    case 'fight':
+      steering = seekPosition(state.x, state.y, targetState.x, targetState.y, speed, dt);
+      break;
+    case 'befriend':
+      steering = befriendPosition(state.x, state.y, targetState.x, targetState.y, speed * 0.5, dt);
+      break;
+    case 'ignore':
+      // No steering for ignore
+      return state;
+  }
+
+  // Build updated state — spread all fields, override x, y, and vx/vy if applicable
+  const hasVelocity = 'vx' in state && 'vy' in state;
+
+  if (hasVelocity) {
+    return {
+      ...state,
+      x: steering.x,
+      y: steering.y,
+      vx: steering.vx,
+      vy: steering.vy,
+    } as EntityState;
+  }
+
+  return {
+    ...state,
+    x: steering.x,
+    y: steering.y,
+  } as EntityState;
+}
