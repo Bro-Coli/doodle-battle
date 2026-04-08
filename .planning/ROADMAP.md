@@ -70,7 +70,10 @@ Plans:
   3. When two hostile entities come within proximity range, the slower one fades out and is removed from the world
   4. Symbiotic entities drift toward each other and remain near each other during simulation
   5. Entities with no relationship to any other entity continue their archetype movement undisturbed
-**Plans**: TBD
+**Plans:** 2 plans
+Plans:
+- [ ] 08-01-PLAN.md — TDD: Pure interaction behavior functions (steering, resolution, state application) with tests
+- [ ] 08-02-PLAN.md — WorldStage integration: HP map, name-ID map, fight cooldowns, _gameTick wiring, visual verification
 
 ### Phase 9: Round UI & End-to-End Integration
 **Goal**: The full round flow is playable end-to-end — a player can draw entities, start a round, watch analysis and simulation, see who survives, and draw again
@@ -94,5 +97,5 @@ Plans:
 | 5. Entity Simulation | v1.0 | 3/3 | Complete | 2026-04-07 |
 | 6. Shared Types & Interaction Server Route | 2/2 | Complete   | 2026-04-08 | - |
 | 7. Round State Machine & Entity Removal | 2/2 | Complete   | 2026-04-08 | - |
-| 8. Interaction Behaviors | v1.1 | 0/? | Not started | - |
+| 8. Interaction Behaviors | v1.1 | 0/2 | Planning complete | - |
 | 9. Round UI & End-to-End Integration | v1.1 | 0/? | Not started | - |
