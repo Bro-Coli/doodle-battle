@@ -9,7 +9,7 @@ Requirements for entity interactions and round-based gameplay. Each maps to road
 
 ### Round System
 
-- [ ] **ROUND-01**: Player can press "Start Round" to begin a round after drawing entities
+- [x] **ROUND-01**: Player can press "Start Round" to begin a round after drawing entities
 - [x] **ROUND-02**: Round runs for a timed duration (~30 seconds) then ends automatically
 - [x] **ROUND-03**: Surviving entities persist into the next round — world accumulates
 - [ ] **ROUND-04**: UI clearly indicates current round phase (drawing, analyzing, simulating, done)
@@ -73,7 +73,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| ROUND-01 | Phase 7 | Pending |
+| ROUND-01 | Phase 7 | Complete |
 | ROUND-02 | Phase 7 | Complete |
 | ROUND-03 | Phase 7 | Complete |
 | ROUND-04 | Phase 9 | Pending |

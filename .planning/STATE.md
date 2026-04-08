@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Entity Interactions & Rounds
 status: planning
-stopped_at: "Checkpoint: Task 2 human-verify — 07-02-PLAN.md"
-last_updated: "2026-04-08T05:23:48.854Z"
+stopped_at: Completed 07-02-PLAN.md
+last_updated: "2026-04-08T05:28:15.247Z"
 last_activity: 2026-04-07 — v1.1 roadmap created (Phases 6-9)
 progress:
   total_phases: 4
@@ -73,6 +73,7 @@ Key v1.1 decisions (from research):
 - [Phase 07-round-state-machine-entity-removal]: fetchInteractions failure produces empty-entries fallback (all-ignore) rather than blocking the round
 - [Phase 07-round-state-machine-entity-removal]: viewToggleBtn locked during analyzing only — player can peek at draw mode during simulation
 - [Phase 07-round-state-machine-entity-removal]: syncStartRoundBtn called in both enableAllToolbar and card dismiss callback to cover all enable paths
+- [Phase 07-round-state-machine-entity-removal]: Human verified complete round lifecycle end-to-end: start, analyze spinner, 30s countdown, auto-end, entity persistence across rounds
 
 ### Pending Todos
 
@@ -86,6 +87,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-04-08T05:23:48.852Z
-Stopped at: Checkpoint: Task 2 human-verify — 07-02-PLAN.md
+Last session: 2026-04-08T05:28:11.973Z
+Stopped at: Completed 07-02-PLAN.md
 Resume file: None
