@@ -6,6 +6,7 @@ type StrokeShadowTextProps = {
   children: ReactNode;
   className?: string;
   fillClassName?: string;
+  fillStyle?: CSSProperties;
   firstStrokeColor: string;
   secondStrokeColor: string;
   firstStrokeWidth?: number;
@@ -17,6 +18,7 @@ export function StrokeShadowText({
   children,
   className,
   fillClassName,
+  fillStyle,
   firstStrokeColor,
   secondStrokeColor,
   firstStrokeWidth = 8,
@@ -50,7 +52,10 @@ export function StrokeShadowText({
       >
         {children}
       </span>
-      <span className={cn('relative text-center uppercase text-white', className, fillClassName)}>
+      <span
+        className={cn('relative text-center uppercase text-white', className, fillClassName)}
+        style={fillStyle}
+      >
         {children}
       </span>
     </span>

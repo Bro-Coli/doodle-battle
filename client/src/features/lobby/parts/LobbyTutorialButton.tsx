@@ -55,23 +55,20 @@ export function LobbyTutorialButton() {
   return (
     <Dialog.Root>
       <Dialog.Trigger asChild>
-        <button
-          type="button"
-          aria-label="Tutorial"
-          className="ui-pill-button"
-        >
+        <button type="button" aria-label="Tutorial" className="ui-pill-button">
           <span className="relative z-1 inline-block tracking-wide">
             <span
               aria-hidden
               className={cn(
                 'pointer-events-none absolute inset-0 text-center uppercase text-transparent',
                 't24-b',
+                'lg:t20-b',
               )}
               style={tutorialStrokeRingStyle}
             >
               Tutorial
             </span>
-            <span className={cn('relative text-center text-white', 't24-b uppercase')}>
+            <span className={cn('relative text-center text-white', 't24-b uppercase', 'lg:t20-b')}>
               Tutorial
             </span>
           </span>
