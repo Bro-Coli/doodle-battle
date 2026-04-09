@@ -69,6 +69,8 @@ export class GameRoom extends Room<{ state: GameState }> {
   _dyingEntities: Set<string> = new Set();
   // Pending profiles buffered during draw phase — spawned simultaneously at simulate start
   _pendingProfiles: Map<string, { profile: EntityProfile; teamId: string }> = new Map();
+  // Count of in-flight recognition calls — must reach 0 before phase can advance
+  _pendingRecognitions: number = 0;
 
   onCreate(options: Record<string, unknown> = {}): void {
     const maxPlayers = (options.maxPlayers as number) ?? 8;
@@ -90,6 +92,7 @@ export class GameRoom extends Room<{ state: GameState }> {
     this._nameIdMap = new Map();
     this._dyingEntities = new Set();
     this._pendingProfiles = new Map();
+    this._pendingRecognitions = 0;
 
     // 20Hz simulation tick
     this.setSimulationInterval((deltaTime) => this._tick(deltaTime), 50);
@@ -306,6 +309,13 @@ export class GameRoom extends Room<{ state: GameState }> {
     const world = WORLD_BOUNDS;
 
     if (this.state.currentPhase === 'draw') {
+      // Wait for all recognition calls to complete before advancing
+      if (this._pendingRecognitions > 0) {
+        // Keep timer at 0 — _tick will retry _advancePhase next tick
+        this.state.phaseTimer = 0;
+        return;
+      }
+
       // Spawn all pending profiles as entities simultaneously
       for (const [, { profile, teamId }] of this._pendingProfiles) {
         const entityId = crypto.randomUUID();
@@ -367,16 +377,18 @@ export class GameRoom extends Room<{ state: GameState }> {
 
     // Set synchronously before async recognition call
     player.hasSubmittedDrawing = true;
+    this._pendingRecognitions++;
 
     const data = msg as Record<string, unknown>;
     const imageDataUrl = (typeof data?.imageDataUrl === 'string') ? data.imageDataUrl : '';
 
     const profile = await recognizeDrawingInternal(imageDataUrl);
 
+    this._pendingRecognitions--;
     this._pendingProfiles.set(client.sessionId, { profile, teamId: player.team });
 
-    // Early phase end if all players submitted
-    if (this._allPlayersSubmitted()) {
+    // Early phase end only when all players submitted AND all recognitions complete
+    if (this._allPlayersSubmitted() && this._pendingRecognitions === 0) {
       this.state.phaseTimer = 0;
     }
   }
