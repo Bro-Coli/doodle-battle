@@ -13,6 +13,12 @@
 @custom-variant md (@media (max-width: 1024px));
 @custom-variant sm (@media (max-width: 768px));
 
+@utility flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 @utility t20-eb {
   font-size: 2rem;
   font-style: normal;
