@@ -28,17 +28,17 @@ export function LobbyActionButton({ action }: LobbyActionButtonProps) {
         src={action.backgroundImage}
         alt=""
         aria-hidden="true"
-        className="pointer-events-none absolute inset-0 z-[1] h-full w-full object-contain transition-[filter] duration-150 ease-linear group-hover:[filter:drop-shadow(0_0_12px_var(--glow-color))_drop-shadow(0_0_28px_var(--glow-color))]"
+        className="pointer-events-none absolute inset-0 z-1 h-full w-full object-contain transition-[filter] duration-150 ease-linear group-hover:filter-[drop-shadow(0_0_12px_var(--glow-color))_drop-shadow(0_0_28px_var(--glow-color))]"
         style={{ ['--glow-color' as string]: action.glowColor }}
       />
       <span className="flex-center relative z-10 text-white">
         <Icon name={action.iconName} size="100px" color="currentColor" />
       </span>
       <span className="flex-center relative z-10 mt-1 flex-col">
-        <span className="t20-eb text-center uppercase text-white [text-shadow:_0_2px_0_rgba(0,0,0,0.24)]">
+        <span className="t20-eb text-center uppercase text-white [text-shadow:0_2px_0_rgba(0,0,0,0.24)]">
           {action.title}
         </span>
-        <span className="t14-b mt-2 max-w-[11ch] text-center text-white/95 [text-shadow:_0_1px_0_rgba(0,0,0,0.18)]">
+        <span className="t14-b mt-2 max-w-[11ch] text-center text-white/95 [text-shadow:0_1px_0_rgba(0,0,0,0.18)]">
           {action.description}
         </span>
       </span>
