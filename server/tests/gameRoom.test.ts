@@ -268,6 +268,10 @@ describe('start_game handler', () => {
     room.onJoin(host as never, { name: 'Host' });
     room.onJoin(guest as never, { name: 'Guest' });
 
+    // All players must be ready before start_game
+    room.state.players.get('host')!.ready = true;
+    room.state.players.get('guest')!.ready = true;
+
     anyRoom._handleStartGame(host);
     expect(anyRoom.broadcast).toHaveBeenCalledWith('game_starting', expect.anything());
     expect(anyRoom.lock).toHaveBeenCalled();

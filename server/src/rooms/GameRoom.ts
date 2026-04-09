@@ -5,6 +5,7 @@ import {
   initEntityState,
   WORLD_BOUNDS,
 } from '@crayon-world/shared/src/simulation/EntitySimulation.js';
+import { recognizeDrawingInternal } from '../recognition/recognizeDrawingInternal.js';
 import type {
   EntityState,
   SpreadingState,
@@ -38,6 +39,7 @@ export class PlayerSchema extends Schema {
   @type('string') name: string = '';
   @type('string') team: string = 'red';
   @type('boolean') ready: boolean = false;
+  @type('boolean') hasSubmittedDrawing: boolean = false;
 }
 
 export class GameState extends Schema {
@@ -45,6 +47,8 @@ export class GameState extends Schema {
   @type({ map: EntitySchema }) entities = new MapSchema<EntitySchema>();
   @type('string') hostSessionId: string = '';
   @type('number') maxPlayers: number = 8;
+  @type('string') currentPhase: string = 'idle';
+  @type('number') phaseTimer: number = 0;
 }
 
 // ---------------------------------------------------------------------------
@@ -63,6 +67,8 @@ export class GameRoom extends Room<{ state: GameState }> {
   _fightCooldowns: Map<string, number> = new Map();
   _nameIdMap: Map<string, string> = new Map();
   _dyingEntities: Set<string> = new Set();
+  // Pending profiles buffered during draw phase — spawned simultaneously at simulate start
+  _pendingProfiles: Map<string, { profile: EntityProfile; teamId: string }> = new Map();
 
   onCreate(options: Record<string, unknown> = {}): void {
     const maxPlayers = (options.maxPlayers as number) ?? 8;
@@ -83,6 +89,7 @@ export class GameRoom extends Room<{ state: GameState }> {
     this._fightCooldowns = new Map();
     this._nameIdMap = new Map();
     this._dyingEntities = new Set();
+    this._pendingProfiles = new Map();
 
     // 20Hz simulation tick
     this.setSimulationInterval((deltaTime) => this._tick(deltaTime), 50);
