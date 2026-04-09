@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Multiplayer
 status: planning
-stopped_at: Completed 11-02-PLAN.md
-last_updated: "2026-04-09T05:13:47.165Z"
+stopped_at: Completed 12-01-PLAN.md
+last_updated: "2026-04-09T05:37:59.122Z"
 last_activity: 2026-04-08 — v2.0 roadmap written, 22 requirements mapped across 5 phases
 progress:
   total_phases: 12
   completed_phases: 5
-  total_plans: 10
-  completed_plans: 10
+  total_plans: 12
+  completed_plans: 11
   percent: 0
 ---
 
@@ -52,6 +52,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 10 P01 | 175 | 3 tasks | 16 files |
 | Phase 10-networking-infrastructure P02 | 60 | 2 tasks | 3 files |
 | Phase 11-lobby-players P01 | 15 | 1 tasks | 2 files |
+| Phase 12 P01 | 3 | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -73,6 +74,9 @@ Recent decisions affecting current work:
 - [Phase 11-lobby-players]: activeRoom stored at ColyseusClient module level to avoid re-render loops when Colyseus fires callbacks
 - [Phase 11-lobby-players]: MapSchema snapshotted into plain Map inside onStateChange before setState — prevents stale proxy references in React state
 - [Phase 11-lobby-players]: WaitingRoomScreen guards state.players for undefined — MapSchema not populated until first server patch
+- [Phase 12-01]: EntitySchema contains only render-critical fields — full EntityState stays in server-side Map
+- [Phase 12-01]: vx/vy added to EntitySchema for sprite orientation without client-side position-delta inference
+- [Phase 12-01]: WORLD_BOUNDS canonical constant (1280x720) defined in shared/src/simulation/EntitySimulation.ts
 
 ### Pending Todos
 
@@ -85,6 +89,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-09T05:13:11.942Z
-Stopped at: Completed 11-02-PLAN.md
+Last session: 2026-04-09T05:37:50.788Z
+Stopped at: Completed 12-01-PLAN.md
 Resume file: None

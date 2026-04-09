@@ -35,9 +35,9 @@ Requirements for Colyseus multiplayer. Each maps to roadmap phases.
 
 ### Server-Authoritative Simulation
 
-- [ ] **SSIM-01**: Entity simulation (movement, interactions) runs on the Colyseus server, not the client
+- [x] **SSIM-01**: Entity simulation (movement, interactions) runs on the Colyseus server, not the client
 - [ ] **SSIM-02**: Clients receive entity positions via Schema patches and render them without local simulation
-- [ ] **SSIM-03**: Fight resolution and entity removal are determined server-side
+- [x] **SSIM-03**: Fight resolution and entity removal are determined server-side
 
 ### Drawing Relay & Reveal
 
@@ -99,9 +99,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 | PHSE-02 | Phase 13 | Pending |
 | PHSE-03 | Phase 13 | Pending |
 | PHSE-04 | Phase 13 | Pending |
-| SSIM-01 | Phase 12 | Pending |
+| SSIM-01 | Phase 12 | Complete |
 | SSIM-02 | Phase 12 | Pending |
-| SSIM-03 | Phase 12 | Pending |
+| SSIM-03 | Phase 12 | Complete |
 | DRAW-01 | Phase 13 | Pending |
 | DRAW-02 | Phase 13 | Pending |
 | DRAW-03 | Phase 13 | Pending |
