@@ -113,6 +113,10 @@ export class GameRoom extends Room<{ state: GameState }> {
     this.onMessage('remove_all_entities', () => {
       this._handleRemoveAllEntities();
     });
+
+    this.onMessage('submit_drawing', (client: Client, msg: unknown) => {
+      void this._handleSubmitDrawing(client, msg);
+    });
   }
 
   onJoin(client: Client, options: Record<string, unknown> = {}): void {
@@ -150,6 +154,21 @@ export class GameRoom extends Room<{ state: GameState }> {
   // ---------------------------------------------------------------------------
 
   _tick(deltaMS: number): void {
+    // Phase timer — runs at 20Hz, decrement and advance when zero
+    if (
+      this.state.currentPhase === 'draw' ||
+      this.state.currentPhase === 'simulate' ||
+      this.state.currentPhase === 'results'
+    ) {
+      this.state.phaseTimer = Math.max(0, this.state.phaseTimer - deltaMS / 1000);
+      if (this.state.phaseTimer <= 0) {
+        this._advancePhase();
+      }
+    }
+
+    // Only run entity simulation during the simulate phase
+    if (this.state.currentPhase !== 'simulate') return;
+
     const dt = deltaMS / 1000;
     const world = WORLD_BOUNDS;
     const worldDiag = Math.sqrt(world.width * world.width + world.height * world.height);
@@ -280,6 +299,97 @@ export class GameRoom extends Room<{ state: GameState }> {
   }
 
   // ---------------------------------------------------------------------------
+  // Phase state machine
+  // ---------------------------------------------------------------------------
+
+  _advancePhase(): void {
+    const world = WORLD_BOUNDS;
+
+    if (this.state.currentPhase === 'draw') {
+      // Spawn all pending profiles as entities simultaneously
+      for (const [, { profile, teamId }] of this._pendingProfiles) {
+        const entityId = crypto.randomUUID();
+
+        // Team-based x positioning
+        let x: number;
+        if (teamId === 'blue') {
+          // Blue team: right half [width/2+40, width-40]
+          x = world.width / 2 + 40 + Math.random() * (world.width / 2 - 80);
+        } else {
+          // Red team: left half [40, width/2-40]
+          x = 40 + Math.random() * (world.width / 2 - 80);
+        }
+        const y = 40 + Math.random() * (world.height - 80);
+
+        const schema = new EntitySchema();
+        schema.entityId = entityId;
+        schema.name = profile.name;
+        schema.archetype = profile.archetype;
+        schema.teamId = teamId;
+        schema.x = x;
+        schema.y = y;
+        schema.hp = 1;
+
+        const entityState = initEntityState(profile.archetype as Archetype, profile.speed, x, y);
+
+        this.state.entities.set(entityId, schema);
+        this._entityStates.set(entityId, entityState);
+        this._entityProfiles.set(entityId, { ...profile });
+      }
+
+      this._pendingProfiles.clear();
+
+      // Transition to simulate
+      this.state.currentPhase = 'simulate';
+      this.state.phaseTimer = 30;
+    } else if (this.state.currentPhase === 'simulate') {
+      this.state.currentPhase = 'results';
+      this.state.phaseTimer = 4;
+    } else if (this.state.currentPhase === 'results') {
+      // Reset hasSubmittedDrawing for new draw round
+      this.state.players.forEach((player) => {
+        player.hasSubmittedDrawing = false;
+      });
+      this.state.currentPhase = 'draw';
+      this.state.phaseTimer = 60;
+    }
+  }
+
+  async _handleSubmitDrawing(client: { sessionId: string }, msg: unknown): Promise<void> {
+    const player = this.state.players.get(client.sessionId);
+    if (!player) return;
+
+    // Guard: only accept during draw phase
+    if (this.state.currentPhase !== 'draw') return;
+
+    // Guard: idempotent — reject if already submitted
+    if (player.hasSubmittedDrawing) return;
+
+    // Set synchronously before async recognition call
+    player.hasSubmittedDrawing = true;
+
+    const data = msg as Record<string, unknown>;
+    const imageDataUrl = (typeof data?.imageDataUrl === 'string') ? data.imageDataUrl : '';
+
+    const profile = await recognizeDrawingInternal(imageDataUrl);
+
+    this._pendingProfiles.set(client.sessionId, { profile, teamId: player.team });
+
+    // Early phase end if all players submitted
+    if (this._allPlayersSubmitted()) {
+      this.state.phaseTimer = 0;
+    }
+  }
+
+  _allPlayersSubmitted(): boolean {
+    let allSubmitted = true;
+    this.state.players.forEach((player) => {
+      if (!player.hasSubmittedDrawing) allSubmitted = false;
+    });
+    return allSubmitted;
+  }
+
+  // ---------------------------------------------------------------------------
   // Fight contact handler
   // ---------------------------------------------------------------------------
 
@@ -406,6 +516,10 @@ export class GameRoom extends Room<{ state: GameState }> {
 
     this.broadcast('game_starting', { startedBy: client.sessionId });
     this.lock();
+
+    // Start the draw phase
+    this.state.currentPhase = 'draw';
+    this.state.phaseTimer = 60;
   }
 
   // ---------------------------------------------------------------------------

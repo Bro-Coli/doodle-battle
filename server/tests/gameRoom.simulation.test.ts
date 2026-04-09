@@ -176,6 +176,9 @@ describe('GameRoom._tick', () => {
     any._dyingEntities = new Set();
     any._nameIdMap = new Map();
     any._interactionMatrix = null;
+    // Entity simulation only runs during simulate phase
+    room.state.currentPhase = 'simulate';
+    room.state.phaseTimer = 30;
   });
 
   it('calls dispatchBehavior and updates EntitySchema x/y from EntityState', () => {
@@ -312,6 +315,9 @@ describe('GameRoom._tick — spreading entity pendingSpawn', () => {
     any._dyingEntities = new Set();
     any._nameIdMap = new Map();
     any._interactionMatrix = null;
+    // Entity simulation only runs during simulate phase
+    room.state.currentPhase = 'simulate';
+    room.state.phaseTimer = 30;
 
     // Spawn a spreading entity
     const msg = makeSpawnMsg({ entityId: 'spreader', name: 'Moss', archetype: 'spreading', x: 400, y: 300 });
