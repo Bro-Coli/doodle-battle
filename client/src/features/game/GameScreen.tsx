@@ -18,15 +18,26 @@ interface PlayerSnapshot {
   hasSubmittedDrawing: boolean;
 }
 
-interface EntitySnapshot {
-  teamId: string;
-}
-
 interface GameSnapshot {
   currentPhase: string;
   phaseTimer: number;
   players: Map<string, PlayerSnapshot>;
   entityCounts: { red: number; blue: number };
+  currentRound: number;
+  maxRounds: number;
+}
+
+interface PlayerStat {
+  name: string;
+  team: string;
+  entitiesDrawn: number;
+  entitiesSurviving: number;
+  kills: number;
+}
+
+interface WinnerData {
+  winner: string;
+  stats: Record<string, PlayerStat>;
 }
 
 // ─── Helper sub-components ────────────────────────────────────────────────────
@@ -42,14 +53,26 @@ function TimerBanner({ seconds }: { seconds: number }): React.JSX.Element {
 
 function DrawPhaseOverlay({
   phaseTimer,
+  currentRound,
+  maxRounds,
   onSubmit,
 }: {
   phaseTimer: number;
+  currentRound: number;
+  maxRounds: number;
   onSubmit: () => void;
 }): React.JSX.Element {
   return (
     <>
-      <TimerBanner seconds={phaseTimer} />
+      <div className="fixed left-1/2 top-4 z-20 -translate-x-1/2 flex items-center gap-3 rounded-xl bg-black/75 px-6 py-2">
+        <span className="font-bold text-white/60 text-lg">
+          Round {currentRound}/{maxRounds}
+        </span>
+        <span className="text-white/30">|</span>
+        <span className="font-bold text-2xl text-white">
+          {Math.max(0, Math.ceil(phaseTimer))}s
+        </span>
+      </div>
       <div className="fixed bottom-8 left-1/2 z-20 -translate-x-1/2">
         <button
           type="button"
@@ -196,6 +219,107 @@ function ResultsOverlay({
   );
 }
 
+function WinnerOverlay({
+  winner,
+  stats,
+  mySessionId,
+  onBackToLobby,
+  onMainMenu,
+}: {
+  winner: string;
+  stats: Record<string, PlayerStat>;
+  mySessionId: string;
+  onBackToLobby: () => void;
+  onMainMenu: () => void;
+}): React.JSX.Element {
+  const winnerLabel =
+    winner === 'red'
+      ? 'Red Team Wins!'
+      : winner === 'blue'
+        ? 'Blue Team Wins!'
+        : "It's a Draw!";
+
+  const winnerColor =
+    winner === 'red'
+      ? 'text-red-400'
+      : winner === 'blue'
+        ? 'text-blue-400'
+        : 'text-yellow-300';
+
+  // Sort by team then kills desc
+  const rows = Object.entries(stats).sort(([, a], [, b]) => {
+    if (a.team !== b.team) return a.team < b.team ? -1 : 1;
+    return b.kills - a.kills;
+  });
+
+  return (
+    <div className="pointer-events-auto fixed inset-0 z-30 flex items-center justify-center bg-black/60">
+      <div className="w-full max-w-lg rounded-2xl bg-[#1a1035]/95 px-8 py-8 shadow-2xl ring-1 ring-white/10">
+        {/* Winner announcement */}
+        <h1 className={`mb-6 text-center text-4xl font-black ${winnerColor}`}>
+          {winnerLabel}
+        </h1>
+
+        {/* Per-player stats table */}
+        <table className="mb-8 w-full text-sm">
+          <thead>
+            <tr className="border-b border-white/20 text-xs font-black uppercase tracking-widest text-white/50">
+              <th className="pb-2 text-left">Player</th>
+              <th className="pb-2 text-left">Team</th>
+              <th className="pb-2 text-right">Drawn</th>
+              <th className="pb-2 text-right">Surviving</th>
+              <th className="pb-2 text-right">Kills</th>
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map(([sessionId, stat]) => {
+              const isMe = sessionId === mySessionId;
+              const teamColor = stat.team === 'red' ? 'text-red-400' : 'text-blue-400';
+              return (
+                <tr
+                  key={sessionId}
+                  className={`border-b border-white/10 ${isMe ? 'bg-white/10 font-bold' : ''}`}
+                >
+                  <td className="py-2 text-white">
+                    {stat.name}
+                    {isMe && (
+                      <span className="ml-2 rounded bg-white/20 px-1 py-0.5 text-xs text-white/60">
+                        you
+                      </span>
+                    )}
+                  </td>
+                  <td className={`py-2 capitalize ${teamColor}`}>{stat.team}</td>
+                  <td className="py-2 text-right text-white">{stat.entitiesDrawn}</td>
+                  <td className="py-2 text-right text-white">{stat.entitiesSurviving}</td>
+                  <td className="py-2 text-right text-white">{stat.kills}</td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+
+        {/* Buttons */}
+        <div className="flex gap-4">
+          <button
+            type="button"
+            onClick={onBackToLobby}
+            className="flex-1 rounded-xl bg-white/90 py-3 font-black uppercase tracking-wide text-[#1a1035] transition hover:bg-white active:scale-95"
+          >
+            Back to Lobby
+          </button>
+          <button
+            type="button"
+            onClick={onMainMenu}
+            className="flex-1 rounded-xl border border-white/30 py-3 font-bold text-white/70 transition hover:bg-white/10 active:scale-95"
+          >
+            Main Menu
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ─── Main GameScreen ──────────────────────────────────────────────────────────
 
 export function GameScreen(): React.JSX.Element {
@@ -206,9 +330,12 @@ export function GameScreen(): React.JSX.Element {
     phaseTimer: 0,
     players: new Map(),
     entityCounts: { red: 0, blue: 0 },
+    currentRound: 0,
+    maxRounds: 5,
   });
   const [hasSubmitted, setHasSubmitted] = useState(false);
   const [capturedImageUrl, setCapturedImageUrl] = useState<string | null>(null);
+  const [winnerData, setWinnerData] = useState<WinnerData | null>(null);
 
   // Refs for PixiJS objects (stable across renders)
   const appRef = useRef<Application<Renderer> | null>(null);
@@ -234,6 +361,12 @@ export function GameScreen(): React.JSX.Element {
       navigate('/');
       return;
     }
+
+    // ─── Register game_finished handler SYNCHRONOUSLY before async PixiJS init ─
+
+    const removeGameFinished = room.onMessage('game_finished', (msg: WinnerData) => {
+      setWinnerData(msg);
+    });
 
     // ─── PixiJS initialization ────────────────────────────────────────────────
 
@@ -290,6 +423,8 @@ export function GameScreen(): React.JSX.Element {
       const state = activeRoom.state as {
         currentPhase?: string;
         phaseTimer?: number;
+        currentRound?: number;
+        maxRounds?: number;
         players?: Map<string, { name: string; team: string; hasSubmittedDrawing: boolean }>;
         entities?: Map<string, { teamId: string }>;
       };
@@ -324,6 +459,8 @@ export function GameScreen(): React.JSX.Element {
 
       const currentPhase = state.currentPhase ?? 'idle';
       const phaseTimer = state.phaseTimer ?? 0;
+      const currentRound = state.currentRound ?? 0;
+      const maxRounds = state.maxRounds ?? 5;
 
       // Handle phase transitions
       const prevPhase = prevPhaseRef.current;
@@ -335,6 +472,11 @@ export function GameScreen(): React.JSX.Element {
           setHasSubmitted(false);
           hasSubmittedRef.current = false;
           setCapturedImageUrl(null);
+
+          // Clear winner data when a new game/round starts from idle
+          if (prevPhase === 'idle') {
+            setWinnerData(null);
+          }
 
           // Set stroke color to team color so drawings are visually team-coded
           const teamTint = TEAM_TINTS[myTeamRef.current];
@@ -355,7 +497,7 @@ export function GameScreen(): React.JSX.Element {
         }
       }
 
-      setSnapshot({ currentPhase, phaseTimer, players, entityCounts });
+      setSnapshot({ currentPhase, phaseTimer, players, entityCounts, currentRound, maxRounds });
     }
 
     // Take initial snapshot
@@ -368,6 +510,7 @@ export function GameScreen(): React.JSX.Element {
 
     return () => {
       room.onStateChange.remove(stateCallback);
+      removeGameFinished();
       cleanupPixi?.();
     };
   }, [room]);
@@ -416,6 +559,16 @@ export function GameScreen(): React.JSX.Element {
     hasSubmittedRef.current = true;
   }
 
+  function handleBackToLobby(): void {
+    room?.send('return_to_lobby');
+    navigate('/waiting');
+  }
+
+  function handleMainMenu(): void {
+    room?.leave();
+    navigate('/');
+  }
+
   // Redirect if no room
   if (!room) {
     return (
@@ -425,7 +578,7 @@ export function GameScreen(): React.JSX.Element {
     );
   }
 
-  const { currentPhase, phaseTimer, players, entityCounts } = snapshot;
+  const { currentPhase, phaseTimer, players, entityCounts, currentRound, maxRounds } = snapshot;
   const myTeam = myTeamRef.current;
 
   return (
@@ -435,7 +588,12 @@ export function GameScreen(): React.JSX.Element {
 
       {/* Phase overlays — React on top of canvas */}
       {currentPhase === 'draw' && !hasSubmitted && (
-        <DrawPhaseOverlay phaseTimer={phaseTimer} onSubmit={handleSubmit} />
+        <DrawPhaseOverlay
+          phaseTimer={phaseTimer}
+          currentRound={currentRound}
+          maxRounds={maxRounds}
+          onSubmit={handleSubmit}
+        />
       )}
 
       {currentPhase === 'draw' && hasSubmitted && (
@@ -452,6 +610,17 @@ export function GameScreen(): React.JSX.Element {
 
       {currentPhase === 'results' && (
         <ResultsOverlay entityCounts={entityCounts} />
+      )}
+
+      {/* Winner overlay — shown when game is finished */}
+      {currentPhase === 'finished' && winnerData && (
+        <WinnerOverlay
+          winner={winnerData.winner}
+          stats={winnerData.stats}
+          mySessionId={room.sessionId}
+          onBackToLobby={handleBackToLobby}
+          onMainMenu={handleMainMenu}
+        />
       )}
 
       {/* Idle state — brief between phases */}
