@@ -18,6 +18,7 @@ interface EntitySchemaLike {
   ownerSessionId: string;
   vx: number;
   vy: number;
+  parentEntityId: string;
 }
 
 /**
@@ -38,6 +39,8 @@ export class MultiplayerWorldBridge {
   private _removeTextureHandler: (() => void) | null = null;
   // Entity textures received from server — entityId → Texture
   private readonly _entityTextures = new Map<string, Texture>();
+  // Copies waiting for parent texture — parentEntityId → set of child entityIds
+  private readonly _pendingCopyTextures = new Map<string, Set<string>>();
 
   constructor(worldStage: WorldStage) {
     this._worldStage = worldStage;
@@ -78,6 +81,16 @@ export class MultiplayerWorldBridge {
           const texture = Texture.from(canvas);
           this._entityTextures.set(entityId, texture);
           this._worldStage.updateEntityTexture(entityId, texture);
+
+          // Apply to any copies that spawned before this texture arrived
+          const pendingCopies = this._pendingCopyTextures.get(entityId);
+          if (pendingCopies) {
+            for (const copyId of pendingCopies) {
+              this._entityTextures.set(copyId, texture);
+              this._worldStage.updateEntityTexture(copyId, texture);
+            }
+            this._pendingCopyTextures.delete(entityId);
+          }
         };
         img.src = dataUrl;
       }
@@ -114,11 +127,25 @@ export class MultiplayerWorldBridge {
             role: '',
             speed: 0,
           };
-          // Use local captured texture for own entity, or received texture from server
+          // Resolve texture: own entity → captured drawing, copy → parent's texture, otherwise → server-sent
           const isMyEntity = this._room && schema.ownerSessionId === this._room.sessionId;
-          const texture = isMyEntity
-            ? this._worldStage.capturedDrawingTexture ?? undefined
-            : this._entityTextures.get(entityId);
+          let texture: Texture | undefined;
+          if (isMyEntity && !schema.parentEntityId) {
+            texture = this._worldStage.capturedDrawingTexture ?? undefined;
+          } else if (schema.parentEntityId) {
+            texture = this._entityTextures.get(schema.parentEntityId);
+            if (!texture) {
+              // Parent texture hasn't arrived yet — register for retroactive apply
+              let pending = this._pendingCopyTextures.get(schema.parentEntityId);
+              if (!pending) {
+                pending = new Set();
+                this._pendingCopyTextures.set(schema.parentEntityId, pending);
+              }
+              pending.add(entityId);
+            }
+          } else {
+            texture = this._entityTextures.get(entityId);
+          }
           this._worldStage.spawnFromSchema(entityId, profile, schema.x, schema.y, schema.teamId, texture);
           this._knownEntityIds.add(entityId);
         }
@@ -155,6 +182,7 @@ export class MultiplayerWorldBridge {
     this._worldStage.multiplayerMode = false;
     this._knownEntityIds.clear();
     this._entityTextures.clear();
+    this._pendingCopyTextures.clear();
     this._stateChangeCallback = null;
     this._room = null;
   }

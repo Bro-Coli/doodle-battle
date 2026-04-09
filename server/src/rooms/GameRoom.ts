@@ -34,6 +34,7 @@ export class EntitySchema extends Schema {
   @type('string') ownerSessionId: string = '';
   @type('number') vx: number = 0;
   @type('number') vy: number = 0;
+  @type('string') parentEntityId: string = '';
 }
 
 export class PlayerSchema extends Schema {
@@ -79,8 +80,7 @@ export class GameRoom extends Room<{ state: GameState }> {
   _killCounts: Map<string, number> = new Map();
   // Entities drawn tracking: ownerSessionId -> count drawn this game
   _entitiesDrawn: Map<string, number> = new Map();
-  // Entity texture data URLs — entityId -> imageDataUrl (for spreading copy broadcasts)
-  _entityTextures: Map<string, string> = new Map();
+
 
   onCreate(options: Record<string, unknown> = {}): void {
     const maxPlayers = (options.maxPlayers as number) ?? 8;
@@ -314,19 +314,13 @@ export class GameRoom extends Room<{ state: GameState }> {
           newSchema.archetype = 'spreading';
           newSchema.teamId = originalSchema?.teamId ?? '';
           newSchema.ownerSessionId = originalSchema?.ownerSessionId ?? '';
+          newSchema.parentEntityId = entityId;
 
           this.state.entities.set(newEntityId, newSchema);
           this._entityStates.set(newEntityId, newCopyState);
 
           if (originalProfile) {
             this._entityProfiles.set(newEntityId, { ...originalProfile });
-          }
-
-          // Broadcast the original entity's texture for the copy
-          const originalTexture = this._entityTextures.get(entityId);
-          if (originalTexture) {
-            this._entityTextures.set(newEntityId, originalTexture);
-            this.broadcast('entity_textures', { [newEntityId]: originalTexture });
           }
         }
       }
@@ -407,7 +401,6 @@ export class GameRoom extends Room<{ state: GameState }> {
         // Map entityId to drawing texture for broadcast and future copy spawns
         if (imageDataUrl) {
           entityTextures[entityId] = imageDataUrl;
-          this._entityTextures.set(entityId, imageDataUrl);
         }
       }
 
@@ -586,7 +579,6 @@ export class GameRoom extends Room<{ state: GameState }> {
   _handleRemoveAllEntities(): void {
     this._entityStates.clear();
     this._entityProfiles.clear();
-    this._entityTextures.clear();
     this._fightCooldowns.clear();
     this._dyingEntities.clear();
     this._nameIdMap.clear();
