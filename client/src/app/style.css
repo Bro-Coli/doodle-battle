@@ -1,4 +1,5 @@
-@import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@300..700&family=Nunito:wght@200..1000&display=swap');
+@import 'tailwindcss';
 
 /*
  * Screen breakpoints
@@ -12,3 +13,270 @@
 @custom-variant lg (@media (max-width: 1366px));
 @custom-variant md (@media (max-width: 1024px));
 @custom-variant sm (@media (max-width: 768px));
+
+@theme {
+  --font-nunito: 'Nunito', sans-serif;
+}
+
+@layer base {
+  html,
+  body,
+  #app {
+    font-family: 'Fredoka', sans-serif;
+  }
+}
+
+@utility flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@utility t12-m {
+  font-size: 1.2rem;
+  font-style: normal;
+  line-height: 1.4rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+}
+
+@utility t12-b {
+  font-size: 1.2rem;
+  font-style: normal;
+  line-height: 1.4rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+@utility t14-m {
+  font-size: 1.4rem;
+  font-style: normal;
+  line-height: 1.5rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+}
+
+@utility t14-b {
+  font-size: 1.4rem;
+  font-style: normal;
+  line-height: 1.5rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+@utility t16-m {
+  font-size: 1.6rem;
+  font-style: normal;
+  line-height: 1.8rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+}
+
+@utility t16-b {
+  font-size: 1.6rem;
+  font-style: normal;
+  line-height: 1.8rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+@utility t18-m {
+  font-size: 1.8rem;
+  font-style: normal;
+  line-height: 2rem;
+  font-weight: 500;
+  letter-spacing: 0.03em;
+}
+
+@utility t18-b {
+  font-size: 1.8rem;
+  font-style: normal;
+  line-height: 2rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+}
+
+@utility t20-m {
+  font-size: 2rem;
+  font-style: normal;
+  line-height: 2rem;
+  font-weight: 500;
+  letter-spacing: 0.03em;
+}
+
+@utility t20-b {
+  font-size: 2rem;
+  font-style: normal;
+  line-height: 2rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+}
+
+@utility t20-eb {
+  font-size: 2rem;
+  font-style: normal;
+  line-height: 2rem;
+  font-weight: 900;
+  letter-spacing: 0.03em;
+}
+
+@utility t24-m {
+  font-size: 2.4rem;
+  font-style: normal;
+  line-height: 2.6rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+}
+
+@utility t24-b {
+  font-size: 2.4rem;
+  font-style: normal;
+  line-height: 2.6rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+@utility t24-eb {
+  font-size: 2.4rem;
+  font-style: normal;
+  line-height: 2.6rem;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+}
+
+@utility t28-m {
+  font-size: 2.8rem;
+  font-style: normal;
+  line-height: 3rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+}
+
+@utility t28-b {
+  font-size: 2.8rem;
+  font-style: normal;
+  line-height: 3rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+@utility t28-eb {
+  font-size: 2.8rem;
+  font-style: normal;
+  line-height: 3rem;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+}
+
+@utility t32-m {
+  font-size: 3.2rem;
+  font-style: normal;
+  line-height: 3.4rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+}
+
+@utility t32-b {
+  font-size: 3.2rem;
+  font-style: normal;
+  line-height: 3.4rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+@utility t32-eb {
+  font-size: 3.2rem;
+  font-style: normal;
+  line-height: 3.4rem;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+}
+
+@layer components {
+  .ui-pill-button {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 5rem; /* h-20 */
+    padding: 0 2.5rem; /* px-10 */
+    border: 3px solid #3d52b8;
+    border-radius: 999px;
+    overflow: hidden;
+    background: linear-gradient(to bottom, #aee8ff 0%, #5890e8 55%, #3a56c8 100%);
+    box-shadow:
+      inset 0 0 0 4px rgba(255, 255, 255, 0.4),
+      inset 0 3px 0 rgba(255, 255, 255, 0.45),
+      inset 0 14px 28px -12px rgba(255, 255, 255, 0.42),
+      inset 14px 0 28px -12px rgba(255, 255, 255, 0.36),
+      inset 0 28px 52px -22px rgba(255, 255, 255, 0.16),
+      inset 28px 0 52px -22px rgba(255, 255, 255, 0.14),
+      inset 0 -6px 0 rgba(38, 58, 145, 0.32),
+      0 4px 0 #3552b0,
+      0 10px 20px rgba(38, 58, 145, 0.34),
+      0 12px 28px rgba(0, 0, 0, 0.2),
+      0 4px 10px rgba(0, 0, 0, 0.12);
+    cursor: pointer;
+    transition:
+      transform 0.15s linear,
+      box-shadow 0.15s linear,
+      filter 0.15s linear;
+  }
+
+  .ui-pill-button::before {
+    content: '';
+    position: absolute;
+    left: 14px;
+    right: 14px;
+    top: 8px;
+    height: 42%;
+    border-radius: 999px;
+    background: linear-gradient(to bottom, rgba(255, 255, 255, 0.55), rgba(255, 255, 255, 0.12));
+    pointer-events: none;
+  }
+
+  .ui-pill-button::after {
+    content: '';
+    position: absolute;
+    left: 18px;
+    top: 12px;
+    width: 16px;
+    height: 9px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.48);
+    transform: rotate(142deg);
+    pointer-events: none;
+  }
+
+  .ui-pill-button:hover {
+    transform: translateY(-2px) scale(1.02);
+    filter: brightness(1.03);
+  }
+
+  .ui-pill-button:active {
+    transform: translateY(3px) scale(0.99);
+    box-shadow:
+      inset 0 0 0 4px rgba(255, 255, 255, 0.45),
+      inset 0 4px 0 rgba(255, 255, 255, 0.35),
+      inset 0 12px 22px -10px rgba(255, 255, 255, 0.32),
+      inset 12px 0 22px -10px rgba(255, 255, 255, 0.28),
+      inset 0 22px 40px -18px rgba(255, 255, 255, 0.12),
+      inset 22px 0 40px -18px rgba(255, 255, 255, 0.1),
+      inset 0 -3px 0 rgba(38, 58, 145, 0.26),
+      0 1px 0 #3552b0,
+      0 4px 10px rgba(38, 58, 145, 0.28),
+      0 6px 16px rgba(0, 0, 0, 0.16),
+      0 2px 6px rgba(0, 0, 0, 0.1);
+  }
+
+  .ui-pill-button--static {
+    cursor: default;
+    transition: none;
+    user-select: none;
+  }
+
+  .ui-pill-button--static:hover {
+    transform: none;
+    filter: none;
+  }
+}

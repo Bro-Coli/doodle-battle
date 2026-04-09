@@ -1,0 +1,1 @@
+export { StrokeShadowText } from './StrokeShadowText';

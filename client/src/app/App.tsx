@@ -3,6 +3,7 @@ import { LobbyScreen } from '../features/lobby/LobbyScreen';
 import { NameInputScreen } from '../features/lobby/NameInputScreen';
 import { WaitingRoomScreen } from '../features/lobby/WaitingRoomScreen';
 import { GameScreen } from '../features/game/GameScreen';
+import { ScenarioRevealScreen } from '../features/scenario/ScenarioRevealScreen';
 
 export function App(): React.JSX.Element {
   const [pathname, setPathname] = useState(window.location.pathname);
@@ -21,5 +22,6 @@ export function App(): React.JSX.Element {
   if (pathname === '/game') return <GameScreen />;
   if (pathname === '/lobby') return <NameInputScreen />;
   if (pathname === '/waiting') return <WaitingRoomScreen />;
+  if (pathname === '/scenario') return <ScenarioRevealScreen />;
   return <LobbyScreen />;
 }
