@@ -1,0 +1,14 @@
+@import "tailwindcss";
+
+/*
+ * Screen breakpoints
+ * - xl: 1367px+
+ * - lg: 1366px and below
+ * - md: 1024px and below
+ * - sm: 768px and below
+ * Desktop-first: write default styles for large screens and scale down with variants.
+ */
+@custom-variant xl (@media (min-width: 1367px));
+@custom-variant lg (@media (max-width: 1366px));
+@custom-variant md (@media (max-width: 1024px));
+@custom-variant sm (@media (max-width: 768px));

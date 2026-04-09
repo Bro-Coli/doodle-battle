@@ -1,19 +1,12 @@
 import { useEffect, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { Application } from 'pixi.js';
-import mainBackground from './assets/main-bg.png';
-import mainTitle from './assets/main-title.png';
-import { DrawingCanvas } from './drawing/DrawingCanvas';
-import { RecognitionOverlay } from './recognition/RecognitionOverlay';
-import { StudioControlsApp } from './ui/StudioControlsApp';
-import { createStudioController } from './ui/createStudioController';
-import { WorldStage } from './world/WorldStage';
-
-function navigate(pathname: string): void {
-  if (window.location.pathname === pathname) return;
-  window.history.pushState({}, '', pathname);
-  window.dispatchEvent(new PopStateEvent('popstate'));
-}
+import { DrawingCanvas } from '../features/drawing/DrawingCanvas';
+import { LobbyScreen } from '../features/lobby/LobbyScreen';
+import { RecognitionOverlay } from '../features/recognition/RecognitionOverlay';
+import { StudioControlsApp } from '../features/studio/StudioControlsApp';
+import { createStudioController } from '../features/studio/createStudioController';
+import { WorldStage } from '../features/world/WorldStage';
 
 async function initGame(host: HTMLElement): Promise<() => void> {
   const app = new Application();
@@ -78,30 +71,6 @@ async function initGame(host: HTMLElement): Promise<() => void> {
     app.destroy(true, { children: true });
     host.replaceChildren();
   };
-}
-
-function LobbyScreen(): React.JSX.Element {
-  return (
-    <main
-      className="flex h-screen w-screen items-center justify-center bg-cover bg-center bg-no-repeat px-6"
-      style={{ backgroundImage: `url(${mainBackground})` }}
-    >
-      <div className="flex w-full max-w-5xl flex-col items-center gap-8 pt-6 sm:gap-10 sm:pt-0">
-        <img
-          src={mainTitle}
-          alt="Doodle Battle"
-          className="w-full max-w-[820px] object-contain drop-shadow-[0_18px_40px_rgba(28,20,78,0.45)]"
-        />
-        <button
-          className="cursor-pointer rounded-lg border border-white/70 bg-white/90 px-5 py-3 text-[15px] font-bold text-slate-800 shadow-[0_10px_30px_rgba(24,24,48,0.18)] transition hover:-translate-y-px hover:bg-white"
-          type="button"
-          onClick={() => navigate('/game')}
-        >
-          Quick Start
-        </button>
-      </div>
-    </main>
-  );
 }
 
 function GameScreen(): React.JSX.Element {

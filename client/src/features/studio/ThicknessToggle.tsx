@@ -21,7 +21,7 @@ export function ThicknessToggle({
 }: ThicknessToggleProps) {
   return (
     <div
-      className="flex flex-wrap items-center justify-center gap-1 md:gap-3"
+      className="flex flex-wrap items-center justify-center gap-3 md:gap-1"
       aria-label="Brush thickness"
     >
       {PRESETS.map((preset) => (
