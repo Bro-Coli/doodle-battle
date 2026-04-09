@@ -1,5 +1,5 @@
 import { __DEV, isBrowser } from './env';
-import { __TODO, _err, _log, _warn } from './logger';
+import { __TODO, _err, _log, _warn } from '../shared/lib/logger';
 
 /**
  * Attach frequently used dev helpers to `globalThis` (browser `window`).

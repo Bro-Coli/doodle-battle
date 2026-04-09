@@ -1,12 +1,12 @@
 import { createRoot } from 'react-dom/client';
 
-import { initApi } from './api/api.config';
-import { App } from './App';
-import { initEnv } from './env';
-import { initGlobalFunctions } from './global';
-import { initStyle } from './style';
+import { App } from './app/App';
+import { initEnv } from './app/env';
+import { initGlobalFunctions } from './app/global';
+import { initStyle } from './app/style';
+import { initApi } from './shared/api/api.config';
 
-import './style.css';
+import './app/style.css';
 
 /* --------------------------------------------------
  *   Initializing Phase
