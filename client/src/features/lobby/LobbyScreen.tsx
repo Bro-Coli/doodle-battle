@@ -42,16 +42,16 @@ function navigate(pathname: string): void {
 export function LobbyScreen() {
   return (
     <main
-      className="flex min-h-screen w-screen items-start justify-center overflow-hidden bg-cover bg-center bg-no-repeat px-6 pt-6 pb-8 sm:px-4 sm:pt-4"
+      className="flex min-h-screen w-full items-start justify-center overflow-x-auto overflow-y-hidden bg-cover bg-center bg-no-repeat px-6 pt-6 pb-8 sm:px-4 sm:pt-4"
       style={{ backgroundImage: `url(${mainBackground})` }}
     >
-      <div className="flex w-full max-w-7xl flex-col items-center gap-6 pt-8 sm:gap-5 sm:pt-6">
+      <div className="flex min-w-[1680px] max-w-7xl flex-col items-center gap-6 pt-8 sm:gap-5 sm:pt-6">
         <img
           src={mainTitle}
           alt="Doodle Battle"
           className="w-full max-w-[580px] object-contain drop-shadow-[0_18px_40px_rgba(28,20,78,0.45)] sm:max-w-[520px]"
         />
-        <div className="grid w-full max-w-[1280px] grid-cols-3 gap-2">
+        <div className="-translate-x-4 mx-auto flex w-max items-center justify-center -space-x-16">
           {lobbyActions.map((action) => (
             <LobbyActionButton key={action.id} action={action} />
           ))}
