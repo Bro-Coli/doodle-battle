@@ -14,6 +14,7 @@ interface EntitySchemaLike {
   name: string;
   archetype: string;
   teamId: string;
+  ownerSessionId: string;
   vx: number;
   vy: number;
 }
@@ -78,7 +79,10 @@ export class MultiplayerWorldBridge {
             role: '',
             speed: 0,
           };
-          this._worldStage.spawnFromSchema(entityId, profile, schema.x, schema.y, schema.teamId);
+          // Use the local player's captured drawing texture for their own entity
+          const isMyEntity = this._room && schema.ownerSessionId === this._room.sessionId;
+          const texture = isMyEntity ? this._worldStage.capturedDrawingTexture ?? undefined : undefined;
+          this._worldStage.spawnFromSchema(entityId, profile, schema.x, schema.y, schema.teamId, texture);
           this._knownEntityIds.add(entityId);
         }
       }

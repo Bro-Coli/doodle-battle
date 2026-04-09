@@ -143,6 +143,11 @@ export class WorldStage {
     this._capturedDrawingTexture = t;
   }
 
+  /** Get the local player's captured drawing texture. */
+  get capturedDrawingTexture(): Texture | null {
+    return this._capturedDrawingTexture;
+  }
+
   /** Set the local player's session ID to identify which spawned entity belongs to them. */
   set mySessionId(id: string) {
     this._mySessionId = id;

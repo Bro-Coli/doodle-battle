@@ -4,6 +4,7 @@ import { DrawingCanvas } from '../drawing/DrawingCanvas';
 import { WorldStage } from '../world/WorldStage';
 import { MultiplayerWorldBridge } from '../world/MultiplayerWorldBridge';
 import { exportPng } from '../drawing/exportPng';
+import { captureEntityTexture } from '../world/captureEntityTexture';
 import { getActiveRoom } from '../../network/ColyseusClient';
 import { navigate } from '../../utils/navigate';
 
@@ -391,6 +392,12 @@ export function GameScreen(): React.JSX.Element {
     // Store for waiting overlay display
     if (dataUrl) {
       setCapturedImageUrl(dataUrl);
+    }
+
+    // Capture transparent-background texture for entity sprite rendering
+    const worldStage = worldStageRef.current;
+    if (worldStage && drawingCanvas.strokeContainerRef.children.length > 0) {
+      worldStage.capturedDrawingTexture = captureEntityTexture(app, drawingCanvas.strokeContainerRef);
     }
 
     // Send to server

@@ -31,6 +31,7 @@ export class EntitySchema extends Schema {
   @type('string') name: string = '';
   @type('string') archetype: string = '';
   @type('string') teamId: string = '';
+  @type('string') ownerSessionId: string = '';
   @type('number') vx: number = 0;
   @type('number') vy: number = 0;
 }
@@ -317,7 +318,7 @@ export class GameRoom extends Room<{ state: GameState }> {
       }
 
       // Spawn all pending profiles as entities simultaneously
-      for (const [, { profile, teamId }] of this._pendingProfiles) {
+      for (const [sessionId, { profile, teamId }] of this._pendingProfiles) {
         const entityId = crypto.randomUUID();
 
         // Team-based x positioning
@@ -336,6 +337,7 @@ export class GameRoom extends Room<{ state: GameState }> {
         schema.name = profile.name;
         schema.archetype = profile.archetype;
         schema.teamId = teamId;
+        schema.ownerSessionId = sessionId;
         schema.x = x;
         schema.y = y;
         schema.hp = 1;
