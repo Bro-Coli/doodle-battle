@@ -12,6 +12,7 @@ interface RoomSnapshot {
   players: Map<string, PlayerSnapshot>;
   hostSessionId: string;
   maxPlayers: number;
+  maxRounds: number;
 }
 
 function CheckIcon({ ready }: { ready: boolean }): React.JSX.Element {
@@ -38,6 +39,7 @@ export function WaitingRoomScreen(): React.JSX.Element {
     players: new Map(),
     hostSessionId: '',
     maxPlayers: 8,
+    maxRounds: 5,
   });
 
   useEffect(() => {
@@ -52,6 +54,7 @@ export function WaitingRoomScreen(): React.JSX.Element {
         players: Map<string, { name: string; team: string; ready: boolean }>;
         hostSessionId: string;
         maxPlayers: number;
+        maxRounds: number;
       };
 
       const players = new Map<string, PlayerSnapshot>();
@@ -71,6 +74,7 @@ export function WaitingRoomScreen(): React.JSX.Element {
         players,
         hostSessionId: state.hostSessionId,
         maxPlayers: state.maxPlayers,
+        maxRounds: state.maxRounds ?? 5,
       });
     }
 
@@ -96,12 +100,12 @@ export function WaitingRoomScreen(): React.JSX.Element {
     return <div className="flex min-h-screen items-center justify-center bg-[#1a1035] text-white">Redirecting…</div>;
   }
 
-  const { players, hostSessionId, maxPlayers } = snapshot;
+  const { players, hostSessionId, maxPlayers, maxRounds } = snapshot;
   const mySessionId = room.sessionId;
   const isHost = mySessionId === hostSessionId;
   const playerCount = players.size;
-  let allReady = playerCount > 0;
-  players.forEach((p) => { if (!p.ready) allReady = false; });
+  const myPlayer = players.get(mySessionId);
+  const isReady = myPlayer?.ready ?? false;
 
   const redPlayers: Array<[string, PlayerSnapshot]> = [];
   const bluePlayers: Array<[string, PlayerSnapshot]> = [];
@@ -118,21 +122,19 @@ export function WaitingRoomScreen(): React.JSX.Element {
     room?.send('toggle_ready');
   }
 
-  function handleStartGame(): void {
-    room?.send('start_game');
-  }
-
   return (
     <main className="flex min-h-screen w-screen flex-col items-center justify-center gap-6 bg-[#1a1035] px-4 py-8 text-white">
-      {/* Room code */}
+      {/* Room code + info */}
       <div className="text-center">
         <p className="text-sm font-bold uppercase tracking-widest text-white/50">Room Code</p>
         <p className="mt-1 font-mono text-5xl font-black tracking-[0.2em] text-white">
           {room.roomId}
         </p>
-        <p className="mt-1 text-sm text-white/60">
-          {playerCount}/{maxPlayers} players
-        </p>
+        <div className="mt-2 flex items-center justify-center gap-4 text-sm text-white/60">
+          <span>{playerCount}/{maxPlayers} players</span>
+          <span className="text-white/30">•</span>
+          <span>Rounds: {maxRounds}</span>
+        </div>
       </div>
 
       {/* Team columns */}
@@ -184,27 +186,26 @@ export function WaitingRoomScreen(): React.JSX.Element {
         </div>
       </div>
 
-      {/* Actions */}
+      {/* Actions — Ready toggle only; auto-start fires server-side when all ready */}
       <div className="flex flex-col items-center gap-3">
         <button
           type="button"
           onClick={handleReadyToggle}
-          className="rounded-xl bg-white/90 px-8 py-3 font-black uppercase tracking-wide text-[#1a1035] transition hover:bg-white"
+          className={`rounded-xl px-8 py-3 font-black uppercase tracking-wide transition active:scale-95 ${
+            isReady
+              ? 'bg-green-500 text-white hover:bg-green-400'
+              : 'bg-white/90 text-[#1a1035] hover:bg-white'
+          }`}
         >
-          Ready Toggle
+          {isReady ? 'Ready!' : 'Ready Up'}
         </button>
 
         {isHost ? (
-          <button
-            type="button"
-            onClick={handleStartGame}
-            disabled={playerCount < 2 || !allReady}
-            className="rounded-xl bg-green-500 px-10 py-3 font-black uppercase tracking-wide text-white transition hover:bg-green-400 disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            Start Game
-          </button>
+          <p className="text-xs text-white/40">
+            Game starts automatically when all players are ready
+          </p>
         ) : (
-          <p className="text-sm text-white/50">Waiting for host…</p>
+          <p className="text-sm text-white/50">Waiting for all players to ready up…</p>
         )}
       </div>
     </main>

@@ -15,11 +15,14 @@ function getTitle(flow: 'quick' | 'create' | 'join'): string {
   return 'Quick Play';
 }
 
+const ROUND_OPTIONS = [3, 5, 10] as const;
+
 export function NameInputScreen(): React.JSX.Element {
   const flow = getFlow();
   const [name, setName] = useState('');
   const [code, setCode] = useState('');
   const [maxPlayers, setMaxPlayers] = useState(8);
+  const [maxRounds, setMaxRounds] = useState(5);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -34,7 +37,7 @@ export function NameInputScreen(): React.JSX.Element {
       if (flow === 'quick') {
         await quickPlay(name.trim());
       } else if (flow === 'create') {
-        await createRoom({ name: name.trim(), maxPlayers, isPrivate: false });
+        await createRoom({ name: name.trim(), maxPlayers, maxRounds, isPrivate: false });
       } else {
         if (code.length !== 4) {
           setError('Please enter a 4-character room code.');
@@ -91,22 +94,47 @@ export function NameInputScreen(): React.JSX.Element {
           )}
 
           {flow === 'create' && (
-            <label className="flex flex-col gap-1">
-              <span className="text-sm font-bold uppercase tracking-wide text-white/70">
-                Max Players
-              </span>
-              <select
-                value={maxPlayers}
-                onChange={(e) => setMaxPlayers(Number(e.target.value))}
-                className="rounded-lg bg-white/20 px-4 py-2 text-white outline-none focus:ring-2 focus:ring-white/60"
-              >
-                {[2, 3, 4, 5, 6, 7, 8].map((n) => (
-                  <option key={n} value={n} className="bg-[#1a1035]">
-                    {n} players
-                  </option>
-                ))}
-              </select>
-            </label>
+            <>
+              <label className="flex flex-col gap-1">
+                <span className="text-sm font-bold uppercase tracking-wide text-white/70">
+                  Max Players
+                </span>
+                <select
+                  value={maxPlayers}
+                  onChange={(e) => setMaxPlayers(Number(e.target.value))}
+                  className="rounded-lg bg-white/20 px-4 py-2 text-white outline-none focus:ring-2 focus:ring-white/60"
+                >
+                  {[2, 3, 4, 5, 6, 7, 8].map((n) => (
+                    <option key={n} value={n} className="bg-[#1a1035]">
+                      {n} players
+                    </option>
+                  ))}
+                </select>
+              </label>
+
+              <div className="flex flex-col gap-1">
+                <span className="text-sm font-bold uppercase tracking-wide text-white/70">
+                  Round Limit
+                </span>
+                <div className="flex gap-2">
+                  {ROUND_OPTIONS.map((n) => (
+                    <button
+                      key={n}
+                      type="button"
+                      onClick={() => setMaxRounds(n)}
+                      className={`flex-1 rounded-lg py-2 font-black text-sm transition ${
+                        maxRounds === n
+                          ? 'bg-white/90 text-[#1a1035]'
+                          : 'bg-white/20 text-white hover:bg-white/30'
+                      }`}
+                    >
+                      {n}
+                    </button>
+                  ))}
+                </div>
+                <span className="text-xs text-white/40">{maxRounds} rounds per game</span>
+              </div>
+            </>
           )}
 
           {error && (
