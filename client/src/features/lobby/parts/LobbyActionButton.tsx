@@ -1,13 +1,15 @@
 import { cn } from '@/shared/lib/cn';
-import { Icon, type IconName } from '@/ui';
+import { Icon, StrokeShadowText, type IconName } from '@/ui';
 
 export type LobbyAction = {
   action?: () => void;
   backgroundImage: string;
   description: string;
+  firstStrokeColor: string;
   glowColor: string;
   iconName: IconName;
   id: string;
+  secondStrokeColor: string;
   title: string;
 };
 
@@ -45,13 +47,17 @@ export function LobbyActionButton({ action }: LobbyActionButtonProps) {
         />
       </div>
       <span className="flex-center relative text-white">
-        <Icon name={action.iconName} size="128px" />
+        <Icon name={action.iconName} size="152px" />
       </span>
-      <span className="flex-center relative mt-1 flex-col">
-        <span className="t20-eb text-center uppercase text-white [text-shadow:0_2px_0_rgba(0,0,0,0.24)]">
+      <span className="flex-center relative mt-6 flex-col">
+        <StrokeShadowText
+          className="t24-b tracking-wide"
+          firstStrokeColor={action.firstStrokeColor}
+          secondStrokeColor={action.secondStrokeColor}
+        >
           {action.title}
-        </span>
-        <span className="t14-b mt-2 max-w-[11ch] text-center text-white/95 [text-shadow:0_1px_0_rgba(0,0,0,0.18)]">
+        </StrokeShadowText>
+        <span className=" font-nunito t18-m mt-4 whitespace-pre-line text-center text-white [text-shadow:0_1px_0_rgba(0,0,0,0.18)]">
           {action.description}
         </span>
       </span>

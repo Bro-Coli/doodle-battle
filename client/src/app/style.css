@@ -1,3 +1,4 @@
+@import url("https://fonts.googleapis.com/css2?family=Fredoka:wght@300..700&family=Nunito:wght@200..1000&display=swap");
 @import "tailwindcss";
 
 /*
@@ -13,10 +14,92 @@
 @custom-variant md (@media (max-width: 1024px));
 @custom-variant sm (@media (max-width: 768px));
 
+@theme {
+  --font-nunito: "Nunito", sans-serif;
+}
+
+@layer base {
+  html,
+  body,
+  #app {
+    font-family: "Fredoka", sans-serif;
+  }
+}
+
 @utility flex-center {
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+@utility t12-m {
+  font-size: 1.2rem;
+  font-style: normal;
+  line-height: 1.4rem;
+  font-weight: 500;
+}
+
+@utility t12-b {
+  font-size: 1.2rem;
+  font-style: normal;
+  line-height: 1.4rem;
+  font-weight: 700;
+}
+
+@utility t14-m {
+  font-size: 1.4rem;
+  font-style: normal;
+  line-height: 1.5rem;
+  font-weight: 500;
+}
+
+@utility t14-b {
+  font-size: 1.4rem;
+  font-style: normal;
+  line-height: 1.5rem;
+  font-weight: 700;
+}
+
+@utility t16-m {
+  font-size: 1.6rem;
+  font-style: normal;
+  line-height: 1.8rem;
+  font-weight: 500;
+}
+
+@utility t16-b {
+  font-size: 1.6rem;
+  font-style: normal;
+  line-height: 1.8rem;
+  font-weight: 700;
+}
+
+@utility t18-m {
+  font-size: 1.8rem;
+  font-style: normal;
+  line-height: 2rem;
+  font-weight: 500;
+}
+
+@utility t18-b {
+  font-size: 1.8rem;
+  font-style: normal;
+  line-height: 2rem;
+  font-weight: 700;
+}
+
+@utility t20-m {
+  font-size: 2rem;
+  font-style: normal;
+  line-height: 2rem;
+  font-weight: 500;
+}
+
+@utility t20-b {
+  font-size: 2rem;
+  font-style: normal;
+  line-height: 2rem;
+  font-weight: 700;
 }
 
 @utility t20-eb {
@@ -26,9 +109,23 @@
   font-weight: 900;
 }
 
-@utility t14-b {
-  font-size: 1.4rem;
+@utility t24-m {
+  font-size: 2.4rem;
   font-style: normal;
-  line-height: 1.5rem;
+  line-height: 2.6rem;
+  font-weight: 500;
+}
+
+@utility t24-b {
+  font-size: 2.4rem;
+  font-style: normal;
+  line-height: 2.6rem;
   font-weight: 700;
+}
+
+@utility t24-eb {
+  font-size: 2.4rem;
+  font-style: normal;
+  line-height: 2.6rem;
+  font-weight: 900;
 }
