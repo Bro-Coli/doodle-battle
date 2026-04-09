@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Multiplayer
 status: planning
-stopped_at: Completed 11-01-PLAN.md
-last_updated: "2026-04-09T03:43:55.782Z"
+stopped_at: Completed 11-02-PLAN.md
+last_updated: "2026-04-09T05:13:17.840Z"
 last_activity: 2026-04-08 — v2.0 roadmap written, 22 requirements mapped across 5 phases
 progress:
   total_phases: 12
-  completed_phases: 4
+  completed_phases: 5
   total_plans: 10
-  completed_plans: 9
+  completed_plans: 10
   percent: 0
 ---
 
@@ -70,6 +70,9 @@ Recent decisions affecting current work:
 - [Phase 11-lobby-players]: Colyseus 0.17 Room generic is Room<{ state: T }> not Room<T>; onLeave is (client, code?: number)
 - [Phase 11-lobby-players]: Message handlers extracted to _handle* methods for unit-testability without Colyseus server startup
 - [Phase 11-lobby-players]: Unambiguous charset ABCDEFGHJKLMNPQRSTUVWXYZ23456789 (no 0/O/I/1) for 4-char room codes
+- [Phase 11-lobby-players]: activeRoom stored at ColyseusClient module level to avoid re-render loops when Colyseus fires callbacks
+- [Phase 11-lobby-players]: MapSchema snapshotted into plain Map inside onStateChange before setState — prevents stale proxy references in React state
+- [Phase 11-lobby-players]: WaitingRoomScreen guards state.players for undefined — MapSchema not populated until first server patch
 
 ### Pending Todos
 
@@ -82,6 +85,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-09T03:43:55.780Z
-Stopped at: Completed 11-01-PLAN.md
+Last session: 2026-04-09T05:13:11.942Z
+Stopped at: Completed 11-02-PLAN.md
 Resume file: None

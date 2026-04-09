@@ -121,7 +121,7 @@ Plans:
 **Milestone Goal:** Turn the single-player PoC into a real-time multiplayer game with lobbies, teams, synchronized draw/simulate phases, and server-authoritative simulation via Colyseus.
 
 - [x] **Phase 10: Networking Infrastructure** - Colyseus server integrated alongside Express; shared simulation module; state sync via binary patches (completed 2026-04-08)
-- [ ] **Phase 11: Lobby & Players** - Players create/join rooms with a 4-char code, see connected players, get auto-assigned to balanced teams, and host can start when ready
+- [x] **Phase 11: Lobby & Players** - Players create/join rooms with a 4-char code, see connected players, get auto-assigned to balanced teams, and host can start when ready (completed 2026-04-09)
 - [ ] **Phase 12: Server-Authoritative Simulation** - Entity simulation moves to the Colyseus server; clients render from Schema patches without running local simulation
 - [ ] **Phase 13: Game Phase Lifecycle & Draw Relay** - Synchronized draw/simulate phases with countdown timer; drawings submitted and hidden until reveal; all entities revealed simultaneously
 - [ ] **Phase 14: Win Condition & End-to-End** - Game ends by elimination or round limit; winner screen shown to all players; full multiplayer loop verified end-to-end
@@ -151,7 +151,7 @@ Plans:
   3. Players joining are auto-assigned to teams so both teams stay as balanced as possible as the player count grows toward 8
   4. Each player sees their own name, team color, and ready status — and can see the same for every other player in the lobby
   5. The host sees a "Start Game" button that becomes enabled only when at least 2 players are connected
-**Plans:** 1/2 plans executed
+**Plans:** 2/2 plans complete
 Plans:
 - [ ] 11-01-PLAN.md — GameRoom Schema (PlayerSchema, GameState), room lifecycle, team assignment, unit tests
 - [ ] 11-02-PLAN.md — ColyseusClient lobby functions, NameInputScreen, WaitingRoomScreen, App routing, end-to-end verification
@@ -203,7 +203,7 @@ Phases execute in numeric order: 10 → 11 → 12 → 13 → 14
 | 6. React Control Surface | v1.2 | 1/2 | Complete | 2026-04-08 |
 | 7. React Overlay Parity | v1.2 | 0/0 | Complete | 2026-04-08 |
 | 10. Networking Infrastructure | 2/2 | Complete    | 2026-04-08 | — |
-| 11. Lobby & Players | 1/2 | In Progress|  | — |
+| 11. Lobby & Players | 2/2 | Complete   | 2026-04-09 | — |
 | 12. Server-Authoritative Simulation | v2.0 | 0/TBD | Not started | — |
 | 13. Game Phase Lifecycle & Draw Relay | v2.0 | 0/TBD | Not started | — |
 | 14. Win Condition & End-to-End | v2.0 | 0/TBD | Not started | — |
