@@ -4,6 +4,7 @@ import mainBtn1 from './assets/main-btn-1.png';
 import mainBtn2 from './assets/main-btn-2.png';
 import mainBtn3 from './assets/main-btn-3.png';
 import { LobbyActionButton, type LobbyAction } from './parts/LobbyActionButton';
+import { LobbyTutorialButton } from './parts/LobbyTutorialButton';
 
 const lobbyActions: LobbyAction[] = [
   {
@@ -48,7 +49,7 @@ function navigate(pathname: string): void {
 export function LobbyScreen() {
   return (
     <main
-      className="flex min-h-screen w-full items-start justify-center overflow-x-auto overflow-y-hidden bg-cover bg-center bg-no-repeat px-6 pt-12 pb-8 sm:px-4 sm:pt-4"
+      className="relative flex min-h-screen w-full items-start justify-center overflow-x-auto overflow-y-hidden bg-cover bg-center bg-no-repeat px-6 pt-12 pb-8 sm:px-4 sm:pt-4"
       style={{ backgroundImage: `url(${mainBackground})` }}
     >
       <div className="flex min-w-[1680px] max-w-7xl flex-col items-center gap-6 pt-8 sm:gap-5 sm:pt-6">
@@ -62,6 +63,9 @@ export function LobbyScreen() {
             <LobbyActionButton key={action.id} action={action} />
           ))}
         </div>
+      </div>
+      <div className="absolute bottom-8 left-8 z-10 sm:bottom-4 sm:left-4">
+        <LobbyTutorialButton />
       </div>
     </main>
   );
