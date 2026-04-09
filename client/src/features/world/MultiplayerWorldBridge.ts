@@ -35,6 +35,7 @@ export class MultiplayerWorldBridge {
   private _room: Room | null = null;
   private readonly _knownEntityIds = new Set<string>();
   private _stateChangeCallback: ((state: unknown) => void) | null = null;
+  private _removeTextureHandler: (() => void) | null = null;
   // Entity textures received from server — entityId → Texture
   private readonly _entityTextures = new Map<string, Texture>();
 
@@ -54,7 +55,7 @@ export class MultiplayerWorldBridge {
     // Listen for entity texture broadcasts — server sends drawing PNGs as base64.
     // The exported PNGs have a white background (for Claude API), so we strip it
     // to transparent by clearing white pixels before creating the texture.
-    room.onMessage('entity_textures', (textures: Record<string, string>) => {
+    this._removeTextureHandler = room.onMessage('entity_textures', (textures: Record<string, string>) => {
       for (const [entityId, dataUrl] of Object.entries(textures)) {
         const img = new Image();
         img.onload = () => {
@@ -145,9 +146,11 @@ export class MultiplayerWorldBridge {
    */
   disconnect(): void {
     if (this._room && this._stateChangeCallback) {
-      // Colyseus 0.17: onStateChange returns an unsubscribe function when called with a callback.
-      // We stored the callback reference but cannot easily remove a specific listener in 0.17.
-      // Setting _room to null prevents further callbacks from having effect.
+      this._room.onStateChange.remove(this._stateChangeCallback);
+    }
+    if (this._removeTextureHandler) {
+      this._removeTextureHandler();
+      this._removeTextureHandler = null;
     }
     this._worldStage.multiplayerMode = false;
     this._knownEntityIds.clear();

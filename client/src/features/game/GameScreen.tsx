@@ -97,6 +97,7 @@ function WaitingOverlay({
 }): React.JSX.Element {
   const teammates: PlayerSnapshot[] = [];
   const opponents: PlayerSnapshot[] = [];
+  let allSubmitted = true;
 
   players.forEach((p) => {
     if (p.team === myTeam) {
@@ -104,13 +105,14 @@ function WaitingOverlay({
     } else {
       opponents.push(p);
     }
+    if (!p.hasSubmittedDrawing) allSubmitted = false;
   });
 
   return (
     <div className="pointer-events-none fixed inset-0 z-20 flex flex-col items-center">
       {/* Header */}
       <div className="mt-6 rounded-xl bg-black/75 px-6 py-2 text-lg font-bold text-white">
-        Waiting for players...
+        {allSubmitted ? 'Bringing drawings to life...' : 'Waiting for players...'}
       </div>
 
       {/* Center: own drawing */}
@@ -131,9 +133,9 @@ function WaitingOverlay({
       {/* Player statuses */}
       <div className="mb-8 flex gap-6">
         {/* Teammates */}
-        <div className="rounded-xl bg-red-900/60 px-4 py-3">
-          <p className="mb-2 text-xs font-black uppercase tracking-widest text-red-300">
-            {myTeam === 'red' ? 'Your Team (Red)' : 'Red Team'}
+        <div className={`rounded-xl px-4 py-3 ${myTeam === 'red' ? 'bg-red-900/60' : 'bg-blue-900/60'}`}>
+          <p className={`mb-2 text-xs font-black uppercase tracking-widest ${myTeam === 'red' ? 'text-red-300' : 'text-blue-300'}`}>
+            Your Team ({myTeam === 'red' ? 'Red' : 'Blue'})
           </p>
           <ul className="flex flex-col gap-1">
             {teammates.map((p) => (
@@ -149,8 +151,8 @@ function WaitingOverlay({
         </div>
 
         {/* Opponents */}
-        <div className="rounded-xl bg-blue-900/60 px-4 py-3">
-          <p className="mb-2 text-xs font-black uppercase tracking-widest text-blue-300">
+        <div className={`rounded-xl px-4 py-3 ${myTeam === 'red' ? 'bg-blue-900/60' : 'bg-red-900/60'}`}>
+          <p className={`mb-2 text-xs font-black uppercase tracking-widest ${myTeam === 'red' ? 'text-blue-300' : 'text-red-300'}`}>
             Opponents
           </p>
           <ul className="flex flex-col gap-1">

@@ -79,6 +79,8 @@ export class GameRoom extends Room<{ state: GameState }> {
   _killCounts: Map<string, number> = new Map();
   // Entities drawn tracking: ownerSessionId -> count drawn this game
   _entitiesDrawn: Map<string, number> = new Map();
+  // Entity texture data URLs — entityId -> imageDataUrl (for spreading copy broadcasts)
+  _entityTextures: Map<string, string> = new Map();
 
   onCreate(options: Record<string, unknown> = {}): void {
     const maxPlayers = (options.maxPlayers as number) ?? 8;
@@ -319,6 +321,13 @@ export class GameRoom extends Room<{ state: GameState }> {
           if (originalProfile) {
             this._entityProfiles.set(newEntityId, { ...originalProfile });
           }
+
+          // Broadcast the original entity's texture for the copy
+          const originalTexture = this._entityTextures.get(entityId);
+          if (originalTexture) {
+            this._entityTextures.set(newEntityId, originalTexture);
+            this.broadcast('entity_textures', { [newEntityId]: originalTexture });
+          }
         }
       }
 
@@ -354,6 +363,7 @@ export class GameRoom extends Room<{ state: GameState }> {
     if (this.state.currentPhase === 'draw') {
       // Wait for all recognition calls to complete before advancing
       if (this._pendingRecognitions > 0) {
+        console.warn(`[advancePhase] draw phase stuck: _pendingRecognitions=${this._pendingRecognitions}, allSubmitted=${this._allPlayersSubmitted()}`);
         // Keep timer at 0 — _tick will retry _advancePhase next tick
         this.state.phaseTimer = 0;
         return;
@@ -394,9 +404,10 @@ export class GameRoom extends Room<{ state: GameState }> {
         // Track entities drawn per player
         this._entitiesDrawn.set(sessionId, (this._entitiesDrawn.get(sessionId) ?? 0) + 1);
 
-        // Map entityId to drawing texture for broadcast
+        // Map entityId to drawing texture for broadcast and future copy spawns
         if (imageDataUrl) {
           entityTextures[entityId] = imageDataUrl;
+          this._entityTextures.set(entityId, imageDataUrl);
         }
       }
 
@@ -451,14 +462,16 @@ export class GameRoom extends Room<{ state: GameState }> {
     const data = msg as Record<string, unknown>;
     const imageDataUrl = (typeof data?.imageDataUrl === 'string') ? data.imageDataUrl : '';
 
-    const profile = await recognizeDrawingInternal(imageDataUrl);
+    try {
+      const profile = await recognizeDrawingInternal(imageDataUrl);
+      this._pendingProfiles.set(client.sessionId, { profile, teamId: player.team, imageDataUrl });
+    } finally {
+      this._pendingRecognitions--;
 
-    this._pendingRecognitions--;
-    this._pendingProfiles.set(client.sessionId, { profile, teamId: player.team, imageDataUrl });
-
-    // Early phase end only when all players submitted AND all recognitions complete
-    if (this._allPlayersSubmitted() && this._pendingRecognitions === 0) {
-      this.state.phaseTimer = 0;
+      // Early phase end only when all players submitted AND all recognitions complete
+      if (this._allPlayersSubmitted() && this._pendingRecognitions === 0) {
+        this.state.phaseTimer = 0;
+      }
     }
   }
 
@@ -573,6 +586,7 @@ export class GameRoom extends Room<{ state: GameState }> {
   _handleRemoveAllEntities(): void {
     this._entityStates.clear();
     this._entityProfiles.clear();
+    this._entityTextures.clear();
     this._fightCooldowns.clear();
     this._dyingEntities.clear();
     this._nameIdMap.clear();
@@ -622,9 +636,18 @@ export class GameRoom extends Room<{ state: GameState }> {
     this.broadcast('game_starting', { startedBy: client.sessionId });
     this.lock();
 
-    // Reset kill/drawn tracking for clean game start
+    // Full game state reset for clean start
     this._killCounts.clear();
     this._entitiesDrawn.clear();
+    this._pendingProfiles.clear();
+    this._pendingRecognitions = 0;
+    this._handleRemoveAllEntities();
+    this.state.currentRound = 0;
+
+    // Reset all player submission flags
+    this.state.players.forEach((player) => {
+      player.hasSubmittedDrawing = false;
+    });
 
     // Start the draw phase
     this.state.currentPhase = 'draw';
@@ -761,12 +784,14 @@ export class GameRoom extends Room<{ state: GameState }> {
       player.hasSubmittedDrawing = false;
     });
 
-    // Clear all entities
+    // Clear all entities and simulation state
     this._handleRemoveAllEntities();
 
-    // Clear tracking maps
+    // Clear tracking maps and pending state
     this._killCounts.clear();
     this._entitiesDrawn.clear();
+    this._pendingProfiles.clear();
+    this._pendingRecognitions = 0;
 
     // Unlock room for new players
     this.unlock();

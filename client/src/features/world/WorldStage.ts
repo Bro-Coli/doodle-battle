@@ -61,6 +61,13 @@ export class WorldStage {
   private readonly _entityIdByContainer = new Map<Container, string>();
   private _multiplayerMode = false;
 
+  // Interpolation — two snapshots of server state for lerping between ticks
+  private _prevSnapshot = new Map<string, { x: number; y: number; vx: number; vy: number; hp: number }>();
+  private _currSnapshot = new Map<string, { x: number; y: number; vx: number; vy: number; hp: number }>();
+  private _snapshotTime = 0; // timestamp when _currSnapshot arrived
+  private _prevSnapshotTime = 0; // timestamp when _prevSnapshot arrived
+  private static readonly SERVER_TICK_MS = 50; // server sends state every 50ms
+
   // Drawing texture for the local player's submitted entity
   private _capturedDrawingTexture: Texture | null = null;
   private _mySessionId = '';
@@ -198,8 +205,11 @@ export class WorldStage {
    * Registered once in the constructor; iterates all entity states.
    */
   private readonly _gameTick = (ticker: Ticker): void => {
-    // In multiplayer mode, server drives simulation — client only renders
-    if (this._multiplayerMode) return;
+    // In multiplayer mode, interpolate between server snapshots for smooth rendering
+    if (this._multiplayerMode) {
+      this._interpolateMultiplayer();
+      return;
+    }
 
     // Freeze all entities when not in simulation phase (idle or analyzing)
     if (this._roundPhase !== 'simulating') return;
@@ -565,44 +575,101 @@ export class WorldStage {
   applyPositions(
     entities: Map<string, { x: number; y: number; vx: number; vy: number; hp: number }>,
   ): void {
+    // Handle deaths immediately (no interpolation delay for removal)
     for (const [entityId, data] of entities) {
-      const container = this._entityContainersById.get(entityId);
-      if (!container) continue;
-
-      // Skip entities already dying
-      if (this._dyingEntities.has(container)) continue;
-
-      // Handle zero-hp removal before updating position
       if (data.hp <= 0) {
-        this.removeEntity(container);
-        continue;
-      }
-
-      container.x = data.x;
-      container.y = data.y;
-
-      // Sprite orientation — horizontal flip and tilt for walking/flying archetypes
-      const profile = this._entityProfiles.get(container);
-      const archetype = profile?.archetype;
-      if (archetype === 'walking' || archetype === 'flying') {
-        if (Math.abs(data.vx) > 0.01) {
-          container.scale.x =
-            data.vx < 0 ? -Math.abs(container.scale.x) : Math.abs(container.scale.x);
-        }
-        const speed = Math.sqrt(data.vx * data.vx + data.vy * data.vy);
-        if (speed > 0.01) {
-          const tilt = Math.asin(Math.max(-1, Math.min(1, data.vy / speed)));
-          const maxTilt = Math.PI / 4;
-          container.rotation = Math.max(-maxTilt, Math.min(maxTilt, tilt));
+        const container = this._entityContainersById.get(entityId);
+        if (container && !this._dyingEntities.has(container)) {
+          this.removeEntity(container);
         }
       }
+    }
+
+    // Shift current snapshot to previous, store new snapshot
+    this._prevSnapshot = this._currSnapshot;
+    this._prevSnapshotTime = this._snapshotTime;
+    this._currSnapshot = new Map(entities);
+    this._snapshotTime = performance.now();
+
+    // For entities appearing for the first time, snap them to position immediately
+    // (no previous snapshot to interpolate from)
+    for (const [entityId, data] of entities) {
+      if (!this._prevSnapshot.has(entityId)) {
+        const container = this._entityContainersById.get(entityId);
+        if (container && !this._dyingEntities.has(container)) {
+          container.x = data.x;
+          container.y = data.y;
+          this._applyOrientation(entityId, data);
+        }
+      }
+    }
+  }
+
+  /**
+   * Interpolate entity positions between previous and current server snapshots.
+   * Called every frame from _gameTick in multiplayer mode.
+   * Renders one tick behind so we always have two endpoints to lerp between.
+   */
+  private _interpolateMultiplayer(): void {
+    if (this._prevSnapshotTime === 0) return; // need at least 2 snapshots
+
+    const now = performance.now();
+    const tickDuration = this._snapshotTime - this._prevSnapshotTime;
+    if (tickDuration <= 0) return;
+
+    // t=0 when curr snapshot just arrived, t=1 one tick later (when next arrives)
+    // This renders one tick behind: we lerp prev→curr over the duration between them
+    const elapsed = now - this._snapshotTime;
+    const t = Math.min(Math.max(elapsed / tickDuration, 0), 1);
+
+    for (const [entityId, curr] of this._currSnapshot) {
+      const container = this._entityContainersById.get(entityId);
+      if (!container || this._dyingEntities.has(container)) continue;
+
+      const prev = this._prevSnapshot.get(entityId);
+      if (!prev) continue; // new entity, already snapped in applyPositions
+
+      // Lerp position
+      container.x = prev.x + (curr.x - prev.x) * t;
+      container.y = prev.y + (curr.y - prev.y) * t;
+
+      // Lerp velocity for orientation (use interpolated values for smooth rotation)
+      const vx = prev.vx + (curr.vx - prev.vx) * t;
+      const vy = prev.vy + (curr.vy - prev.vy) * t;
+      this._applyOrientation(entityId, { vx, vy });
 
       // Sync label position
       const label = this._entityLabels.get(container);
       const spriteH = this._entitySpriteHeights.get(container);
       if (label && spriteH !== undefined) {
-        label.x = data.x;
-        label.y = data.y - spriteH / 2 - 6;
+        label.x = container.x;
+        label.y = container.y - spriteH / 2 - 6;
+      }
+    }
+  }
+
+  /**
+   * Apply sprite orientation (horizontal flip + tilt) from velocity data.
+   */
+  private _applyOrientation(
+    entityId: string,
+    data: { vx: number; vy: number },
+  ): void {
+    const container = this._entityContainersById.get(entityId);
+    if (!container) return;
+
+    const profile = this._entityProfiles.get(container);
+    const archetype = profile?.archetype;
+    if (archetype === 'walking' || archetype === 'flying') {
+      if (Math.abs(data.vx) > 0.01) {
+        container.scale.x =
+          data.vx < 0 ? -Math.abs(container.scale.x) : Math.abs(container.scale.x);
+      }
+      const speed = Math.sqrt(data.vx * data.vx + data.vy * data.vy);
+      if (speed > 0.01) {
+        const tilt = Math.asin(Math.max(-1, Math.min(1, data.vy / speed)));
+        const maxTilt = Math.PI / 4;
+        container.rotation = Math.max(-maxTilt, Math.min(maxTilt, tilt));
       }
     }
   }
