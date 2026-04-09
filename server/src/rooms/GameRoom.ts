@@ -92,6 +92,13 @@ export class GameRoom extends Room<{ state: GameState }> {
     if (client.sessionId !== this.state.hostSessionId) return;
     if ((this.clients as unknown[]).length < 2) return;
 
+    // All players must be ready
+    let allReady = true;
+    this.state.players.forEach((player) => {
+      if (!player.ready) allReady = false;
+    });
+    if (!allReady) return;
+
     this.broadcast('game_starting', { startedBy: client.sessionId });
     this.lock();
   }

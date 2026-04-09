@@ -18,7 +18,7 @@ Requirements for Colyseus multiplayer. Each maps to roadmap phases.
 - [x] **LBBY-01**: A player can create a new game room (public or private)
 - [x] **LBBY-02**: A player can join a private room using a 4-character alphanumeric code
 - [x] **LBBY-03**: Rooms support 2-8 players with a configurable player limit
-- [ ] **LBBY-04**: Players see a lobby screen with the room code and connected player list
+- [x] **LBBY-04**: Players see a lobby screen with the room code and connected player list
 
 ### Teams & Players
 
@@ -91,7 +91,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | LBBY-01 | Phase 11 | Complete |
 | LBBY-02 | Phase 11 | Complete |
 | LBBY-03 | Phase 11 | Complete |
-| LBBY-04 | Phase 11 | Pending |
+| LBBY-04 | Phase 11 | Complete |
 | TEAM-01 | Phase 11 | Complete |
 | TEAM-02 | Phase 11 | Complete |
 | TEAM-03 | Phase 11 | Complete |

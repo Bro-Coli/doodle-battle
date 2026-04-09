@@ -55,15 +55,17 @@ export function WaitingRoomScreen(): React.JSX.Element {
       };
 
       const players = new Map<string, PlayerSnapshot>();
-      state.players.forEach(
-        (p: { name: string; team: string; ready: boolean }, sessionId: string) => {
-          players.set(sessionId, {
-            name: p.name,
-            team: p.team,
-            ready: p.ready,
-          });
-        },
-      );
+      if (state.players) {
+        state.players.forEach(
+          (p: { name: string; team: string; ready: boolean }, sessionId: string) => {
+            players.set(sessionId, {
+              name: p.name,
+              team: p.team,
+              ready: p.ready,
+            });
+          },
+        );
+      }
 
       setSnapshot({
         players,
@@ -98,6 +100,8 @@ export function WaitingRoomScreen(): React.JSX.Element {
   const mySessionId = room.sessionId;
   const isHost = mySessionId === hostSessionId;
   const playerCount = players.size;
+  let allReady = playerCount > 0;
+  players.forEach((p) => { if (!p.ready) allReady = false; });
 
   const redPlayers: Array<[string, PlayerSnapshot]> = [];
   const bluePlayers: Array<[string, PlayerSnapshot]> = [];
@@ -194,7 +198,7 @@ export function WaitingRoomScreen(): React.JSX.Element {
           <button
             type="button"
             onClick={handleStartGame}
-            disabled={playerCount < 2}
+            disabled={playerCount < 2 || !allReady}
             className="rounded-xl bg-green-500 px-10 py-3 font-black uppercase tracking-wide text-white transition hover:bg-green-400 disabled:cursor-not-allowed disabled:opacity-50"
           >
             Start Game

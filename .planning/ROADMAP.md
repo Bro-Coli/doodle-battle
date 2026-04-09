@@ -203,7 +203,7 @@ Phases execute in numeric order: 10 → 11 → 12 → 13 → 14
 | 6. React Control Surface | v1.2 | 1/2 | Complete | 2026-04-08 |
 | 7. React Overlay Parity | v1.2 | 0/0 | Complete | 2026-04-08 |
 | 10. Networking Infrastructure | 2/2 | Complete    | 2026-04-08 | — |
-| 11. Lobby & Players | 2/2 | Complete   | 2026-04-09 | — |
+| 11. Lobby & Players | 2/2 | Complete    | 2026-04-09 | — |
 | 12. Server-Authoritative Simulation | v2.0 | 0/TBD | Not started | — |
 | 13. Game Phase Lifecycle & Draw Relay | v2.0 | 0/TBD | Not started | — |
 | 14. Win Condition & End-to-End | v2.0 | 0/TBD | Not started | — |
