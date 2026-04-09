@@ -15,6 +15,9 @@ export interface WorldBounds {
   height: number;
 }
 
+/** Canonical world bounds shared by server simulation and client rendering. */
+export const WORLD_BOUNDS: WorldBounds = { width: 1280, height: 720 };
+
 // ---------------------------------------------------------------------------
 // Per-archetype state types
 // ---------------------------------------------------------------------------
