@@ -122,7 +122,7 @@ Plans:
 
 - [x] **Phase 10: Networking Infrastructure** - Colyseus server integrated alongside Express; shared simulation module; state sync via binary patches (completed 2026-04-08)
 - [x] **Phase 11: Lobby & Players** - Players create/join rooms with a 4-char code, see connected players, get auto-assigned to balanced teams, and host can start when ready (completed 2026-04-09)
-- [ ] **Phase 12: Server-Authoritative Simulation** - Entity simulation moves to the Colyseus server; clients render from Schema patches without running local simulation
+- [x] **Phase 12: Server-Authoritative Simulation** - Entity simulation moves to the Colyseus server; clients render from Schema patches without running local simulation (completed 2026-04-09)
 - [ ] **Phase 13: Game Phase Lifecycle & Draw Relay** - Synchronized draw/simulate phases with countdown timer; drawings submitted and hidden until reveal; all entities revealed simultaneously
 - [ ] **Phase 14: Win Condition & End-to-End** - Game ends by elimination or round limit; winner screen shown to all players; full multiplayer loop verified end-to-end
 
@@ -164,7 +164,7 @@ Plans:
   1. An entity spawned in a room moves on screen for all connected clients simultaneously, driven entirely by server tick logic — no client behavior functions run during simulation
   2. Opening the network inspector shows entity position data arriving as binary patch messages, not full-state JSON on every tick
   3. When a fight is resolved server-side, the defeated entity disappears from all connected clients' screens at the same time
-**Plans:** 1/2 plans executed
+**Plans:** 2/2 plans complete
 Plans:
 - [ ] 12-01-PLAN.md — EntitySchema, server simulation tick, fight resolution, spawn/interaction message handlers
 - [ ] 12-02-PLAN.md — Client render-only WorldStage, MultiplayerWorldBridge wiring Schema patches to PixiJS
@@ -207,6 +207,6 @@ Phases execute in numeric order: 10 → 11 → 12 → 13 → 14
 | 7. React Overlay Parity | v1.2 | 0/0 | Complete | 2026-04-08 |
 | 10. Networking Infrastructure | 2/2 | Complete    | 2026-04-08 | — |
 | 11. Lobby & Players | 2/2 | Complete    | 2026-04-09 | — |
-| 12. Server-Authoritative Simulation | 1/2 | In Progress|  | — |
+| 12. Server-Authoritative Simulation | 2/2 | Complete   | 2026-04-09 | — |
 | 13. Game Phase Lifecycle & Draw Relay | v2.0 | 0/TBD | Not started | — |
 | 14. Win Condition & End-to-End | v2.0 | 0/TBD | Not started | — |

@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Multiplayer
 status: planning
-stopped_at: Completed 12-01-PLAN.md
-last_updated: "2026-04-09T05:37:59.122Z"
+stopped_at: Completed 12-02-PLAN.md
+last_updated: "2026-04-09T05:42:48.485Z"
 last_activity: 2026-04-08 — v2.0 roadmap written, 22 requirements mapped across 5 phases
 progress:
   total_phases: 12
-  completed_phases: 5
+  completed_phases: 6
   total_plans: 12
-  completed_plans: 11
+  completed_plans: 12
   percent: 0
 ---
 
@@ -53,6 +53,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 10-networking-infrastructure P02 | 60 | 2 tasks | 3 files |
 | Phase 11-lobby-players P01 | 15 | 1 tasks | 2 files |
 | Phase 12 P01 | 3 | 2 tasks | 3 files |
+| Phase 12-server-authoritative-simulation P02 | 8 | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -77,6 +78,9 @@ Recent decisions affecting current work:
 - [Phase 12-01]: EntitySchema contains only render-critical fields — full EntityState stays in server-side Map
 - [Phase 12-01]: vx/vy added to EntitySchema for sprite orientation without client-side position-delta inference
 - [Phase 12-01]: WORLD_BOUNDS canonical constant (1280x720) defined in shared/src/simulation/EntitySimulation.ts
+- [Phase 12-02]: UUID-keyed parallel maps added to WorldStage: _entityContainersById and _entityIdByContainer for multiplayer entity lookup and cleanup
+- [Phase 12-02]: EntitySchemaLike duck-typed interface avoids importing server Schema classes with decorators in browser client
+- [Phase 12-02]: multiplayerMode boolean flag on WorldStage makes _gameTick a no-op when server drives simulation
 
 ### Pending Todos
 
@@ -89,6 +93,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-09T05:37:50.788Z
-Stopped at: Completed 12-01-PLAN.md
+Last session: 2026-04-09T05:42:48.483Z
+Stopped at: Completed 12-02-PLAN.md
 Resume file: None
