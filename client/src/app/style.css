@@ -12,3 +12,17 @@
 @custom-variant lg (@media (max-width: 1366px));
 @custom-variant md (@media (max-width: 1024px));
 @custom-variant sm (@media (max-width: 768px));
+
+@utility t20-eb {
+  font-size: 2rem;
+  font-style: normal;
+  line-height: 2rem;
+  font-weight: 900;
+}
+
+@utility t14-b {
+  font-size: 1.4rem;
+  font-style: normal;
+  line-height: 1.5rem;
+  font-weight: 700;
+}

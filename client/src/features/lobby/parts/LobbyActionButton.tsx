@@ -14,7 +14,7 @@ type LobbyActionButtonProps = {
   action: LobbyAction;
 };
 
-export function LobbyActionButton({ action }: LobbyActionButtonProps): React.JSX.Element {
+export function LobbyActionButton({ action }: LobbyActionButtonProps) {
   return (
     <button
       type="button"
@@ -32,13 +32,13 @@ export function LobbyActionButton({ action }: LobbyActionButtonProps): React.JSX
         style={{ ['--glow-color' as string]: action.glowColor }}
       />
       <span className="relative z-10 flex items-center justify-center text-white">
-        <Icon name={action.iconName} size="clamp(36px, 8vw, 56px)" color="currentColor" />
+        <Icon name={action.iconName} size="100px" color="currentColor" />
       </span>
       <span className="relative z-10 mt-1 flex flex-col items-center justify-center">
-        <span className="text-center text-[clamp(0.98rem,1.8vw,2rem)] font-black uppercase leading-[0.98] tracking-[-0.04em] text-white [text-shadow:_0_2px_0_rgba(0,0,0,0.24)]">
+        <span className="t20-eb text-center uppercase text-white [text-shadow:_0_2px_0_rgba(0,0,0,0.24)]">
           {action.title}
         </span>
-        <span className="mt-2 max-w-[11ch] text-center text-[clamp(0.74rem,1.3vw,1.4rem)] font-bold leading-[1.08] text-white/95 [text-shadow:_0_1px_0_rgba(0,0,0,0.18)]">
+        <span className="t14-b mt-2 max-w-[11ch] text-center text-white/95 [text-shadow:_0_1px_0_rgba(0,0,0,0.18)]">
           {action.description}
         </span>
       </span>
