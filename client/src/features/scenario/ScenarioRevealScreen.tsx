@@ -3,6 +3,8 @@ import { useEffect, useState } from 'react';
 
 import { StrokeShadowText } from '@/ui/text/StrokeShadowText';
 
+import { YouBadge } from './parts/YouBadge';
+
 import scenarioBackground from './assets/scenario-bg.png';
 import scenarioTeamBlueBackground from './assets/scenario-team-blue-bg.webp';
 import scenarioTeamRedBackground from './assets/scenario-team-red-bg.webp';
@@ -59,12 +61,17 @@ export function ScenarioRevealScreen() {
       {/* Scenario */}
       <div className="flex w-full justify-center pt-8">
         <div className="flex items-center gap-12">
-          <div
-            className="flex h-[400px] w-[600px] flex-col bg-contain bg-center bg-no-repeat p-6"
-            style={{
-              backgroundImage: `url(${scenarioTeamBlueBackground})`,
-            }}
-          ></div>
+          <div className="relative">
+            <div
+              className="neon-glow-yellow flex h-[400px] w-[600px] flex-col bg-contain bg-center bg-no-repeat p-6"
+              style={{
+                backgroundImage: `url(${scenarioTeamBlueBackground})`,
+              }}
+            ></div>
+            <div className="absolute -top-4 left-1/2 z-10 -translate-x-1/2">
+              <YouBadge />
+            </div>
+          </div>
 
           <img
             src={scenarioVsText}
@@ -84,7 +91,7 @@ export function ScenarioRevealScreen() {
 
       {/* Countdown */}
       <div className="pointer-events-none flex w-full justify-center pt-8">
-        <p className="flex items-baseline gap-4 select-none" aria-live="polite" aria-atomic="true">
+        <p className="flex items-center gap-8 select-none" aria-live="polite" aria-atomic="true">
           <StrokeShadowText
             className="t72-eb"
             firstStrokeColor="#1a2555"
@@ -97,7 +104,7 @@ export function ScenarioRevealScreen() {
             Starts In
           </StrokeShadowText>
           <StrokeShadowText
-            className="t96-eb ml-4"
+            className="t96-eb"
             firstStrokeColor="#331C57"
             secondStrokeColor="#A01E75"
             firstStrokeWidth={12}
