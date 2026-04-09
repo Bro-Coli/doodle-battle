@@ -408,15 +408,16 @@ export class GameRoom extends Room<{ state: GameState }> {
         player.hasSubmittedDrawing = false;
       });
 
-      // Check win condition BEFORE incrementing round — this round just finished
+      // Increment round counter
+      this.state.currentRound++;
+
+      // Check win condition before transitioning
       const winner = this._computeWinner();
       if (winner !== null) {
         this._finishGame(winner);
         return;
       }
 
-      // Increment round counter for the NEW round about to start
-      this.state.currentRound++;
       this.state.currentPhase = 'draw';
       this.state.phaseTimer = 60;
     }
@@ -615,7 +616,6 @@ export class GameRoom extends Room<{ state: GameState }> {
     this._entitiesDrawn.clear();
 
     // Start the draw phase
-    this.state.currentRound = 1;
     this.state.currentPhase = 'draw';
     this.state.phaseTimer = 60;
   }

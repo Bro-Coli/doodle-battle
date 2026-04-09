@@ -66,7 +66,7 @@ function DrawPhaseOverlay({
     <>
       <div className="fixed left-1/2 top-4 z-20 -translate-x-1/2 flex items-center gap-3 rounded-xl bg-black/75 px-6 py-2">
         <span className="font-bold text-white/60 text-lg">
-          Round {currentRound}/{maxRounds}
+          Round {currentRound + 1}/{maxRounds}
         </span>
         <span className="text-white/30">|</span>
         <span className="font-bold text-2xl text-white">
