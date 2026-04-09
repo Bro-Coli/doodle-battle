@@ -192,6 +192,70 @@
   letter-spacing: 0.04em;
 }
 
+@utility t38-eb {
+  font-size: 3.8rem;
+  font-style: normal;
+  line-height: 4rem;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+}
+
+@utility t40-eb {
+  font-size: 4rem;
+  font-style: normal;
+  line-height: 4rem;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+}
+
+@utility t50-eb {
+  font-size: 5rem;
+  font-style: normal;
+  line-height: 4.4rem;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+}
+
+@utility t60-eb {
+  font-size: 6rem;
+  font-style: normal;
+  line-height: 6rem;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+}
+
+@utility t68-eb {
+  font-size: 6.8rem;
+  font-style: normal;
+  line-height: 7rem;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+}
+
+@utility t72-eb {
+  font-size: 7.2rem;
+  font-style: normal;
+  line-height: 7.4rem;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+}
+
+@utility t80-eb {
+  font-size: 8rem;
+  font-style: normal;
+  line-height: 8rem;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+}
+
+@utility t96-eb {
+  font-size: 9.6rem;
+  font-style: normal;
+  line-height: 9.8rem;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+}
+
 @layer components {
   .ui-pill-button {
     position: relative;
