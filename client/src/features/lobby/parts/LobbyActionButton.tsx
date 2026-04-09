@@ -1,9 +1,11 @@
+import { Icon, type IconName } from '../../../ui';
+
 export type LobbyAction = {
   action?: () => void;
   backgroundImage: string;
   description: string;
   glowColor: string;
-  icon: React.JSX.Element;
+  iconName: IconName;
   id: string;
   title: string;
 };
@@ -29,7 +31,9 @@ export function LobbyActionButton({ action }: LobbyActionButtonProps): React.JSX
         className="pointer-events-none absolute inset-0 z-[1] h-full w-full object-contain transition-[filter] duration-150 ease-linear group-hover:[filter:drop-shadow(0_0_12px_var(--glow-color))_drop-shadow(0_0_28px_var(--glow-color))]"
         style={{ ['--glow-color' as string]: action.glowColor }}
       />
-      <span className="relative z-10 flex items-center justify-center text-white">{action.icon}</span>
+      <span className="relative z-10 flex items-center justify-center text-white">
+        <Icon name={action.iconName} size="clamp(36px, 8vw, 56px)" color="currentColor" />
+      </span>
       <span className="relative z-10 mt-1 flex flex-col items-center justify-center">
         <span className="text-center text-[clamp(0.98rem,1.8vw,2rem)] font-black uppercase leading-[0.98] tracking-[-0.04em] text-white [text-shadow:_0_2px_0_rgba(0,0,0,0.24)]">
           {action.title}

@@ -13,17 +13,7 @@ const lobbyActions: LobbyAction[] = [
     backgroundImage: mainBtn1,
     glowColor: 'rgba(255, 202, 73, 0.78)',
     action: () => navigate('/game'),
-    icon: (
-      <svg viewBox="0 0 64 64" className="h-10 w-10 sm:h-9 sm:w-9">
-        <path
-          d="M36 4 16 33h12l-4 27 24-33H35z"
-          fill="#fff8e8"
-          stroke="currentColor"
-          strokeWidth="4"
-          strokeLinejoin="round"
-        />
-      </svg>
-    ),
+    iconName: 'lightning',
   },
   {
     id: 'create-room',
@@ -31,12 +21,7 @@ const lobbyActions: LobbyAction[] = [
     description: 'Make a room and invite friends',
     backgroundImage: mainBtn2,
     glowColor: 'rgba(255, 118, 207, 0.78)',
-    icon: (
-      <svg viewBox="0 0 64 64" className="h-10 w-10 sm:h-9 sm:w-9">
-        <path d="M32 12v40M12 32h40" stroke="#fff8ef" strokeWidth="9" strokeLinecap="round" />
-        <path d="M32 12v40M12 32h40" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
-      </svg>
-    ),
+    iconName: 'plus',
   },
   {
     id: 'join-room',
@@ -44,14 +29,7 @@ const lobbyActions: LobbyAction[] = [
     description: 'Enter a code or browse rooms',
     backgroundImage: mainBtn3,
     glowColor: 'rgba(90, 237, 255, 0.78)',
-    icon: (
-      <svg viewBox="0 0 64 64" className="h-10 w-10 sm:h-9 sm:w-9">
-        <circle cx="28" cy="28" r="16" fill="none" stroke="#fff8ef" strokeWidth="8" />
-        <path d="M40 40 52 52" stroke="#fff8ef" strokeWidth="8" strokeLinecap="round" />
-        <circle cx="28" cy="28" r="16" fill="none" stroke="currentColor" strokeWidth="2.5" />
-        <path d="M40 40 52 52" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
-      </svg>
-    ),
+    iconName: 'search',
   },
 ];
 
