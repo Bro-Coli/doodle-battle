@@ -164,7 +164,10 @@ Plans:
   1. An entity spawned in a room moves on screen for all connected clients simultaneously, driven entirely by server tick logic — no client behavior functions run during simulation
   2. Opening the network inspector shows entity position data arriving as binary patch messages, not full-state JSON on every tick
   3. When a fight is resolved server-side, the defeated entity disappears from all connected clients' screens at the same time
-**Plans**: TBD
+**Plans:** 2 plans
+Plans:
+- [ ] 12-01-PLAN.md — EntitySchema, server simulation tick, fight resolution, spawn/interaction message handlers
+- [ ] 12-02-PLAN.md — Client render-only WorldStage, MultiplayerWorldBridge wiring Schema patches to PixiJS
 
 ### Phase 13: Game Phase Lifecycle & Draw Relay
 **Goal**: All players experience a synchronized draw phase (timed, hidden drawings) followed by a simulation phase (all entities revealed simultaneously), repeated each round
@@ -204,6 +207,6 @@ Phases execute in numeric order: 10 → 11 → 12 → 13 → 14
 | 7. React Overlay Parity | v1.2 | 0/0 | Complete | 2026-04-08 |
 | 10. Networking Infrastructure | 2/2 | Complete    | 2026-04-08 | — |
 | 11. Lobby & Players | 2/2 | Complete    | 2026-04-09 | — |
-| 12. Server-Authoritative Simulation | v2.0 | 0/TBD | Not started | — |
+| 12. Server-Authoritative Simulation | v2.0 | 0/2 | Not started | — |
 | 13. Game Phase Lifecycle & Draw Relay | v2.0 | 0/TBD | Not started | — |
 | 14. Win Condition & End-to-End | v2.0 | 0/TBD | Not started | — |
