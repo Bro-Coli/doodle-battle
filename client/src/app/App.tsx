@@ -4,6 +4,7 @@ import { Application } from 'pixi.js';
 import { DrawingCanvas } from '../features/drawing/DrawingCanvas';
 import { LobbyScreen } from '../features/lobby/LobbyScreen';
 import { RecognitionOverlay } from '../features/recognition/RecognitionOverlay';
+import { ScenarioRevealScreen } from '../features/scenario/ScenarioRevealScreen';
 import { StudioControlsApp } from '../features/studio/StudioControlsApp';
 import { createStudioController } from '../features/studio/createStudioController';
 import { WorldStage } from '../features/world/WorldStage';
@@ -106,5 +107,7 @@ export function App(): React.JSX.Element {
     };
   }, []);
 
-  return pathname === '/game' ? <GameScreen /> : <LobbyScreen />;
+  if (pathname === '/game') return <GameScreen />;
+  if (pathname === '/scenario') return <ScenarioRevealScreen />;
+  return <LobbyScreen />;
 }
