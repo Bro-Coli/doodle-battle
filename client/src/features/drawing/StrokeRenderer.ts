@@ -28,6 +28,14 @@ function smoothPoints(pts: [number, number][], strength: number): [number, numbe
 
 const SMOOTHING = 0.1;
 
+/** Current stroke color — defaults to black, set via setStrokeColor(). */
+let strokeColor = 0x000000;
+
+/** Set the stroke color for all subsequent strokes. */
+export function setStrokeColor(color: number): void {
+  strokeColor = color;
+}
+
 export function renderStroke(
   gfx: Graphics,
   points: [number, number][],
@@ -37,7 +45,7 @@ export function renderStroke(
     if (points.length === 1) {
       const r = THICKNESS_PRESETS[preset].size / 2;
       gfx.clear();
-      gfx.circle(points[0][0], points[0][1], r).fill({ color: 0x000000 });
+      gfx.circle(points[0][0], points[0][1], r).fill({ color: strokeColor });
     }
     return;
   }
@@ -54,7 +62,7 @@ export function renderStroke(
   }
 
   gfx.stroke({
-    color: 0x000000,
+    color: strokeColor,
     width: THICKNESS_PRESETS[preset].size,
     cap: 'round',
     join: 'round',

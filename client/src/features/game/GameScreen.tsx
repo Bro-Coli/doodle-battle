@@ -5,6 +5,8 @@ import { WorldStage } from '../world/WorldStage';
 import { MultiplayerWorldBridge } from '../world/MultiplayerWorldBridge';
 import { exportPng } from '../drawing/exportPng';
 import { captureEntityTexture } from '../world/captureEntityTexture';
+import { setStrokeColor } from '../drawing/StrokeRenderer';
+import { TEAM_TINTS } from '../world/EntitySprite';
 import { getActiveRoom } from '../../network/ColyseusClient';
 import { navigate } from '../../utils/navigate';
 
@@ -333,6 +335,12 @@ export function GameScreen(): React.JSX.Element {
           setHasSubmitted(false);
           hasSubmittedRef.current = false;
           setCapturedImageUrl(null);
+
+          // Set stroke color to team color so drawings are visually team-coded
+          const teamTint = TEAM_TINTS[myTeamRef.current];
+          if (teamTint !== undefined) {
+            setStrokeColor(teamTint);
+          }
 
           // Show drawing root, hide world root
           const stage = worldStageRef.current;

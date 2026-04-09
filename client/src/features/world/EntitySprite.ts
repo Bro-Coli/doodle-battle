@@ -72,13 +72,6 @@ export function buildEntityContainer(
   const finalScale = minDim < 30 ? scaleFactor * (30 / minDim) : scaleFactor;
   sprite.scale.set(finalScale);
 
-  // Apply team tint if provided — works correctly on transparent-background textures
-  // (from captureEntityTexture). Tint multiplies RGB, so black strokes stay dark-tinted
-  // and transparent pixels remain invisible.
-  if (teamId && TEAM_TINTS[teamId] !== undefined) {
-    sprite.tint = TEAM_TINTS[teamId];
-  }
-
   // Drop shadow filter — pixi-filters v6 uses `offset` (PointData), not `distance`
   sprite.filters = [new DropShadowFilter({ blur: 3, offset: { x: 4, y: 6 }, alpha: 0.35 })];
 
