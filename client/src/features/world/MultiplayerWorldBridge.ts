@@ -1,4 +1,5 @@
 import type { Room } from '@colyseus/sdk';
+import { Assets, Texture } from 'pixi.js';
 import type { WorldStage } from './WorldStage';
 import type { Archetype, EntityProfile, InteractionMatrix } from '@crayon-world/shared/src/types';
 
@@ -34,6 +35,8 @@ export class MultiplayerWorldBridge {
   private _room: Room | null = null;
   private readonly _knownEntityIds = new Set<string>();
   private _stateChangeCallback: ((state: unknown) => void) | null = null;
+  // Entity textures received from server — entityId → Texture
+  private readonly _entityTextures = new Map<string, Texture>();
 
   constructor(worldStage: WorldStage) {
     this._worldStage = worldStage;
@@ -47,6 +50,20 @@ export class MultiplayerWorldBridge {
   connect(room: Room): void {
     this._room = room;
     this._worldStage.multiplayerMode = true;
+
+    // Listen for entity texture broadcasts — server sends drawing PNGs as base64
+    room.onMessage('entity_textures', (textures: Record<string, string>) => {
+      for (const [entityId, dataUrl] of Object.entries(textures)) {
+        const img = new Image();
+        img.onload = () => {
+          const texture = Texture.from(img);
+          this._entityTextures.set(entityId, texture);
+          // If the entity was already spawned with a placeholder, update its texture
+          this._worldStage.updateEntityTexture(entityId, texture);
+        };
+        img.src = dataUrl;
+      }
+    });
 
     const callback = (state: unknown): void => {
       const typedState = state as { entities?: Map<string, EntitySchemaLike> };
@@ -79,9 +96,11 @@ export class MultiplayerWorldBridge {
             role: '',
             speed: 0,
           };
-          // Use the local player's captured drawing texture for their own entity
+          // Use local captured texture for own entity, or received texture from server
           const isMyEntity = this._room && schema.ownerSessionId === this._room.sessionId;
-          const texture = isMyEntity ? this._worldStage.capturedDrawingTexture ?? undefined : undefined;
+          const texture = isMyEntity
+            ? this._worldStage.capturedDrawingTexture ?? undefined
+            : this._entityTextures.get(entityId);
           this._worldStage.spawnFromSchema(entityId, profile, schema.x, schema.y, schema.teamId, texture);
           this._knownEntityIds.add(entityId);
         }
@@ -115,6 +134,7 @@ export class MultiplayerWorldBridge {
     }
     this._worldStage.multiplayerMode = false;
     this._knownEntityIds.clear();
+    this._entityTextures.clear();
     this._stateChangeCallback = null;
     this._room = null;
   }

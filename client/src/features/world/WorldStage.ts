@@ -542,6 +542,20 @@ export class WorldStage {
   }
 
   /**
+   * Update an already-spawned entity's sprite texture (e.g., when texture arrives after spawn).
+   */
+  updateEntityTexture(entityId: string, texture: Texture): void {
+    const container = this._entityContainersById.get(entityId);
+    if (!container) return;
+
+    // The sprite is the first child of the entity container
+    const sprite = container.children[0];
+    if (sprite && 'texture' in sprite) {
+      (sprite as { texture: Texture }).texture = texture;
+    }
+  }
+
+  /**
    * Apply position/velocity/hp updates from server Schema patches to PixiJS containers.
    * Called each time room.onStateChange fires with the full entity snapshot.
    *

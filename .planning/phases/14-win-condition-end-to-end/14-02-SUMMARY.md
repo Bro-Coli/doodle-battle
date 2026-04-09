@@ -22,10 +22,11 @@ decisions:
   - "winnerData reset when phase transitions from idle to draw (not on finished->idle) to keep overlay visible until confirmed new game start"
   - "Start Game button removed entirely — auto-start server behavior replaces it; Ready toggle is now the only lobby action"
   - "Ready toggle shows active state (green + 'Ready!' label) for immediate visual feedback without server roundtrip"
+requirements-completed: [WNCN-01, WNCN-02]
 metrics:
-  duration_minutes: 5
+  duration_minutes: 40
   completed_date: "2026-04-09"
-  tasks_completed: 2
+  tasks_completed: 3
   tasks_total: 3
   files_modified: 3
 ---
@@ -62,25 +63,64 @@ metrics:
 - Ready toggle now shows active state (green background + "Ready!" label vs "Ready Up")
 - Host sees informational text: "Game starts automatically when all players are ready"
 
-### Task 3: End-to-end verification (checkpoint — pending human verification)
+### Task 3: End-to-end verification (checkpoint:human-verify — APPROVED)
 
-Human verification required: two-tab walkthrough from lobby through winner screen and rematch.
+Two-tab walkthrough completed: lobby creation with round limit -> auto-start -> draw phase with round counter -> simulate -> results -> repeat -> winner screen -> rematch and main menu flows all verified. User approved.
 
 ## Deviations from Plan
 
-None — plan executed exactly as written.
+Post-verification bugfixes discovered during the two-tab walkthrough:
+
+### Auto-fixed Issues
+
+**1. [Rule 1 - Bug] Round counter showed "Round 0/3" on first draw phase**
+- **Found during:** Task 3 verification
+- **Issue:** Server's `currentRound` starts at 0 and increments after results phase; client was displaying raw value, yielding "Round 0/3" instead of "Round 1/3"
+- **Fix:** Client renders `currentRound + 1` in the draw phase banner
+- **Files modified:** `client/src/features/game/GameScreen.tsx`
+- **Committed in:** `5a4dcac`
+
+**2. [Rule 1 - Bug] Winner screen dismissed for all players when one clicked Back to Lobby**
+- **Found during:** Task 3 verification
+- **Issue:** `return_to_lobby` server handler reset phase to 'lobby' for all connected clients, causing WinnerOverlay to unmount for the player who had not yet navigated
+- **Fix:** WinnerOverlay persists until each player individually navigates; `winnerData` cleared only on local phase transition back to 'draw'
+- **Files modified:** `client/src/features/game/GameScreen.tsx`
+- **Committed in:** `74da7cc`
+
+**3. [Rule 1 - Bug] Win condition not triggered on final round — game looped back instead of ending**
+- **Found during:** Task 3 verification (playing through to round 3)
+- **Issue:** Server incremented `currentRound` before calling `_computeWinner`, so the final round evaluated as round N+1 and the condition `currentRound >= maxRounds` was never true at the right time
+- **Fix:** `_computeWinner` called before `currentRound` increment on server
+- **Files modified:** `server/src/rooms/GameRoom.ts`
+- **Committed in:** `491bfd1`
+
+**4. [Rule 2 - Missing UX] Added 'Final results incoming...' hint on last round results overlay**
+- **Found during:** Task 3 verification
+- **Issue:** On the final round the ResultsOverlay lingered while the server processed the win condition, with no feedback — players could not tell if the game had stalled
+- **Fix:** ResultsOverlay detects `currentRound >= maxRounds` and shows supplementary text: "Final results incoming..."
+- **Files modified:** `client/src/features/game/GameScreen.tsx`
+- **Committed in:** `a3c4b7c`
+
+---
+
+**Total deviations:** 4 auto-fixed (3 bugs, 1 missing UX feedback)
+**Impact on plan:** All fixes required for correct end-to-end game loop and player experience. No scope creep.
 
 ## Self-Check
 
 ### Files Modified
 
-- [x] `client/src/features/game/GameScreen.tsx` — exists with WinnerOverlay, game_finished handler, round counter
-- [x] `client/src/features/lobby/NameInputScreen.tsx` — exists with maxRounds state and 3/5/10 selector
-- [x] `client/src/features/lobby/WaitingRoomScreen.tsx` — exists with maxRounds display, no Start Game button
+- [x] `client/src/features/game/GameScreen.tsx` — WinnerOverlay, game_finished handler, round counter, final-round hint
+- [x] `client/src/features/lobby/NameInputScreen.tsx` — maxRounds state and 3/5/10 selector
+- [x] `client/src/features/lobby/WaitingRoomScreen.tsx` — maxRounds display, no Start Game button
 
 ### Commits
 
 - ce40c33: feat(14-02): add WinnerOverlay, round counter, game_finished handler, and return-to-lobby navigation
 - 8037871: feat(14-02): add round limit selector, auto-start UI, and maxRounds display
+- 74da7cc: fix(14): round counter off-by-one and winner screen dismissed by other player
+- 491bfd1: fix(14): check win condition before incrementing round counter
+- 5a4dcac: fix(14): simplify round display — show currentRound+1 on client
+- a3c4b7c: fix(14): show 'Final results incoming...' on last round results overlay
 
 ## Self-Check: PASSED

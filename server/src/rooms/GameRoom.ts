@@ -72,7 +72,7 @@ export class GameRoom extends Room<{ state: GameState }> {
   _nameIdMap: Map<string, string> = new Map();
   _dyingEntities: Set<string> = new Set();
   // Pending profiles buffered during draw phase — spawned simultaneously at simulate start
-  _pendingProfiles: Map<string, { profile: EntityProfile; teamId: string }> = new Map();
+  _pendingProfiles: Map<string, { profile: EntityProfile; teamId: string; imageDataUrl: string }> = new Map();
   // Count of in-flight recognition calls — must reach 0 before phase can advance
   _pendingRecognitions: number = 0;
   // Kill tracking: ownerSessionId -> kill count
@@ -360,7 +360,8 @@ export class GameRoom extends Room<{ state: GameState }> {
       }
 
       // Spawn all pending profiles as entities simultaneously
-      for (const [sessionId, { profile, teamId }] of this._pendingProfiles) {
+      const entityTextures: Record<string, string> = {};
+      for (const [sessionId, { profile, teamId, imageDataUrl }] of this._pendingProfiles) {
         const entityId = crypto.randomUUID();
 
         // Team-based x positioning
@@ -392,9 +393,19 @@ export class GameRoom extends Room<{ state: GameState }> {
 
         // Track entities drawn per player
         this._entitiesDrawn.set(sessionId, (this._entitiesDrawn.get(sessionId) ?? 0) + 1);
+
+        // Map entityId to drawing texture for broadcast
+        if (imageDataUrl) {
+          entityTextures[entityId] = imageDataUrl;
+        }
       }
 
       this._pendingProfiles.clear();
+
+      // Broadcast entity textures to all clients so they can render drawings
+      if (Object.keys(entityTextures).length > 0) {
+        this.broadcast('entity_textures', entityTextures);
+      }
 
       // Transition to simulate
       this.state.currentPhase = 'simulate';
@@ -443,7 +454,7 @@ export class GameRoom extends Room<{ state: GameState }> {
     const profile = await recognizeDrawingInternal(imageDataUrl);
 
     this._pendingRecognitions--;
-    this._pendingProfiles.set(client.sessionId, { profile, teamId: player.team });
+    this._pendingProfiles.set(client.sessionId, { profile, teamId: player.team, imageDataUrl });
 
     // Early phase end only when all players submitted AND all recognitions complete
     if (this._allPlayersSubmitted() && this._pendingRecognitions === 0) {

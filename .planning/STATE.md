@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Multiplayer
 status: planning
-stopped_at: "Completed 14-02-PLAN.md (checkpoint: human-verify pending)"
-last_updated: "2026-04-09T08:30:52.225Z"
+stopped_at: Completed 14-02-PLAN.md — full multiplayer game loop verified end-to-end
+last_updated: "2026-04-09T08:56:56.574Z"
 last_activity: 2026-04-08 — v2.0 roadmap written, 22 requirements mapped across 5 phases
 progress:
   total_phases: 12
@@ -103,6 +103,8 @@ Recent decisions affecting current work:
 - [Phase 14-win-condition-end-to-end]: _handleReturnToLobby guarded by currentPhase === 'finished' — no-op if called at any other time
 - [Phase 14-win-condition-end-to-end]: game_finished handler registered synchronously before async PixiJS init to avoid missed messages
 - [Phase 14-win-condition-end-to-end]: Start Game button removed entirely — auto-start server behavior replaces it
+- [Phase 14-win-condition-end-to-end]: Round display uses currentRound+1 on client — server stores zero-indexed value incremented after results phase
+- [Phase 14-win-condition-end-to-end]: Win condition checked before currentRound increment on server to correctly identify final round
 
 ### Pending Todos
 
@@ -115,6 +117,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-09T08:30:52.222Z
-Stopped at: Completed 14-02-PLAN.md (checkpoint: human-verify pending)
+Last session: 2026-04-09T08:56:52.322Z
+Stopped at: Completed 14-02-PLAN.md — full multiplayer game loop verified end-to-end
 Resume file: None
