@@ -1,9 +1,11 @@
 import { navigate } from '../../utils/navigate';
 import mainBackground from './assets/main-bg.png';
 import mainTitle from './assets/main-title.png';
-import mainBtn1 from './assets/main-btn-1.png';
-import mainBtn2 from './assets/main-btn-2.png';
-import mainBtn3 from './assets/main-btn-3.png';
+import mainBtn1 from './assets/main-btn-1.webp';
+import mainBtn2 from './assets/main-btn-2.webp';
+import mainBtn3 from './assets/main-btn-3.webp';
+import { cn } from '@/shared/lib/cn';
+
 import { LobbyActionButton, type LobbyAction } from './parts/LobbyActionButton';
 import { LobbyTutorialButton } from './parts/LobbyTutorialButton';
 
@@ -46,22 +48,24 @@ const lobbyActions: LobbyAction[] = [
 export function LobbyScreen(): React.JSX.Element {
   return (
     <main
-      className="relative flex min-h-screen w-full items-start justify-center overflow-x-auto overflow-y-hidden bg-cover bg-center bg-no-repeat px-6 pt-12 pb-8 sm:px-4 sm:pt-4"
+      className="relative flex min-h-screen w-full items-start justify-center overflow-x-auto overflow-y-hidden bg-cover bg-center bg-no-repeat px-6 pt-8 pb-8 sm:px-4 sm:pt-4"
       style={{ backgroundImage: `url(${mainBackground})` }}
     >
       <div className="flex min-w-[1680px] max-w-7xl flex-col items-center gap-6 pt-8 sm:gap-5 sm:pt-6">
         <img
           src={mainTitle}
           alt="Doodle Battle"
-          className="w-full max-w-[600px] object-contain drop-shadow-[0_18px_40px_rgba(28,20,78,0.45)] sm:max-w-[520px]"
+          className="w-full max-w-[580px] object-contain drop-shadow-[0_18px_40px_rgba(28,20,78,0.45)] sm:max-w-[520px]"
         />
-        <div className="-translate-x-4 mx-auto flex w-max items-center justify-center -space-x-8">
-          {lobbyActions.map((action) => (
-            <LobbyActionButton key={action.id} action={action} />
+        <div className="-translate-x-4 mx-auto flex w-max items-center justify-center -space-x-4 lg:-space-x-16">
+          {lobbyActions.map((action, index) => (
+            <div key={action.id} className={cn('shrink-0', index === 2 && 'ml-4')}>
+              <LobbyActionButton action={action} />
+            </div>
           ))}
         </div>
       </div>
-      <div className="absolute bottom-8 left-8 z-10 sm:bottom-4 sm:left-4">
+      <div className="absolute bottom-8 left-8 sm:bottom-4 sm:left-4">
         <LobbyTutorialButton />
       </div>
       <div className="absolute top-6 right-6 z-10 sm:top-4 sm:right-4">

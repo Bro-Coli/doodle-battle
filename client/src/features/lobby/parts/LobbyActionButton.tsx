@@ -24,11 +24,12 @@ export function LobbyActionButton({ action }: LobbyActionButtonProps) {
       onClick={action.action}
       disabled={!action.action}
       className={cn(
-        'flex-center group relative h-136 w-136 flex-col text-center',
+        'flex-center group relative h-120 w-120 flex-col text-center',
         'cursor-pointer transition-transform duration-100 ease-linear',
         'hover:scale-[1.06] active:scale-[0.96]',
         'disabled:cursor-default disabled:opacity-90',
         'disabled:hover:scale-100 disabled:active:scale-100',
+        'lg:h-114 lg:w-114',
       )}
       aria-label={action.title}
     >
@@ -36,9 +37,10 @@ export function LobbyActionButton({ action }: LobbyActionButtonProps) {
       <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
         <div
           className={cn(
-            'h-120 w-120 bg-contain bg-center bg-no-repeat',
+            'h-110 w-110 bg-contain bg-center bg-no-repeat',
             'transition-[filter] duration-150 ease-linear',
             'group-hover:filter-[drop-shadow(0_0_12px_var(--glow-color))_drop-shadow(0_0_28px_var(--glow-color))]',
+            'lg:h-96 lg:w-96',
           )}
           style={{
             backgroundImage: `url(${action.backgroundImage})`,
@@ -58,13 +60,13 @@ export function LobbyActionButton({ action }: LobbyActionButtonProps) {
       </span>
       <span className="flex-center relative mt-6 flex-col">
         <StrokeShadowText
-          className="t28-eb tracking-wide"
+          className="t28-eb tracking-wide lg:t24-eb"
           firstStrokeColor={action.firstStrokeColor}
           secondStrokeColor={action.secondStrokeColor}
         >
           {action.title}
         </StrokeShadowText>
-        <span className=" font-nunito t20-b mt-4 whitespace-pre-line text-center text-white [text-shadow:0_1px_0_rgba(0,0,0,0.18)]">
+        <span className=" font-nunito t20-b mt-4 whitespace-pre-line text-center text-white [text-shadow:0_1px_0_rgba(0,0,0,0.18)] lg:t18-b lg:mt-2">
           {action.description}
         </span>
       </span>
