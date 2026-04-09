@@ -55,7 +55,7 @@ export function LobbyScreen(): React.JSX.Element {
         <img
           src={mainTitle}
           alt="Doodle Battle"
-          className="w-full max-w-[580px] object-contain drop-shadow-[0_18px_40px_rgba(28,20,78,0.45)] sm:max-w-[520px]"
+          className="w-full max-w-[580px] object-contain drop-shadow-[0_18px_40px_rgba(28,20,78,0.45)] lg:max-w-[520px]"
         />
         <div className="-translate-x-4 mx-auto flex w-max items-center justify-center -space-x-4 lg:-space-x-16">
           {lobbyActions.map((action, index) => (
