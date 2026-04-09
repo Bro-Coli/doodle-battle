@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Multiplayer
 status: planning
-stopped_at: Completed 13-02-PLAN.md — visual verification approved
-last_updated: "2026-04-09T07:24:03.498Z"
+stopped_at: "Completed 14-02-PLAN.md (checkpoint: human-verify pending)"
+last_updated: "2026-04-09T08:30:52.225Z"
 last_activity: 2026-04-08 — v2.0 roadmap written, 22 requirements mapped across 5 phases
 progress:
   total_phases: 12
-  completed_phases: 7
-  total_plans: 14
-  completed_plans: 14
+  completed_phases: 8
+  total_plans: 16
+  completed_plans: 16
   percent: 0
 ---
 
@@ -57,6 +57,8 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 13-game-phase-lifecycle-draw-relay P01 | 6 | 2 tasks | 6 files |
 | Phase 13-game-phase-lifecycle-draw-relay P02 | 3 | 2 tasks | 5 files |
 | Phase 13-game-phase-lifecycle-draw-relay P02 | 55 | 3 tasks | 9 files |
+| Phase 14-win-condition-end-to-end P01 | 5 | 2 tasks | 4 files |
+| Phase 14-win-condition-end-to-end P02 | 5 | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -95,6 +97,12 @@ Recent decisions affecting current work:
 - [Phase 13-game-phase-lifecycle-draw-relay]: ownerSessionId added to EntitySchema so client can identify local player's entity for texture assignment
 - [Phase 13-game-phase-lifecycle-draw-relay]: WebSocket maxPayload raised to 2MB — drawing PNGs can exceed the default 64KB ws limit
 - [Phase 13-game-phase-lifecycle-draw-relay]: _pendingRecognitions counter in GameRoom prevents phase advance before all async Claude recognitions complete
+- [Phase 14-win-condition-end-to-end]: _computeWinner called after currentRound increment — round 5 of 5 evaluated with the incremented value
+- [Phase 14-win-condition-end-to-end]: Forfeit checks remaining players after deleting leaver from state.players to avoid counting them as present
+- [Phase 14-win-condition-end-to-end]: Auto-start reuses _handleStartGame with hostSessionId — existing validation (client count >= 2, all ready) and lock() run as expected
+- [Phase 14-win-condition-end-to-end]: _handleReturnToLobby guarded by currentPhase === 'finished' — no-op if called at any other time
+- [Phase 14-win-condition-end-to-end]: game_finished handler registered synchronously before async PixiJS init to avoid missed messages
+- [Phase 14-win-condition-end-to-end]: Start Game button removed entirely — auto-start server behavior replaces it
 
 ### Pending Todos
 
@@ -107,6 +115,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-09T07:24:03.496Z
-Stopped at: Completed 13-02-PLAN.md — visual verification approved
+Last session: 2026-04-09T08:30:52.222Z
+Stopped at: Completed 14-02-PLAN.md (checkpoint: human-verify pending)
 Resume file: None

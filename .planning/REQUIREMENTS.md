@@ -28,10 +28,10 @@ Requirements for Colyseus multiplayer. Each maps to roadmap phases.
 
 ### Game Phase Lifecycle
 
-- [ ] **PHSE-01**: The game alternates between draw phase and simulation phase, synchronized for all players
-- [ ] **PHSE-02**: Draw phase has a countdown timer (~60s) and ends early when all players submit or click ready
-- [ ] **PHSE-03**: Each player submits exactly one drawing per draw phase, hidden from other players until simulation
-- [ ] **PHSE-04**: Simulation phase runs for ~30 seconds with all entities visible to all players
+- [x] **PHSE-01**: The game alternates between draw phase and simulation phase, synchronized for all players
+- [x] **PHSE-02**: Draw phase has a countdown timer (~60s) and ends early when all players submit or click ready
+- [x] **PHSE-03**: Each player submits exactly one drawing per draw phase, hidden from other players until simulation
+- [x] **PHSE-04**: Simulation phase runs for ~30 seconds with all entities visible to all players
 
 ### Server-Authoritative Simulation
 
@@ -41,14 +41,14 @@ Requirements for Colyseus multiplayer. Each maps to roadmap phases.
 
 ### Drawing Relay & Reveal
 
-- [ ] **DRAW-01**: Player sends drawing PNG to server via Colyseus room message (not Schema state)
-- [ ] **DRAW-02**: Server calls Claude Haiku recognition internally for each submitted drawing
-- [ ] **DRAW-03**: All new entities are revealed simultaneously to all players at simulation phase start
+- [x] **DRAW-01**: Player sends drawing PNG to server via Colyseus room message (not Schema state)
+- [x] **DRAW-02**: Server calls Claude Haiku recognition internally for each submitted drawing
+- [x] **DRAW-03**: All new entities are revealed simultaneously to all players at simulation phase start
 
 ### Win Condition
 
-- [ ] **WNCN-01**: Game ends when one team has zero surviving entities (elimination) or after a configurable round limit
-- [ ] **WNCN-02**: At game end, the team with more surviving entities wins; a winner screen is shown to all players
+- [x] **WNCN-01**: Game ends when one team has zero surviving entities (elimination) or after a configurable round limit
+- [x] **WNCN-02**: At game end, the team with more surviving entities wins; a winner screen is shown to all players
 
 ## v3 Requirements
 
@@ -95,18 +95,18 @@ Which phases cover which requirements. Updated during roadmap creation.
 | TEAM-01 | Phase 11 | Complete |
 | TEAM-02 | Phase 11 | Complete |
 | TEAM-03 | Phase 11 | Complete |
-| PHSE-01 | Phase 13 | Pending |
-| PHSE-02 | Phase 13 | Pending |
-| PHSE-03 | Phase 13 | Pending |
-| PHSE-04 | Phase 13 | Pending |
+| PHSE-01 | Phase 13 | Complete |
+| PHSE-02 | Phase 13 | Complete |
+| PHSE-03 | Phase 13 | Complete |
+| PHSE-04 | Phase 13 | Complete |
 | SSIM-01 | Phase 12 | Complete |
 | SSIM-02 | Phase 12 | Complete |
 | SSIM-03 | Phase 12 | Complete |
-| DRAW-01 | Phase 13 | Pending |
-| DRAW-02 | Phase 13 | Pending |
-| DRAW-03 | Phase 13 | Pending |
-| WNCN-01 | Phase 14 | Pending |
-| WNCN-02 | Phase 14 | Pending |
+| DRAW-01 | Phase 13 | Complete |
+| DRAW-02 | Phase 13 | Complete |
+| DRAW-03 | Phase 13 | Complete |
+| WNCN-01 | Phase 14 | Complete |
+| WNCN-02 | Phase 14 | Complete |
 
 **Coverage:**
 - v2.0 requirements: 22 total
