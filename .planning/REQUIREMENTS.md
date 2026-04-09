@@ -15,16 +15,16 @@ Requirements for Colyseus multiplayer. Each maps to roadmap phases.
 
 ### Lobby & Matchmaking
 
-- [ ] **LBBY-01**: A player can create a new game room (public or private)
-- [ ] **LBBY-02**: A player can join a private room using a 4-character alphanumeric code
-- [ ] **LBBY-03**: Rooms support 2-8 players with a configurable player limit
+- [x] **LBBY-01**: A player can create a new game room (public or private)
+- [x] **LBBY-02**: A player can join a private room using a 4-character alphanumeric code
+- [x] **LBBY-03**: Rooms support 2-8 players with a configurable player limit
 - [ ] **LBBY-04**: Players see a lobby screen with the room code and connected player list
 
 ### Teams & Players
 
-- [ ] **TEAM-01**: Players are auto-assigned to one of two teams on join, balanced by count
-- [ ] **TEAM-02**: Each player has a visible name, team assignment, and ready status in the lobby
-- [ ] **TEAM-03**: The host (first player to join) can start the game when at least 2 players are connected
+- [x] **TEAM-01**: Players are auto-assigned to one of two teams on join, balanced by count
+- [x] **TEAM-02**: Each player has a visible name, team assignment, and ready status in the lobby
+- [x] **TEAM-03**: The host (first player to join) can start the game when at least 2 players are connected
 
 ### Game Phase Lifecycle
 
@@ -88,13 +88,13 @@ Which phases cover which requirements. Updated during roadmap creation.
 | NTWK-01 | Phase 10 | Complete |
 | NTWK-02 | Phase 10 | Complete |
 | NTWK-03 | Phase 10 | Complete |
-| LBBY-01 | Phase 11 | Pending |
-| LBBY-02 | Phase 11 | Pending |
-| LBBY-03 | Phase 11 | Pending |
+| LBBY-01 | Phase 11 | Complete |
+| LBBY-02 | Phase 11 | Complete |
+| LBBY-03 | Phase 11 | Complete |
 | LBBY-04 | Phase 11 | Pending |
-| TEAM-01 | Phase 11 | Pending |
-| TEAM-02 | Phase 11 | Pending |
-| TEAM-03 | Phase 11 | Pending |
+| TEAM-01 | Phase 11 | Complete |
+| TEAM-02 | Phase 11 | Complete |
+| TEAM-03 | Phase 11 | Complete |
 | PHSE-01 | Phase 13 | Pending |
 | PHSE-02 | Phase 13 | Pending |
 | PHSE-03 | Phase 13 | Pending |

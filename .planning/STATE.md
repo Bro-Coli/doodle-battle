@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Multiplayer
 status: planning
-stopped_at: Completed 10-02-PLAN.md
-last_updated: "2026-04-08T14:34:04.556Z"
+stopped_at: Completed 11-01-PLAN.md
+last_updated: "2026-04-09T03:43:55.782Z"
 last_activity: 2026-04-08 — v2.0 roadmap written, 22 requirements mapped across 5 phases
 progress:
   total_phases: 12
   completed_phases: 4
-  total_plans: 8
-  completed_plans: 8
+  total_plans: 10
+  completed_plans: 9
   percent: 0
 ---
 
@@ -51,6 +51,7 @@ Progress: [░░░░░░░░░░] 0%
 | 14. Win Condition & End-to-End | v2.0 | TBD |
 | Phase 10 P01 | 175 | 3 tasks | 16 files |
 | Phase 10-networking-infrastructure P02 | 60 | 2 tasks | 3 files |
+| Phase 11-lobby-players P01 | 15 | 1 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -66,6 +67,9 @@ Recent decisions affecting current work:
 - [Phase 10]: Colyseus 0.17 integrated via Server class + WebSocketTransport sharing port 3001 with Express; experimentalDecorators only in server/tsconfig.json
 - [Phase 10-networking-infrastructure]: Colyseus 0.17: use onStateChange (not state.listen) and manual matchmake route (not defineServer) to avoid tsx class-name stripping bug
 - [Phase 10-networking-infrastructure]: CORS must use regex localhost pattern with credentials: true for Colyseus HTTP upgrade handshake in cross-origin dev
+- [Phase 11-lobby-players]: Colyseus 0.17 Room generic is Room<{ state: T }> not Room<T>; onLeave is (client, code?: number)
+- [Phase 11-lobby-players]: Message handlers extracted to _handle* methods for unit-testability without Colyseus server startup
+- [Phase 11-lobby-players]: Unambiguous charset ABCDEFGHJKLMNPQRSTUVWXYZ23456789 (no 0/O/I/1) for 4-char room codes
 
 ### Pending Todos
 
@@ -78,6 +82,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-08T14:30:35.587Z
-Stopped at: Completed 10-02-PLAN.md
+Last session: 2026-04-09T03:43:55.780Z
+Stopped at: Completed 11-01-PLAN.md
 Resume file: None

@@ -151,7 +151,7 @@ Plans:
   3. Players joining are auto-assigned to teams so both teams stay as balanced as possible as the player count grows toward 8
   4. Each player sees their own name, team color, and ready status — and can see the same for every other player in the lobby
   5. The host sees a "Start Game" button that becomes enabled only when at least 2 players are connected
-**Plans:** 2 plans
+**Plans:** 1/2 plans executed
 Plans:
 - [ ] 11-01-PLAN.md — GameRoom Schema (PlayerSchema, GameState), room lifecycle, team assignment, unit tests
 - [ ] 11-02-PLAN.md — ColyseusClient lobby functions, NameInputScreen, WaitingRoomScreen, App routing, end-to-end verification
@@ -203,7 +203,7 @@ Phases execute in numeric order: 10 → 11 → 12 → 13 → 14
 | 6. React Control Surface | v1.2 | 1/2 | Complete | 2026-04-08 |
 | 7. React Overlay Parity | v1.2 | 0/0 | Complete | 2026-04-08 |
 | 10. Networking Infrastructure | 2/2 | Complete    | 2026-04-08 | — |
-| 11. Lobby & Players | v2.0 | 0/2 | Planning complete | — |
+| 11. Lobby & Players | 1/2 | In Progress|  | — |
 | 12. Server-Authoritative Simulation | v2.0 | 0/TBD | Not started | — |
 | 13. Game Phase Lifecycle & Draw Relay | v2.0 | 0/TBD | Not started | — |
 | 14. Win Condition & End-to-End | v2.0 | 0/TBD | Not started | — |
