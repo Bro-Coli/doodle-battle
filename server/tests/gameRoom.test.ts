@@ -174,7 +174,7 @@ describe('GameRoom.onLeave', () => {
     anyRoom.clients.push(client);
     room.onJoin(client as never, { name: 'Alice' });
     anyRoom.clients.splice(0, 1);
-    room.onLeave(client as never, false);
+    room.onLeave(client as never);
     expect(room.state.players.has('s1')).toBe(false);
   });
 
@@ -187,7 +187,7 @@ describe('GameRoom.onLeave', () => {
     room.onJoin(guest as never, { name: 'Guest' });
     // host leaves — remove from clients mock
     anyRoom.clients.splice(0, 1);
-    room.onLeave(host as never, false);
+    room.onLeave(host as never);
     expect(room.state.hostSessionId).toBe('guest');
   });
 
@@ -196,7 +196,7 @@ describe('GameRoom.onLeave', () => {
     anyRoom.clients.push(client);
     room.onJoin(client as never, { name: 'Alone' });
     anyRoom.clients.splice(0, 1);
-    room.onLeave(client as never, false);
+    room.onLeave(client as never);
     expect(room.state.hostSessionId).toBe('');
   });
 });
