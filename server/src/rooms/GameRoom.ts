@@ -616,6 +616,7 @@ export class GameRoom extends Room<{ state: GameState }> {
     this._entitiesDrawn.clear();
 
     // Start the draw phase
+    this.state.currentRound = 1;
     this.state.currentPhase = 'draw';
     this.state.phaseTimer = 60;
   }

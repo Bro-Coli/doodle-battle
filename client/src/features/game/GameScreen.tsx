@@ -612,8 +612,11 @@ export function GameScreen(): React.JSX.Element {
         <ResultsOverlay entityCounts={entityCounts} />
       )}
 
-      {/* Winner overlay — shown when game is finished */}
-      {currentPhase === 'finished' && winnerData && (
+      {/* Winner overlay — driven by client-local winnerData, NOT currentPhase.
+          When one player clicks "Back to Lobby", currentPhase resets to idle on
+          the shared Schema, but the other player should still see the winner
+          screen until they choose an action themselves. */}
+      {winnerData && (
         <WinnerOverlay
           winner={winnerData.winner}
           stats={winnerData.stats}
@@ -624,7 +627,7 @@ export function GameScreen(): React.JSX.Element {
       )}
 
       {/* Idle state — brief between phases */}
-      {currentPhase === 'idle' && (
+      {currentPhase === 'idle' && !winnerData && (
         <div className="pointer-events-none fixed inset-0 z-20 flex items-center justify-center">
           <div className="rounded-xl bg-black/70 px-8 py-4 text-lg font-bold text-white">
             Waiting for game to start...
