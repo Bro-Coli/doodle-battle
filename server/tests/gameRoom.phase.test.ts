@@ -288,10 +288,22 @@ describe('_advancePhase simulate -> results', () => {
 });
 
 describe('_advancePhase results -> draw', () => {
-  it('sets currentPhase to draw and phaseTimer to 60', () => {
+  it('sets currentPhase to draw and phaseTimer to 60 when both teams have entities', () => {
     const { room, anyRoom } = setupRoom();
     room.state.currentPhase = 'results';
     room.state.phaseTimer = 0;
+    room.state.currentRound = 1;
+    room.state.maxRounds = 5;
+
+    // Add entities on both teams so no win condition is triggered
+    const redSchema = new EntitySchema();
+    redSchema.entityId = 'r1';
+    redSchema.teamId = 'red';
+    room.state.entities.set('r1', redSchema);
+    const blueSchema = new EntitySchema();
+    blueSchema.entityId = 'b1';
+    blueSchema.teamId = 'blue';
+    room.state.entities.set('b1', blueSchema);
 
     anyRoom._advancePhase();
 

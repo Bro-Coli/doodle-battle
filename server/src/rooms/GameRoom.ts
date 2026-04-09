@@ -50,6 +50,9 @@ export class GameState extends Schema {
   @type('number') maxPlayers: number = 8;
   @type('string') currentPhase: string = 'idle';
   @type('number') phaseTimer: number = 0;
+  @type('number') currentRound: number = 0;
+  @type('number') maxRounds: number = 5;
+  @type('string') gameStatus: string = 'active';
 }
 
 // ---------------------------------------------------------------------------
@@ -72,11 +75,16 @@ export class GameRoom extends Room<{ state: GameState }> {
   _pendingProfiles: Map<string, { profile: EntityProfile; teamId: string }> = new Map();
   // Count of in-flight recognition calls — must reach 0 before phase can advance
   _pendingRecognitions: number = 0;
+  // Kill tracking: ownerSessionId -> kill count
+  _killCounts: Map<string, number> = new Map();
+  // Entities drawn tracking: ownerSessionId -> count drawn this game
+  _entitiesDrawn: Map<string, number> = new Map();
 
   onCreate(options: Record<string, unknown> = {}): void {
     const maxPlayers = (options.maxPlayers as number) ?? 8;
     this.maxClients = maxPlayers;
     this.state.maxPlayers = maxPlayers;
+    this.state.maxRounds = (options.maxRounds as number) ?? 5;
 
     // Override roomId with a 4-char human-readable code
     this.roomId = this._generate4CharCode();
@@ -94,6 +102,8 @@ export class GameRoom extends Room<{ state: GameState }> {
     this._dyingEntities = new Set();
     this._pendingProfiles = new Map();
     this._pendingRecognitions = 0;
+    this._killCounts = new Map();
+    this._entitiesDrawn = new Map();
 
     // 20Hz simulation tick
     this.setSimulationInterval((deltaTime) => this._tick(deltaTime), 50);
@@ -121,6 +131,10 @@ export class GameRoom extends Room<{ state: GameState }> {
     this.onMessage('submit_drawing', (client: Client, msg: unknown) => {
       void this._handleSubmitDrawing(client, msg);
     });
+
+    this.onMessage('return_to_lobby', (client: Client) => {
+      this._handleReturnToLobby(client);
+    });
   }
 
   onJoin(client: Client, options: Record<string, unknown> = {}): void {
@@ -138,7 +152,34 @@ export class GameRoom extends Room<{ state: GameState }> {
   }
 
   onLeave(client: Client, _code?: number): void {
-    this.state.players.delete(client.sessionId);
+    const activePhasesForForfeit = ['draw', 'simulate', 'results'];
+
+    // Forfeit detection: check before deleting player
+    if (activePhasesForForfeit.includes(this.state.currentPhase)) {
+      const leavingPlayer = this.state.players.get(client.sessionId);
+      if (leavingPlayer) {
+        const leavingTeam = leavingPlayer.team;
+        const otherTeam = leavingTeam === 'red' ? 'blue' : 'red';
+
+        // Delete the leaving player
+        this.state.players.delete(client.sessionId);
+
+        // Check if any remaining player is on the same team
+        let teamStillHasPlayers = false;
+        this.state.players.forEach((player) => {
+          if (player.team === leavingTeam) teamStillHasPlayers = true;
+        });
+
+        if (!teamStillHasPlayers) {
+          // Forfeit — other team wins
+          this._finishGame(otherTeam as 'red' | 'blue' | 'draw');
+        }
+      } else {
+        this.state.players.delete(client.sessionId);
+      }
+    } else {
+      this.state.players.delete(client.sessionId);
+    }
 
     // Re-assign host if the host left
     if (this.state.hostSessionId === client.sessionId) {
@@ -270,6 +311,7 @@ export class GameRoom extends Room<{ state: GameState }> {
           newSchema.name = originalSchema?.name ?? '';
           newSchema.archetype = 'spreading';
           newSchema.teamId = originalSchema?.teamId ?? '';
+          newSchema.ownerSessionId = originalSchema?.ownerSessionId ?? '';
 
           this.state.entities.set(newEntityId, newSchema);
           this._entityStates.set(newEntityId, newCopyState);
@@ -347,6 +389,9 @@ export class GameRoom extends Room<{ state: GameState }> {
         this.state.entities.set(entityId, schema);
         this._entityStates.set(entityId, entityState);
         this._entityProfiles.set(entityId, { ...profile });
+
+        // Track entities drawn per player
+        this._entitiesDrawn.set(sessionId, (this._entitiesDrawn.get(sessionId) ?? 0) + 1);
       }
 
       this._pendingProfiles.clear();
@@ -362,6 +407,17 @@ export class GameRoom extends Room<{ state: GameState }> {
       this.state.players.forEach((player) => {
         player.hasSubmittedDrawing = false;
       });
+
+      // Increment round counter
+      this.state.currentRound++;
+
+      // Check win condition before transitioning
+      const winner = this._computeWinner();
+      if (winner !== null) {
+        this._finishGame(winner);
+        return;
+      }
+
       this.state.currentPhase = 'draw';
       this.state.phaseTimer = 60;
     }
@@ -426,6 +482,13 @@ export class GameRoom extends Room<{ state: GameState }> {
     if (targetSchema.hp <= 0) {
       this._dyingEntities.add(targetId);
       toRemove.push(targetId);
+
+      // Track kill for attacker's owner
+      const attackerSchema = this.state.entities.get(attackerId);
+      if (attackerSchema?.ownerSessionId) {
+        const ownerId = attackerSchema.ownerSessionId;
+        this._killCounts.set(ownerId, (this._killCounts.get(ownerId) ?? 0) + 1);
+      }
     }
   }
 
@@ -515,6 +578,23 @@ export class GameRoom extends Room<{ state: GameState }> {
     if (player) {
       player.ready = !player.ready;
     }
+
+    // Auto-start: fire if all players ready, >= 2 connected, and in idle phase
+    if (
+      this.state.currentPhase === 'idle' &&
+      (this.clients as unknown[]).length >= 2 &&
+      this._allPlayersReady()
+    ) {
+      this._handleStartGame({ sessionId: this.state.hostSessionId });
+    }
+  }
+
+  _allPlayersReady(): boolean {
+    let allReady = true;
+    this.state.players.forEach((player) => {
+      if (!player.ready) allReady = false;
+    });
+    return allReady;
   }
 
   _handleStartGame(client: { sessionId: string }): void {
@@ -530,6 +610,10 @@ export class GameRoom extends Room<{ state: GameState }> {
 
     this.broadcast('game_starting', { startedBy: client.sessionId });
     this.lock();
+
+    // Reset kill/drawn tracking for clean game start
+    this._killCounts.clear();
+    this._entitiesDrawn.clear();
 
     // Start the draw phase
     this.state.currentPhase = 'draw';
@@ -574,5 +658,106 @@ export class GameRoom extends Room<{ state: GameState }> {
         this._nameIdMap.set(profile.name, String(id++));
       }
     }
+  }
+
+  // ---------------------------------------------------------------------------
+  // Win condition
+  // ---------------------------------------------------------------------------
+
+  /**
+   * Compute the winner based on current entity counts and round state.
+   * Returns 'red', 'blue', 'draw', or null (game still ongoing).
+   */
+  _computeWinner(): 'red' | 'blue' | 'draw' | null {
+    let red = 0;
+    let blue = 0;
+    this.state.entities.forEach((entity) => {
+      if (entity.teamId === 'red') red++;
+      else if (entity.teamId === 'blue') blue++;
+    });
+
+    // Elimination: one or both teams at 0
+    if (red === 0 && blue === 0) return 'draw';
+    if (red === 0) return 'blue';
+    if (blue === 0) return 'red';
+
+    // Round limit reached
+    if (this.state.currentRound >= this.state.maxRounds) {
+      if (red > blue) return 'red';
+      if (blue > red) return 'blue';
+      return 'draw';
+    }
+
+    // Game still ongoing
+    return null;
+  }
+
+  /**
+   * Build per-player stats for the game_finished broadcast.
+   */
+  _buildPlayerStats(): Record<string, { name: string; team: string; entitiesDrawn: number; entitiesSurviving: number; kills: number }> {
+    const stats: Record<string, { name: string; team: string; entitiesDrawn: number; entitiesSurviving: number; kills: number }> = {};
+
+    // Count surviving entities per owner
+    const surviving = new Map<string, number>();
+    this.state.entities.forEach((entity) => {
+      if (entity.ownerSessionId) {
+        surviving.set(entity.ownerSessionId, (surviving.get(entity.ownerSessionId) ?? 0) + 1);
+      }
+    });
+
+    this.state.players.forEach((player, sessionId) => {
+      stats[sessionId] = {
+        name: player.name,
+        team: player.team,
+        entitiesDrawn: this._entitiesDrawn.get(sessionId) ?? 0,
+        entitiesSurviving: surviving.get(sessionId) ?? 0,
+        kills: this._killCounts.get(sessionId) ?? 0,
+      };
+    });
+
+    return stats;
+  }
+
+  /**
+   * Finish the game: set state to finished and broadcast game_finished.
+   */
+  _finishGame(winner: 'red' | 'blue' | 'draw'): void {
+    this.state.currentPhase = 'finished';
+    this.state.gameStatus = 'finished';
+    this.state.phaseTimer = 0;
+
+    const stats = this._buildPlayerStats();
+    this.broadcast('game_finished', { winner, stats });
+  }
+
+  /**
+   * Return to lobby: reset room state for a rematch.
+   * Guard: only valid when currentPhase === 'finished'.
+   */
+  _handleReturnToLobby(_client: { sessionId: string }): void {
+    if (this.state.currentPhase !== 'finished') return;
+
+    // Reset game state
+    this.state.currentPhase = 'idle';
+    this.state.gameStatus = 'active';
+    this.state.currentRound = 0;
+    this.state.phaseTimer = 0;
+
+    // Reset all player flags
+    this.state.players.forEach((player) => {
+      player.ready = false;
+      player.hasSubmittedDrawing = false;
+    });
+
+    // Clear all entities
+    this._handleRemoveAllEntities();
+
+    // Clear tracking maps
+    this._killCounts.clear();
+    this._entitiesDrawn.clear();
+
+    // Unlock room for new players
+    this.unlock();
   }
 }
