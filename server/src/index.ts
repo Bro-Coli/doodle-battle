@@ -45,7 +45,10 @@ app.post('/matchmake/:method/:roomName', async (req, res) => {
 });
 
 const gameServer = new Server({
-  transport: new WebSocketTransport({ server: httpServer }),
+  transport: new WebSocketTransport({
+    server: httpServer,
+    maxPayload: 2 * 1024 * 1024, // 2MB — drawing PNGs can be 100KB-1MB
+  }),
 });
 
 gameServer.define('game_room', GameRoom);
