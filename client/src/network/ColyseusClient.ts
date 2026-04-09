@@ -3,6 +3,7 @@ import { Client, Room } from '@colyseus/sdk';
 const COLYSEUS_URL = 'http://localhost:3001';
 
 let client: Client | null = null;
+let activeRoom: Room | null = null;
 
 export function getClient(): Client {
   if (!client) {
@@ -11,30 +12,28 @@ export function getClient(): Client {
   return client;
 }
 
-export async function connectToRoom(roomName: string = 'game_room'): Promise<Room> {
-  const c = getClient();
-  const room = await c.joinOrCreate(roomName);
+export function getActiveRoom(): Room | null {
+  return activeRoom;
+}
+
+export async function createRoom(options: {
+  name: string;
+  maxPlayers?: number;
+  isPrivate?: boolean;
+}): Promise<Room> {
+  const room = await getClient().create('game_room', options);
+  activeRoom = room;
   return room;
 }
 
-export async function verifySync(): Promise<void> {
-  const room = await connectToRoom();
-  console.log('[Colyseus] Connected to room:', room.id);
-  console.log('[Colyseus] Initial state:', JSON.stringify(room.state));
-
-  // Try multiple listener approaches for 0.17 compatibility
-  room.onStateChange((state: any) => {
-    console.log('[Colyseus] state changed — tick:', state?.tick);
-  });
-
-  // Auto-leave after 10 seconds
-  setTimeout(() => {
-    room.leave();
-    console.log('[Colyseus] Left room after verification');
-  }, 10000);
+export async function joinByCode(code: string, name: string): Promise<Room> {
+  const room = await getClient().joinById(code.toUpperCase(), { name });
+  activeRoom = room;
+  return room;
 }
 
-// Temporary — for Phase 10 verification only
-if (typeof window !== 'undefined') {
-  (window as any).__verifyColyseusSync = verifySync;
+export async function quickPlay(name: string): Promise<Room> {
+  const room = await getClient().joinOrCreate('game_room', { name, isPrivate: false });
+  activeRoom = room;
+  return room;
 }

@@ -1,3 +1,4 @@
+import { navigate } from '../../utils/navigate';
 import mainBackground from './assets/main-bg.png';
 import mainTitle from './assets/main-title.png';
 import mainBtn1 from './assets/main-btn-1.png';
@@ -5,7 +6,7 @@ import mainBtn2 from './assets/main-btn-2.png';
 import mainBtn3 from './assets/main-btn-3.png';
 
 type LobbyAction = {
-  action?: () => void;
+  action: () => void;
   backgroundImage: string;
   description: string;
   glowColor: string;
@@ -21,7 +22,7 @@ const lobbyActions: LobbyAction[] = [
     description: 'Join a game automatically!',
     backgroundImage: mainBtn1,
     glowColor: 'rgba(255, 202, 73, 0.78)',
-    action: () => navigate('/game'),
+    action: () => navigate('/lobby', '?flow=quick'),
     icon: (
       <svg viewBox="0 0 64 64" className="h-10 w-10 sm:h-9 sm:w-9">
         <path
@@ -40,6 +41,7 @@ const lobbyActions: LobbyAction[] = [
     description: 'Make a room and invite friends',
     backgroundImage: mainBtn2,
     glowColor: 'rgba(255, 118, 207, 0.78)',
+    action: () => navigate('/lobby', '?flow=create'),
     icon: (
       <svg viewBox="0 0 64 64" className="h-10 w-10 sm:h-9 sm:w-9">
         <path d="M32 12v40M12 32h40" stroke="#fff8ef" strokeWidth="9" strokeLinecap="round" />
@@ -53,6 +55,7 @@ const lobbyActions: LobbyAction[] = [
     description: 'Enter a code or browse rooms',
     backgroundImage: mainBtn3,
     glowColor: 'rgba(90, 237, 255, 0.78)',
+    action: () => navigate('/lobby', '?flow=join'),
     icon: (
       <svg viewBox="0 0 64 64" className="h-10 w-10 sm:h-9 sm:w-9">
         <circle cx="28" cy="28" r="16" fill="none" stroke="#fff8ef" strokeWidth="8" />
@@ -63,12 +66,6 @@ const lobbyActions: LobbyAction[] = [
     ),
   },
 ];
-
-function navigate(pathname: string): void {
-  if (window.location.pathname === pathname) return;
-  window.history.pushState({}, '', pathname);
-  window.dispatchEvent(new PopStateEvent('popstate'));
-}
 
 export function LobbyScreen(): React.JSX.Element {
   return (
@@ -88,8 +85,7 @@ export function LobbyScreen(): React.JSX.Element {
               key={action.id}
               type="button"
               onClick={action.action}
-              disabled={!action.action}
-              className="group relative flex aspect-square w-full min-w-0 cursor-pointer flex-col items-center justify-center p-[clamp(14px,2vw,24px)] text-center transition-transform duration-100 ease-linear hover:scale-[1.035] active:scale-[0.97] disabled:cursor-default disabled:opacity-90 disabled:hover:scale-100 disabled:active:scale-100"
+              className="group relative flex aspect-square w-full min-w-0 cursor-pointer flex-col items-center justify-center p-[clamp(14px,2vw,24px)] text-center transition-transform duration-100 ease-linear hover:scale-[1.035] active:scale-[0.97]"
               aria-label={action.title}
             >
               <span className="pointer-events-none absolute bottom-[4%] left-1/2 z-0 h-[14%] w-[78%] -translate-x-1/2 rounded-full bg-black/42 blur-2xl" />
