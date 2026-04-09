@@ -43,7 +43,7 @@ export function ActionButtons({
   }`;
 
   return (
-    <div className="flex flex-wrap items-center justify-center gap-2 md:gap-3">
+    <div className="flex flex-wrap items-center justify-center gap-3 md:gap-2">
       <button
         type="button"
         onClick={onSubmit}
