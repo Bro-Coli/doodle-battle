@@ -191,8 +191,10 @@ function SimulationOverlay({
 
 function ResultsOverlay({
   entityCounts,
+  isFinalRound,
 }: {
   entityCounts: { red: number; blue: number };
+  isFinalRound: boolean;
 }): React.JSX.Element {
   return (
     <div className="pointer-events-none fixed inset-0 z-20 flex items-center justify-center">
@@ -213,7 +215,9 @@ function ResultsOverlay({
             </p>
           </div>
         </div>
-        <p className="mt-4 text-sm text-white/50">Next round starting soon...</p>
+        <p className="mt-4 text-sm text-white/50">
+          {isFinalRound ? 'Final results incoming...' : 'Next round starting soon...'}
+        </p>
       </div>
     </div>
   );
@@ -609,7 +613,7 @@ export function GameScreen(): React.JSX.Element {
       )}
 
       {currentPhase === 'results' && (
-        <ResultsOverlay entityCounts={entityCounts} />
+        <ResultsOverlay entityCounts={entityCounts} isFinalRound={currentRound + 1 >= maxRounds} />
       )}
 
       {/* Winner overlay — driven by client-local winnerData, NOT currentPhase.
