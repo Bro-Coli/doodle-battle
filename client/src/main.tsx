@@ -8,7 +8,7 @@ import { initApi } from './shared/api/api.config';
 
 import './app/style.css';
 
-// Side-effect import: registers window.__verifyColyseusSync for Phase 10 verification
+// Eagerly initialize Colyseus client singleton
 import './network/ColyseusClient';
 
 /* --------------------------------------------------

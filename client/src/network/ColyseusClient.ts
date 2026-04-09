@@ -1,6 +1,6 @@
 import { Client, Room } from '@colyseus/sdk';
 
-const COLYSEUS_URL = 'http://localhost:3001';
+const COLYSEUS_URL = import.meta.env.VITE_COLYSEUS_URL ?? 'http://localhost:3001';
 
 let client: Client | null = null;
 let activeRoom: Room | null = null;

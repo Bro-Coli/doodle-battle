@@ -1,7 +1,7 @@
 import type { Room } from '@colyseus/sdk';
 import { Assets, Texture } from 'pixi.js';
 import type { WorldStage } from './WorldStage';
-import type { Archetype, EntityProfile, InteractionMatrix } from '@crayon-world/shared/src/types';
+import type { Archetype, EntityProfile } from '@crayon-world/shared/src/types';
 
 /**
  * Lightweight shape matching EntitySchema fields received via onStateChange.
@@ -154,39 +154,6 @@ export class MultiplayerWorldBridge {
     this._entityTextures.clear();
     this._stateChangeCallback = null;
     this._room = null;
-  }
-
-  /**
-   * Send a spawn_entity message to the server.
-   * Called by game flow after recognition completes — the server creates the EntitySchema
-   * and broadcasts it to all clients via Schema patches.
-   */
-  sendSpawnEntity(
-    entityId: string,
-    profile: EntityProfile,
-    x: number,
-    y: number,
-    teamId: string,
-  ): void {
-    if (!this._room) return;
-    this._room.send('spawn_entity', {
-      entityId,
-      name: profile.name,
-      archetype: profile.archetype,
-      speed: profile.speed,
-      x,
-      y,
-      teamId,
-    });
-  }
-
-  /**
-   * Send the AI-generated interaction matrix to the server.
-   * The server uses this to drive fight resolution and entity behavior steering.
-   */
-  sendInteractionMatrix(matrix: InteractionMatrix): void {
-    if (!this._room) return;
-    this._room.send('interaction_matrix', matrix);
   }
 
   /**
