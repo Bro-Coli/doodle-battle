@@ -1,5 +1,21 @@
 import { cn } from '@/shared/lib/cn';
 import { Icon, StrokeShadowText, type IconName } from '@/ui';
+import lobbyButtonClickPrimary from '../assets/lobby-button-click-primary.wav';
+
+let lobbyClickAudio: HTMLAudioElement | null = null;
+
+function playLobbyClickSound(): void {
+  if (typeof Audio === 'undefined') return;
+  if (!lobbyClickAudio) {
+    lobbyClickAudio = new Audio(lobbyButtonClickPrimary);
+    lobbyClickAudio.preload = 'auto';
+  }
+
+  lobbyClickAudio.currentTime = 0;
+  void lobbyClickAudio.play().catch(() => {
+    // Ignore autoplay/promise rejection noise.
+  });
+}
 
 export type LobbyAction = {
   action?: () => void;
@@ -18,10 +34,15 @@ type LobbyActionButtonProps = {
 };
 
 export function LobbyActionButton({ action }: LobbyActionButtonProps) {
+  const handleClick = () => {
+    playLobbyClickSound();
+    action.action?.();
+  };
+
   return (
     <button
       type="button"
-      onClick={action.action}
+      onClick={handleClick}
       disabled={!action.action}
       className={cn(
         'flex-center group relative h-120 w-120 flex-col text-center',
