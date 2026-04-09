@@ -51,14 +51,31 @@ export class MultiplayerWorldBridge {
     this._room = room;
     this._worldStage.multiplayerMode = true;
 
-    // Listen for entity texture broadcasts — server sends drawing PNGs as base64
+    // Listen for entity texture broadcasts — server sends drawing PNGs as base64.
+    // The exported PNGs have a white background (for Claude API), so we strip it
+    // to transparent by clearing white pixels before creating the texture.
     room.onMessage('entity_textures', (textures: Record<string, string>) => {
       for (const [entityId, dataUrl] of Object.entries(textures)) {
         const img = new Image();
         img.onload = () => {
-          const texture = Texture.from(img);
+          // Draw to canvas and strip white background
+          const canvas = document.createElement('canvas');
+          canvas.width = img.width;
+          canvas.height = img.height;
+          const ctx = canvas.getContext('2d')!;
+          ctx.drawImage(img, 0, 0);
+          const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+          const data = imageData.data;
+          for (let i = 0; i < data.length; i += 4) {
+            // If pixel is near-white, make it fully transparent
+            if (data[i] > 240 && data[i + 1] > 240 && data[i + 2] > 240) {
+              data[i + 3] = 0;
+            }
+          }
+          ctx.putImageData(imageData, 0, 0);
+
+          const texture = Texture.from(canvas);
           this._entityTextures.set(entityId, texture);
-          // If the entity was already spawned with a placeholder, update its texture
           this._worldStage.updateEntityTexture(entityId, texture);
         };
         img.src = dataUrl;
