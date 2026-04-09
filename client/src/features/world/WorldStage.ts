@@ -61,6 +61,10 @@ export class WorldStage {
   private readonly _entityIdByContainer = new Map<Container, string>();
   private _multiplayerMode = false;
 
+  // Drawing texture for the local player's submitted entity
+  private _capturedDrawingTexture: Texture | null = null;
+  private _mySessionId = '';
+
   constructor(app: Application) {
     this._app = app;
     this._drawingRoot = new Container();
@@ -132,6 +136,16 @@ export class WorldStage {
    */
   set multiplayerMode(enabled: boolean) {
     this._multiplayerMode = enabled;
+  }
+
+  /** Store the local player's captured drawing texture for use when their entity spawns. */
+  set capturedDrawingTexture(t: Texture | null) {
+    this._capturedDrawingTexture = t;
+  }
+
+  /** Set the local player's session ID to identify which spawned entity belongs to them. */
+  set mySessionId(id: string) {
+    this._mySessionId = id;
   }
 
   /** Toggle between draw mode and world mode. */
@@ -479,15 +493,29 @@ export class WorldStage {
 
   /**
    * Spawn an entity driven by a server Schema record.
-   * Uses a 1x1 white placeholder texture (entity textures are deferred to Phase 13).
+   * Uses a 1x1 white placeholder texture unless an explicit texture is provided.
    * Stores the container in UUID-keyed maps so applyPositions/removeEntityById can look it up.
    *
    * Does NOT initialize EntityState — server owns simulation.
+   *
+   * @param entityId - UUID from server Schema
+   * @param profile - Entity profile from recognition
+   * @param x - Initial x position in world pixels
+   * @param y - Initial y position in world pixels
+   * @param teamId - Optional team identifier for color tinting ('red' | 'blue')
+   * @param texture - Optional explicit texture; falls back to Texture.WHITE placeholder
    */
-  spawnFromSchema(entityId: string, profile: EntityProfile, x: number, y: number): void {
-    // 1x1 white placeholder texture
-    const texture = Texture.WHITE;
-    const { entity, label, spriteHeight } = buildEntityContainer(texture, profile, this._app);
+  spawnFromSchema(
+    entityId: string,
+    profile: EntityProfile,
+    x: number,
+    y: number,
+    teamId?: string,
+    texture?: Texture,
+  ): void {
+    // Use provided texture or 1x1 white placeholder
+    const tex = texture ?? Texture.WHITE;
+    const { entity, label, spriteHeight } = buildEntityContainer(tex, profile, this._app, teamId);
 
     entity.x = x;
     entity.y = y;

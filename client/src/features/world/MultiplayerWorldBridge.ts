@@ -78,7 +78,7 @@ export class MultiplayerWorldBridge {
             role: '',
             speed: 0,
           };
-          this._worldStage.spawnFromSchema(entityId, profile, schema.x, schema.y);
+          this._worldStage.spawnFromSchema(entityId, profile, schema.x, schema.y, schema.teamId);
           this._knownEntityIds.add(entityId);
         }
       }
@@ -146,5 +146,16 @@ export class MultiplayerWorldBridge {
   sendInteractionMatrix(matrix: InteractionMatrix): void {
     if (!this._room) return;
     this._room.send('interaction_matrix', matrix);
+  }
+
+  /**
+   * Send a drawing submission to the server for AI recognition and entity spawning.
+   * The server will recognize the drawing, create an EntitySchema, and broadcast it.
+   *
+   * @param imageDataUrl - PNG data URL of the player's drawing
+   */
+  submitDrawing(imageDataUrl: string): void {
+    if (!this._room) return;
+    this._room.send('submit_drawing', { imageDataUrl });
   }
 }

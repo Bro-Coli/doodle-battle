@@ -9,6 +9,18 @@ export interface EntityBuildResult {
   spriteHeight: number;
 }
 
+/** Hex tint values applied to entity sprites by team. */
+export const TEAM_TINTS: Record<string, number> = {
+  red: 0xff6666,
+  blue: 0x6699ff,
+};
+
+/** CSS color values applied to entity label text by team. */
+export const TEAM_LABEL_COLORS: Record<string, string> = {
+  red: '#ff6666',
+  blue: '#6699ff',
+};
+
 /**
  * Build an entity Container and a separate label Container from a texture and profile.
  *
@@ -24,12 +36,14 @@ export interface EntityBuildResult {
  * @param texture - Transparent texture from captureEntityTexture
  * @param profile - Entity identity from the recognition pipeline
  * @param app - The PixiJS Application (needed for ticker)
+ * @param teamId - Optional team identifier ('red' | 'blue') for color tinting
  * @returns Entity container, label container, and sprite height for positioning
  */
 export function buildEntityContainer(
   texture: Texture,
   profile: EntityProfile,
   app: Application,
+  teamId?: string,
 ): EntityBuildResult {
   const entity = new Container();
   entity.eventMode = 'static';
@@ -58,6 +72,11 @@ export function buildEntityContainer(
   const finalScale = minDim < 30 ? scaleFactor * (30 / minDim) : scaleFactor;
   sprite.scale.set(finalScale);
 
+  // Apply team tint if provided
+  if (teamId && TEAM_TINTS[teamId] !== undefined) {
+    sprite.tint = TEAM_TINTS[teamId];
+  }
+
   // Drop shadow filter — pixi-filters v6 uses `offset` (PointData), not `distance`
   sprite.filters = [new DropShadowFilter({ blur: 3, offset: { x: 4, y: 6 }, alpha: 0.35 })];
 
@@ -65,11 +84,12 @@ export function buildEntityContainer(
 
   // Floating name label — separate container, not a child of entity
   const label = new Container();
+  const labelFill = (teamId && TEAM_LABEL_COLORS[teamId]) ? TEAM_LABEL_COLORS[teamId] : '#333333';
   const labelText = new Text({
     text: profile.name,
     style: new TextStyle({
       fontSize: 14,
-      fill: '#333333',
+      fill: labelFill,
       fontWeight: 'bold',
     }),
     resolution: window.devicePixelRatio || 2,
