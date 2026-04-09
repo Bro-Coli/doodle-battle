@@ -1,0 +1,452 @@
+import { useEffect, useRef, useState } from 'react';
+import { Application, Renderer } from 'pixi.js';
+import { DrawingCanvas } from '../drawing/DrawingCanvas';
+import { WorldStage } from '../world/WorldStage';
+import { MultiplayerWorldBridge } from '../world/MultiplayerWorldBridge';
+import { exportPng } from '../drawing/exportPng';
+import { getActiveRoom } from '../../network/ColyseusClient';
+import { navigate } from '../../utils/navigate';
+
+// ─── Snapshot types ───────────────────────────────────────────────────────────
+
+interface PlayerSnapshot {
+  name: string;
+  team: string;
+  hasSubmittedDrawing: boolean;
+}
+
+interface EntitySnapshot {
+  teamId: string;
+}
+
+interface GameSnapshot {
+  currentPhase: string;
+  phaseTimer: number;
+  players: Map<string, PlayerSnapshot>;
+  entityCounts: { red: number; blue: number };
+}
+
+// ─── Helper sub-components ────────────────────────────────────────────────────
+
+function TimerBanner({ seconds }: { seconds: number }): React.JSX.Element {
+  const display = Math.max(0, Math.ceil(seconds));
+  return (
+    <div className="fixed left-1/2 top-4 z-20 -translate-x-1/2 rounded-xl bg-black/75 px-6 py-2 text-center font-bold text-2xl text-white">
+      {display}s
+    </div>
+  );
+}
+
+function DrawPhaseOverlay({
+  phaseTimer,
+  onSubmit,
+}: {
+  phaseTimer: number;
+  onSubmit: () => void;
+}): React.JSX.Element {
+  return (
+    <>
+      <TimerBanner seconds={phaseTimer} />
+      <div className="fixed bottom-8 left-1/2 z-20 -translate-x-1/2">
+        <button
+          type="button"
+          onClick={onSubmit}
+          className="rounded-2xl bg-green-500 px-10 py-4 text-xl font-black uppercase tracking-wide text-white shadow-lg transition hover:bg-green-400 active:scale-95"
+        >
+          Submit Drawing
+        </button>
+      </div>
+    </>
+  );
+}
+
+function WaitingOverlay({
+  capturedImageUrl,
+  players,
+  myTeam,
+}: {
+  capturedImageUrl: string | null;
+  players: Map<string, PlayerSnapshot>;
+  myTeam: string;
+}): React.JSX.Element {
+  const teammates: PlayerSnapshot[] = [];
+  const opponents: PlayerSnapshot[] = [];
+
+  players.forEach((p) => {
+    if (p.team === myTeam) {
+      teammates.push(p);
+    } else {
+      opponents.push(p);
+    }
+  });
+
+  return (
+    <div className="pointer-events-none fixed inset-0 z-20 flex flex-col items-center">
+      {/* Header */}
+      <div className="mt-6 rounded-xl bg-black/75 px-6 py-2 text-lg font-bold text-white">
+        Waiting for players...
+      </div>
+
+      {/* Center: own drawing */}
+      <div className="mt-4 flex flex-1 items-center justify-center">
+        {capturedImageUrl ? (
+          <div className="rounded-xl border-4 border-white/30 bg-white p-2 shadow-2xl">
+            <img
+              src={capturedImageUrl}
+              alt="Your drawing"
+              className="max-h-64 max-w-xs object-contain"
+            />
+          </div>
+        ) : (
+          <div className="rounded-xl bg-white/10 px-8 py-6 text-white/60">Drawing submitted</div>
+        )}
+      </div>
+
+      {/* Player statuses */}
+      <div className="mb-8 flex gap-6">
+        {/* Teammates */}
+        <div className="rounded-xl bg-red-900/60 px-4 py-3">
+          <p className="mb-2 text-xs font-black uppercase tracking-widest text-red-300">
+            {myTeam === 'red' ? 'Your Team (Red)' : 'Red Team'}
+          </p>
+          <ul className="flex flex-col gap-1">
+            {teammates.map((p) => (
+              <li key={p.name} className="flex items-center gap-2 text-sm text-white">
+                <span>{p.hasSubmittedDrawing ? '✓' : '○'}</span>
+                <span>{p.name}</span>
+              </li>
+            ))}
+            {teammates.length === 0 && (
+              <li className="text-xs text-white/40">No teammates</li>
+            )}
+          </ul>
+        </div>
+
+        {/* Opponents */}
+        <div className="rounded-xl bg-blue-900/60 px-4 py-3">
+          <p className="mb-2 text-xs font-black uppercase tracking-widest text-blue-300">
+            Opponents
+          </p>
+          <ul className="flex flex-col gap-1">
+            {opponents.map((p) => (
+              <li key={p.name} className="flex items-center gap-2 text-sm text-white">
+                <span>{p.hasSubmittedDrawing ? '✓' : '○'}</span>
+                <span>{p.name}</span>
+              </li>
+            ))}
+            {opponents.length === 0 && (
+              <li className="text-xs text-white/40">No opponents</li>
+            )}
+          </ul>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function SimulationOverlay({
+  phaseTimer,
+  entityCounts,
+}: {
+  phaseTimer: number;
+  entityCounts: { red: number; blue: number };
+}): React.JSX.Element {
+  return (
+    <>
+      <TimerBanner seconds={phaseTimer} />
+      <div className="fixed left-1/2 top-16 z-20 -translate-x-1/2 rounded-xl bg-black/70 px-6 py-2 text-sm font-bold text-white">
+        <span className="text-red-400">Red: {entityCounts.red}</span>
+        <span className="mx-3 text-white/40">|</span>
+        <span className="text-blue-400">Blue: {entityCounts.blue}</span>
+      </div>
+    </>
+  );
+}
+
+function ResultsOverlay({
+  entityCounts,
+}: {
+  entityCounts: { red: number; blue: number };
+}): React.JSX.Element {
+  return (
+    <div className="pointer-events-none fixed inset-0 z-20 flex items-center justify-center">
+      <div className="rounded-2xl bg-black/85 px-10 py-8 text-center shadow-2xl">
+        <h2 className="mb-4 text-2xl font-black text-white">Round Results</h2>
+        <div className="flex gap-8">
+          <div>
+            <p className="text-4xl font-black text-red-400">{entityCounts.red}</p>
+            <p className="mt-1 text-sm font-bold uppercase tracking-widest text-red-300">
+              Red Surviving
+            </p>
+          </div>
+          <div className="self-center text-white/30 text-2xl">vs</div>
+          <div>
+            <p className="text-4xl font-black text-blue-400">{entityCounts.blue}</p>
+            <p className="mt-1 text-sm font-bold uppercase tracking-widest text-blue-300">
+              Blue Surviving
+            </p>
+          </div>
+        </div>
+        <p className="mt-4 text-sm text-white/50">Next round starting soon...</p>
+      </div>
+    </div>
+  );
+}
+
+// ─── Main GameScreen ──────────────────────────────────────────────────────────
+
+export function GameScreen(): React.JSX.Element {
+  const room = getActiveRoom();
+
+  const [snapshot, setSnapshot] = useState<GameSnapshot>({
+    currentPhase: 'idle',
+    phaseTimer: 0,
+    players: new Map(),
+    entityCounts: { red: 0, blue: 0 },
+  });
+  const [hasSubmitted, setHasSubmitted] = useState(false);
+  const [capturedImageUrl, setCapturedImageUrl] = useState<string | null>(null);
+
+  // Refs for PixiJS objects (stable across renders)
+  const appRef = useRef<Application<Renderer> | null>(null);
+  const drawingCanvasRef = useRef<DrawingCanvas | null>(null);
+  const worldStageRef = useRef<WorldStage | null>(null);
+  const bridgeRef = useRef<MultiplayerWorldBridge | null>(null);
+
+  // Snapshot ref for imperative access from callbacks
+  const snapshotRef = useRef<GameSnapshot>(snapshot);
+  snapshotRef.current = snapshot;
+
+  const hasSubmittedRef = useRef(hasSubmitted);
+  hasSubmittedRef.current = hasSubmitted;
+
+  // Track previous phase for transition logic
+  const prevPhaseRef = useRef<string>('idle');
+
+  // Track my team (derived from room state once, stable)
+  const myTeamRef = useRef<string>('red');
+
+  useEffect(() => {
+    if (!room) {
+      navigate('/');
+      return;
+    }
+
+    // ─── PixiJS initialization ────────────────────────────────────────────────
+
+    const host = document.getElementById('game-pixi-host');
+    if (!host) return;
+
+    let cleanupPixi: (() => void) | undefined;
+
+    void (async () => {
+      const app = new Application();
+      await app.init({
+        resizeTo: window,
+        autoDensity: true,
+        background: '#1a1035',
+      });
+      app.canvas.className = 'block h-screen w-screen';
+      host.appendChild(app.canvas);
+      appRef.current = app;
+
+      const worldStage = new WorldStage(app);
+      worldStageRef.current = worldStage;
+
+      const drawingCanvas = new DrawingCanvas(app);
+      drawingCanvasRef.current = drawingCanvas;
+      worldStage.drawingRoot.addChild(drawingCanvas.region);
+
+      // Set up bridge
+      const bridge = new MultiplayerWorldBridge(worldStage);
+      bridgeRef.current = bridge;
+      bridge.connect(room);
+
+      // Store our session ID on worldStage so it can identify our entity
+      if (room) worldStage.mySessionId = room.sessionId;
+
+      // Start in draw mode — worldRoot hidden, drawingRoot visible
+      // WorldStage starts with worldRoot hidden by default
+
+      cleanupPixi = () => {
+        bridge.disconnect();
+        app.destroy(true, { children: true });
+        host.replaceChildren();
+        appRef.current = null;
+        drawingCanvasRef.current = null;
+        worldStageRef.current = null;
+        bridgeRef.current = null;
+      };
+    })();
+
+    // ─── Colyseus state sync ──────────────────────────────────────────────────
+    // Capture room as non-null for use in closures (already guarded above)
+    const activeRoom = room;
+
+    function takeSnapshot(): void {
+      const state = activeRoom.state as {
+        currentPhase?: string;
+        phaseTimer?: number;
+        players?: Map<string, { name: string; team: string; hasSubmittedDrawing: boolean }>;
+        entities?: Map<string, { teamId: string }>;
+      };
+
+      const players = new Map<string, PlayerSnapshot>();
+      if (state.players) {
+        state.players.forEach(
+          (p: { name: string; team: string; hasSubmittedDrawing: boolean }, sessionId: string) => {
+            players.set(sessionId, {
+              name: p.name,
+              team: p.team,
+              hasSubmittedDrawing: p.hasSubmittedDrawing ?? false,
+            });
+          },
+        );
+      }
+
+      // Derive my team
+      const myPlayer = players.get(activeRoom.sessionId);
+      if (myPlayer) {
+        myTeamRef.current = myPlayer.team;
+      }
+
+      // Count entities by team
+      const entityCounts = { red: 0, blue: 0 };
+      if (state.entities) {
+        state.entities.forEach((e: { teamId: string }) => {
+          if (e.teamId === 'red') entityCounts.red++;
+          else if (e.teamId === 'blue') entityCounts.blue++;
+        });
+      }
+
+      const currentPhase = state.currentPhase ?? 'idle';
+      const phaseTimer = state.phaseTimer ?? 0;
+
+      // Handle phase transitions
+      const prevPhase = prevPhaseRef.current;
+      if (prevPhase !== currentPhase) {
+        prevPhaseRef.current = currentPhase;
+
+        if (currentPhase === 'draw') {
+          // Reset submission state for new round
+          setHasSubmitted(false);
+          hasSubmittedRef.current = false;
+          setCapturedImageUrl(null);
+
+          // Show drawing root, hide world root
+          const stage = worldStageRef.current;
+          if (stage) {
+            if (stage.inWorld) stage.toggle();
+            drawingCanvasRef.current?.clear();
+          }
+        } else if (currentPhase === 'simulate' || currentPhase === 'results') {
+          // Show world root, hide drawing root
+          const stage = worldStageRef.current;
+          if (stage && !stage.inWorld) stage.toggle();
+        }
+      }
+
+      setSnapshot({ currentPhase, phaseTimer, players, entityCounts });
+    }
+
+    // Take initial snapshot
+    takeSnapshot();
+
+    const stateCallback = () => {
+      takeSnapshot();
+    };
+    room.onStateChange(stateCallback);
+
+    return () => {
+      room.onStateChange.remove(stateCallback);
+      cleanupPixi?.();
+    };
+  }, [room]);
+
+  // Auto-submit when timer hits 0 and player hasn't submitted yet
+  useEffect(() => {
+    if (
+      snapshot.currentPhase === 'draw' &&
+      snapshot.phaseTimer <= 0 &&
+      !hasSubmitted
+    ) {
+      handleSubmit();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [snapshot.phaseTimer, snapshot.currentPhase]);
+
+  function handleSubmit(): void {
+    if (hasSubmittedRef.current) return;
+
+    const app = appRef.current;
+    const drawingCanvas = drawingCanvasRef.current;
+    const bridge = bridgeRef.current;
+
+    if (!app || !drawingCanvas || !bridge) return;
+
+    // Export current drawing (empty canvas returns null — submit anyway with empty)
+    const imageDataUrl = exportPng(app, drawingCanvas.strokeContainerRef, drawingCanvas.region);
+    const dataUrl = imageDataUrl ?? '';
+
+    // Store for waiting overlay display
+    if (dataUrl) {
+      setCapturedImageUrl(dataUrl);
+    }
+
+    // Send to server
+    bridge.submitDrawing(dataUrl);
+
+    // Mark submitted
+    setHasSubmitted(true);
+    hasSubmittedRef.current = true;
+  }
+
+  // Redirect if no room
+  if (!room) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-[#1a1035] text-white">
+        Redirecting...
+      </div>
+    );
+  }
+
+  const { currentPhase, phaseTimer, players, entityCounts } = snapshot;
+  const myTeam = myTeamRef.current;
+
+  return (
+    <div className="relative h-screen w-screen overflow-hidden">
+      {/* PixiJS canvas host — always mounted */}
+      <div id="game-pixi-host" className="absolute inset-0" />
+
+      {/* Phase overlays — React on top of canvas */}
+      {currentPhase === 'draw' && !hasSubmitted && (
+        <DrawPhaseOverlay phaseTimer={phaseTimer} onSubmit={handleSubmit} />
+      )}
+
+      {currentPhase === 'draw' && hasSubmitted && (
+        <WaitingOverlay
+          capturedImageUrl={capturedImageUrl}
+          players={players}
+          myTeam={myTeam}
+        />
+      )}
+
+      {currentPhase === 'simulate' && (
+        <SimulationOverlay phaseTimer={phaseTimer} entityCounts={entityCounts} />
+      )}
+
+      {currentPhase === 'results' && (
+        <ResultsOverlay entityCounts={entityCounts} />
+      )}
+
+      {/* Idle state — brief between phases */}
+      {currentPhase === 'idle' && (
+        <div className="pointer-events-none fixed inset-0 z-20 flex items-center justify-center">
+          <div className="rounded-xl bg-black/70 px-8 py-4 text-lg font-bold text-white">
+            Waiting for game to start...
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
