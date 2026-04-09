@@ -9,6 +9,7 @@
   "dependencies": {
     "@colyseus/sdk": "^0.17.38",
     "@crayon-world/shared": "workspace:*",
+    "@radix-ui/react-dialog": "^1.1.15",
     "pixi-filters": "^6.1.5",
     "pixi.js": "^8.16.0",
     "react": "^19.0.0",
