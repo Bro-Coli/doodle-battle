@@ -123,7 +123,7 @@ Plans:
 - [x] **Phase 10: Networking Infrastructure** - Colyseus server integrated alongside Express; shared simulation module; state sync via binary patches (completed 2026-04-08)
 - [x] **Phase 11: Lobby & Players** - Players create/join rooms with a 4-char code, see connected players, get auto-assigned to balanced teams, and host can start when ready (completed 2026-04-09)
 - [x] **Phase 12: Server-Authoritative Simulation** - Entity simulation moves to the Colyseus server; clients render from Schema patches without running local simulation (completed 2026-04-09)
-- [ ] **Phase 13: Game Phase Lifecycle & Draw Relay** - Synchronized draw/simulate phases with countdown timer; drawings submitted and hidden until reveal; all entities revealed simultaneously
+- [x] **Phase 13: Game Phase Lifecycle & Draw Relay** - Synchronized draw/simulate phases with countdown timer; drawings submitted and hidden until reveal; all entities revealed simultaneously (completed 2026-04-09)
 - [ ] **Phase 14: Win Condition & End-to-End** - Game ends by elimination or round limit; winner screen shown to all players; full multiplayer loop verified end-to-end
 
 ## Phase Details
@@ -179,7 +179,10 @@ Plans:
   3. The draw phase ends when all players have submitted or the countdown reaches zero, whichever comes first
   4. When simulation phase begins, all entities from all players' drawings appear on screen for every connected client at the same moment
   5. Simulation runs for ~30 seconds and all players watch the same entity world simultaneously
-**Plans**: TBD
+**Plans:** 2/2 plans complete
+Plans:
+- [ ] 13-01-PLAN.md — Server-side phase state machine, drawing relay handler, recognition extraction, unit tests
+- [ ] 13-02-PLAN.md — Client GameScreen with phase-aware overlays, entity team tinting, visual verification
 
 ### Phase 14: Win Condition & End-to-End
 **Goal**: The game has a definitive end state — one team wins by elimination or by having more entities when the round limit is reached — and every connected player sees the outcome
@@ -189,7 +192,10 @@ Plans:
   1. When one team's last entity is eliminated, the game ends immediately and all players see a winner screen naming the winning team
   2. When the configured round limit is reached without full elimination, the team with more surviving entities wins and all players see the winner screen
   3. Two players can complete a full loop — lobby → draw → simulate → outcome → back to lobby — without a page refresh
-**Plans**: TBD
+**Plans:** 2 plans
+Plans:
+- [ ] 13-01-PLAN.md — Server-side phase state machine, drawing relay handler, recognition extraction, unit tests
+- [ ] 13-02-PLAN.md — Client GameScreen with phase-aware overlays, entity team tinting, visual verification
 
 ## Progress
 
@@ -208,5 +214,5 @@ Phases execute in numeric order: 10 → 11 → 12 → 13 → 14
 | 10. Networking Infrastructure | 2/2 | Complete    | 2026-04-08 | — |
 | 11. Lobby & Players | 2/2 | Complete    | 2026-04-09 | — |
 | 12. Server-Authoritative Simulation | 2/2 | Complete    | 2026-04-09 | — |
-| 13. Game Phase Lifecycle & Draw Relay | v2.0 | 0/TBD | Not started | — |
+| 13. Game Phase Lifecycle & Draw Relay | 2/2 | Complete   | 2026-04-09 | — |
 | 14. Win Condition & End-to-End | v2.0 | 0/TBD | Not started | — |

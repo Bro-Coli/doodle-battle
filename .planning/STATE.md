@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Multiplayer
 status: planning
-stopped_at: Completed 12-02-PLAN.md
-last_updated: "2026-04-09T05:43:26.832Z"
+stopped_at: Completed 13-02-PLAN.md — visual verification approved
+last_updated: "2026-04-09T07:24:03.498Z"
 last_activity: 2026-04-08 — v2.0 roadmap written, 22 requirements mapped across 5 phases
 progress:
   total_phases: 12
-  completed_phases: 6
-  total_plans: 12
-  completed_plans: 12
+  completed_phases: 7
+  total_plans: 14
+  completed_plans: 14
   percent: 0
 ---
 
@@ -54,6 +54,9 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 11-lobby-players P01 | 15 | 1 tasks | 2 files |
 | Phase 12 P01 | 3 | 2 tasks | 3 files |
 | Phase 12-server-authoritative-simulation P02 | 8 | 2 tasks | 2 files |
+| Phase 13-game-phase-lifecycle-draw-relay P01 | 6 | 2 tasks | 6 files |
+| Phase 13-game-phase-lifecycle-draw-relay P02 | 3 | 2 tasks | 5 files |
+| Phase 13-game-phase-lifecycle-draw-relay P02 | 55 | 3 tasks | 9 files |
 
 ## Accumulated Context
 
@@ -81,6 +84,17 @@ Recent decisions affecting current work:
 - [Phase 12-02]: UUID-keyed parallel maps added to WorldStage: _entityContainersById and _entityIdByContainer for multiplayer entity lookup and cleanup
 - [Phase 12-02]: EntitySchemaLike duck-typed interface avoids importing server Schema classes with decorators in browser client
 - [Phase 12-02]: multiplayerMode boolean flag on WorldStage makes _gameTick a no-op when server drives simulation
+- [Phase 13-01]: recognizeDrawingInternal has no cache — HTTP route caches; GameRoom calls are per-round
+- [Phase 13-01]: hasSubmittedDrawing resets at results->draw transition, not draw->simulate
+- [Phase 13-01]: Entity simulation guarded by currentPhase === 'simulate'; phase timer runs in draw/simulate/results
+- [Phase 13-01]: Existing entities accumulate across rounds — _advancePhase only adds pending profiles
+- [Phase 13-02]: TEAM_TINTS constants exported from EntitySprite.ts for co-location with sprite rendering logic
+- [Phase 13-02]: GameScreen uses useRef for PixiJS objects to avoid stale closures in React effects; phase transitions detected by prevPhaseRef comparison in onStateChange
+- [Phase 13-02]: Phase-aware overlay pattern: PixiJS canvas always mounted, React overlays switch on top based on currentPhase snapshot
+- [Phase 13-game-phase-lifecycle-draw-relay]: Team color applied as stroke color at draw phase start — black strokes cannot be tinted via PixiJS (0 × anything = 0)
+- [Phase 13-game-phase-lifecycle-draw-relay]: ownerSessionId added to EntitySchema so client can identify local player's entity for texture assignment
+- [Phase 13-game-phase-lifecycle-draw-relay]: WebSocket maxPayload raised to 2MB — drawing PNGs can exceed the default 64KB ws limit
+- [Phase 13-game-phase-lifecycle-draw-relay]: _pendingRecognitions counter in GameRoom prevents phase advance before all async Claude recognitions complete
 
 ### Pending Todos
 
@@ -93,6 +107,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-09T05:42:48.483Z
-Stopped at: Completed 12-02-PLAN.md
+Last session: 2026-04-09T07:24:03.496Z
+Stopped at: Completed 13-02-PLAN.md — visual verification approved
 Resume file: None
