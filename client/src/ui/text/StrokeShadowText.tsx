@@ -19,7 +19,7 @@ export function StrokeShadowText({
   fillClassName,
   firstStrokeColor,
   secondStrokeColor,
-  firstStrokeWidth = 6,
+  firstStrokeWidth = 8,
   secondStrokeWidth = 8,
   shadowOffsetY = '0.25rem',
 }: StrokeShadowTextProps) {

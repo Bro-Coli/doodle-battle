@@ -46,18 +46,25 @@ export function LobbyActionButton({ action }: LobbyActionButtonProps) {
           }}
         />
       </div>
-      <span className="flex-center relative text-white">
-        <Icon name={action.iconName} size="152px" />
+      <span
+        className={cn(
+          'flex-center relative text-white',
+          'transition-[filter] duration-150 ease-linear',
+          'filter-[drop-shadow(0_0_14px_rgba(255,255,255,0.98))_drop-shadow(0_0_30px_rgba(255,255,255,0.8))_drop-shadow(0_0_48px_rgba(255,255,255,0.42))]',
+          'group-hover:filter-[drop-shadow(0_0_18px_rgba(255,255,255,1))_drop-shadow(0_0_36px_rgba(255,255,255,0.9))_drop-shadow(0_0_58px_rgba(255,255,255,0.5))]',
+        )}
+      >
+        <Icon name={action.iconName} size="158px" />
       </span>
       <span className="flex-center relative mt-6 flex-col">
         <StrokeShadowText
-          className="t24-b tracking-wide"
+          className="t28-eb tracking-wide"
           firstStrokeColor={action.firstStrokeColor}
           secondStrokeColor={action.secondStrokeColor}
         >
           {action.title}
         </StrokeShadowText>
-        <span className=" font-nunito t18-m mt-4 whitespace-pre-line text-center text-white [text-shadow:0_1px_0_rgba(0,0,0,0.18)]">
+        <span className=" font-nunito t20-b mt-4 whitespace-pre-line text-center text-white [text-shadow:0_1px_0_rgba(0,0,0,0.18)]">
           {action.description}
         </span>
       </span>
