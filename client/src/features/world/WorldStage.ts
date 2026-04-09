@@ -56,6 +56,11 @@ export class WorldStage {
   private readonly _nameIdMap = new Map<string, string>();
   private readonly _fightCooldowns = new Map<string, number>();
 
+  // Multiplayer — UUID-keyed container maps for Schema-driven rendering
+  private readonly _entityContainersById = new Map<string, Container>();
+  private readonly _entityIdByContainer = new Map<Container, string>();
+  private _multiplayerMode = false;
+
   constructor(app: Application) {
     this._app = app;
     this._drawingRoot = new Container();
@@ -120,6 +125,15 @@ export class WorldStage {
     this._onRoundPhaseChange = cb;
   }
 
+  /**
+   * Enable or disable multiplayer render-only mode.
+   * When true, _gameTick is a no-op and entity positions come from Schema patches
+   * via applyPositions() called by MultiplayerWorldBridge.
+   */
+  set multiplayerMode(enabled: boolean) {
+    this._multiplayerMode = enabled;
+  }
+
   /** Toggle between draw mode and world mode. */
   toggle(): void {
     this._inWorld = !this._inWorld;
@@ -165,6 +179,9 @@ export class WorldStage {
    * Registered once in the constructor; iterates all entity states.
    */
   private readonly _gameTick = (ticker: Ticker): void => {
+    // In multiplayer mode, server drives simulation — client only renders
+    if (this._multiplayerMode) return;
+
     // Freeze all entities when not in simulation phase (idle or analyzing)
     if (this._roundPhase !== 'simulating') return;
 
@@ -458,6 +475,102 @@ export class WorldStage {
     this._onRoundPhaseChange?.(this._roundPhase);
   }
 
+  // ─── Multiplayer render-only API ─────────────────────────────────────────
+
+  /**
+   * Spawn an entity driven by a server Schema record.
+   * Uses a 1x1 white placeholder texture (entity textures are deferred to Phase 13).
+   * Stores the container in UUID-keyed maps so applyPositions/removeEntityById can look it up.
+   *
+   * Does NOT initialize EntityState — server owns simulation.
+   */
+  spawnFromSchema(entityId: string, profile: EntityProfile, x: number, y: number): void {
+    // 1x1 white placeholder texture
+    const texture = Texture.WHITE;
+    const { entity, label, spriteHeight } = buildEntityContainer(texture, profile, this._app);
+
+    entity.x = x;
+    entity.y = y;
+    label.x = x;
+    label.y = y - spriteHeight / 2 - 6;
+
+    this._worldRoot.addChild(entity);
+    this._worldRoot.addChild(label);
+
+    // Store in Container-keyed maps (shared infrastructure)
+    this._entityLabels.set(entity, label);
+    this._entitySpriteHeights.set(entity, spriteHeight);
+    this._entityHp.set(entity, 1);
+    this._entityProfiles.set(entity, profile);
+
+    // Store in UUID-keyed maps (multiplayer lookup)
+    this._entityContainersById.set(entityId, entity);
+    this._entityIdByContainer.set(entity, entityId);
+  }
+
+  /**
+   * Apply position/velocity/hp updates from server Schema patches to PixiJS containers.
+   * Called each time room.onStateChange fires with the full entity snapshot.
+   *
+   * For each entity: updates x/y, applies sprite orientation from vx/vy,
+   * syncs label position. If hp <= 0 and entity is not already dying, calls removeEntity.
+   */
+  applyPositions(
+    entities: Map<string, { x: number; y: number; vx: number; vy: number; hp: number }>,
+  ): void {
+    for (const [entityId, data] of entities) {
+      const container = this._entityContainersById.get(entityId);
+      if (!container) continue;
+
+      // Skip entities already dying
+      if (this._dyingEntities.has(container)) continue;
+
+      // Handle zero-hp removal before updating position
+      if (data.hp <= 0) {
+        this.removeEntity(container);
+        continue;
+      }
+
+      container.x = data.x;
+      container.y = data.y;
+
+      // Sprite orientation — horizontal flip and tilt for walking/flying archetypes
+      const profile = this._entityProfiles.get(container);
+      const archetype = profile?.archetype;
+      if (archetype === 'walking' || archetype === 'flying') {
+        if (Math.abs(data.vx) > 0.01) {
+          container.scale.x =
+            data.vx < 0 ? -Math.abs(container.scale.x) : Math.abs(container.scale.x);
+        }
+        const speed = Math.sqrt(data.vx * data.vx + data.vy * data.vy);
+        if (speed > 0.01) {
+          const tilt = Math.asin(Math.max(-1, Math.min(1, data.vy / speed)));
+          const maxTilt = Math.PI / 4;
+          container.rotation = Math.max(-maxTilt, Math.min(maxTilt, tilt));
+        }
+      }
+
+      // Sync label position
+      const label = this._entityLabels.get(container);
+      const spriteH = this._entitySpriteHeights.get(container);
+      if (label && spriteH !== undefined) {
+        label.x = data.x;
+        label.y = data.y - spriteH / 2 - 6;
+      }
+    }
+  }
+
+  /**
+   * Remove an entity by UUID (used when server removes it from Schema).
+   * Delegates to removeEntity() for fade-out animation.
+   * Also cleans UUID-keyed maps when the fade completes.
+   */
+  removeEntityById(entityId: string): void {
+    const container = this._entityContainersById.get(entityId);
+    if (!container) return;
+    this.removeEntity(container);
+  }
+
   // ─── Entity removal ───────────────────────────────────────────────────────
 
   /**
@@ -496,6 +609,13 @@ export class WorldStage {
         this._entitySpriteHeights.delete(container);
         this._entityHp.delete(container);
         this._dyingEntities.delete(container);
+
+        // Clean UUID-keyed maps (multiplayer mode)
+        const entityId = this._entityIdByContainer.get(container);
+        if (entityId !== undefined) {
+          this._entityContainersById.delete(entityId);
+        }
+        this._entityIdByContainer.delete(container);
 
         label?.destroy({ children: true });
         container.destroy({ children: true });
