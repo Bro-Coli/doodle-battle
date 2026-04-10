@@ -59,7 +59,7 @@ export function LobbyScreen(): React.JSX.Element {
           alt="Doodle Battle"
           width={2096}
           height={992}
-          className="w-full max-w-[580px] object-contain drop-shadow-[0_18px_40px_rgba(28,20,78,0.45)] lg:max-w-[520px]"
+          className="w-full max-w-[580px] object-contain  lg:max-w-[520px]"
           decoding="async"
         />
         <div className="-translate-x-4 mx-auto flex w-max items-center justify-center -space-x-4 lg:-space-x-16">
