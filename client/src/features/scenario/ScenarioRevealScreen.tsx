@@ -89,15 +89,17 @@ export function ScenarioRevealScreen() {
       </div>
       {/* Round Title */}
       <div className="pointer-events-none flex w-full justify-center pt-12 select-none">
-        <span
-          className="uppercase t60-eb lg:t50-eb"
-          style={{
-            ...textillStyle,
-            filter: 'drop-shadow(0 4px 6px rgba(0,0,0,0.5))',
-          }}
+        <StrokeShadowText
+          className="t68-eb lg:t60-eb"
+          fillStyle={textillStyle}
+          firstStrokeColor="#1a2555"
+          secondStrokeColor="#2c5890"
+          firstStrokeWidth={14}
+          secondStrokeWidth={11}
+          shadowOffsetY="0.45rem"
         >
           Final Survivors
-        </span>
+        </StrokeShadowText>
       </div>
       {/* Scenario */}
       <div className="flex w-full flex-1 items-center justify-center">
