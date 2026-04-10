@@ -68,7 +68,7 @@ export function LobbyScreen(): React.JSX.Element {
       <div className="absolute bottom-8 left-8 sm:bottom-4 sm:left-4">
         <LobbyTutorialButton />
       </div>
-      <div className="absolute top-6 right-6 z-10 sm:top-4 sm:right-4">
+      <div className="absolute top-6 left-6 z-10 sm:top-4 sm:left-4">
         <button
           type="button"
           onClick={() => navigate('/scenario')}
