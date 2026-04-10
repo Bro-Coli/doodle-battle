@@ -1,6 +1,7 @@
 import type { CSSProperties } from 'react';
 import { useEffect, useState } from 'react';
 
+import { getActiveRoom } from '@/network/ColyseusClient';
 import { StrokeShadowText } from '@/ui/text/StrokeShadowText';
 
 import { YouBadge } from './parts/YouBadge';
@@ -11,7 +12,7 @@ import scenarioTeamRedBackground from './assets/scenario-team-red-bg.webp';
 import scenarioVsText from './assets/scenario-vs-text.webp';
 
 const countdownFillStyle: CSSProperties = {
-  background: 'linear-gradient(to bottom, #FFFFFF 0%, #B9DBF3 55%, #a8e4ee 100%)',
+  background: 'linear-gradient(to bottom, #FFFFFF 0%, #c5ddee 55%, #a8e4ee 100%)',
   WebkitBackgroundClip: 'text',
   WebkitTextFillColor: 'transparent',
 };
@@ -21,8 +22,12 @@ const roundBadgeStrokeStyle: React.CSSProperties & { '--stroke': string } = {
   WebkitTextStroke: 'var(--stroke) #3a56c8',
 };
 
+type TeamId = 'red' | 'blue';
+
 export function ScenarioRevealScreen() {
   const [remainingSeconds, setRemainingSeconds] = useState(10);
+  // Local player's team in the active room; defaults to blue for safe initial render.
+  const [myTeam, setMyTeam] = useState<TeamId>('blue');
 
   useEffect(() => {
     const intervalId = window.setInterval(() => {
@@ -34,6 +39,29 @@ export function ScenarioRevealScreen() {
 
     return () => window.clearInterval(intervalId);
   }, []);
+
+  useEffect(() => {
+    const room = getActiveRoom();
+    if (!room) return;
+
+    // Keep team ownership in sync with live room state so highlight/badge follows "my team".
+    const syncMyTeam = () => {
+      const state = room.state as {
+        players?: Map<string, { team: string }>;
+      };
+      const myPlayer = state.players?.get(room.sessionId);
+      if (myPlayer?.team === 'red' || myPlayer?.team === 'blue') {
+        setMyTeam(myPlayer.team);
+      }
+    };
+
+    syncMyTeam();
+    room.onStateChange(syncMyTeam);
+    return () => room.onStateChange.remove(syncMyTeam);
+  }, []);
+
+  // Blue card is on the left, red card is on the right.
+  const isBlueTeam = myTeam === 'blue';
 
   return (
     <main
@@ -63,14 +91,16 @@ export function ScenarioRevealScreen() {
         <div className="flex items-center gap-12">
           <div className="relative">
             <div
-              className="neon-glow-yellow flex h-[400px] w-[600px] flex-col bg-contain bg-center bg-no-repeat p-6"
+              className={`flex h-[400px] w-[600px] flex-col bg-contain bg-center bg-no-repeat p-6 ${isBlueTeam ? 'neon-glow-yellow' : ''}`}
               style={{
                 backgroundImage: `url(${scenarioTeamBlueBackground})`,
               }}
             ></div>
-            <div className="absolute -top-4 left-1/2 z-10 -translate-x-1/2">
-              <YouBadge />
-            </div>
+            {isBlueTeam && (
+              <div className="absolute -top-4 left-1/2 z-10 -translate-x-1/2">
+                <YouBadge />
+              </div>
+            )}
           </div>
 
           <img
@@ -80,12 +110,19 @@ export function ScenarioRevealScreen() {
             draggable={false}
           />
 
-          <div
-            className="flex h-[400px] w-[600px] flex-col bg-contain bg-center bg-no-repeat p-6"
-            style={{
-              backgroundImage: `url(${scenarioTeamRedBackground})`,
-            }}
-          ></div>
+          <div className="relative">
+            <div
+              className={`flex h-[400px] w-[600px] flex-col bg-contain bg-center bg-no-repeat p-6 ${!isBlueTeam ? 'neon-glow-yellow' : ''}`}
+              style={{
+                backgroundImage: `url(${scenarioTeamRedBackground})`,
+              }}
+            ></div>
+            {!isBlueTeam && (
+              <div className="absolute -top-4 left-1/2 z-10 -translate-x-1/2">
+                <YouBadge />
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
