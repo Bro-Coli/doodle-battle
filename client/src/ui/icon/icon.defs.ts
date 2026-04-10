@@ -1,6 +1,6 @@
 import type { ReactElement, SVGProps } from 'react';
 
-export type IconName = 'lightning' | 'plus' | 'search';
+export type IconName = 'lightning' | 'plus' | 'search' | 'user';
 
 export type IconSize = '1em' | '1rem' | 16 | 20 | 24 | 32 | 48 | 64 | number | string;
 
@@ -9,7 +9,7 @@ export interface IconBaseProps {
   color?: string;
   secondColor?: string;
   size?: IconSize;
-  strokeWidth?: number;
+  strokeWidth?: SVGProps<SVGSVGElement>['strokeWidth'];
   title?: string;
 }
 
