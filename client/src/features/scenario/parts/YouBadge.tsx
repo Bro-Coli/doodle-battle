@@ -5,7 +5,7 @@ export function YouBadge() {
     <div className="ui-you-badge">
       <span className="relative">
         <StrokeShadowText
-          className="t32-eb"
+          className="t32-eb lg:t20-eb"
           firstStrokeColor="#A96A1E"
           secondStrokeColor="#623F17"
           firstStrokeWidth={6}

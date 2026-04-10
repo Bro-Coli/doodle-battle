@@ -90,26 +90,30 @@ export function ScenarioRevealScreen() {
       {/* Round Title */}
       <div className="pointer-events-none flex w-full justify-center pt-12 select-none">
         <span
-          className="uppercase t60-eb lg:t50-eb "
+          className="uppercase t60-eb lg:t50-eb"
           style={{
             ...textillStyle,
             filter: 'drop-shadow(0 4px 6px rgba(0,0,0,0.5))',
           }}
         >
-          FINAL SURVIVORS
+          Final Survivors
         </span>
       </div>
       {/* Scenario */}
       <div className="flex w-full flex-1 items-center justify-center">
-        <div className="flex shrink-0 items-center gap-12">
-          <TeamCard backgroundImage={scenarioTeamBlueBackground} isMyTeam={isBlueTeam} />
+        <div className="flex shrink-0 items-center gap-8">
+          <TeamCard
+            team="blue"
+            backgroundImage={scenarioTeamBlueBackground}
+            isMyTeam={isBlueTeam}
+          />
           <img
             src={scenarioVsText}
             alt="VS"
-            className="block h-32 w-auto select-none object-contain lg:h-28"
+            className="block h-30 w-auto select-none object-contain lg:h-26"
             draggable={false}
           />
-          <TeamCard backgroundImage={scenarioTeamRedBackground} isMyTeam={!isBlueTeam} />
+          <TeamCard team="red" backgroundImage={scenarioTeamRedBackground} isMyTeam={!isBlueTeam} />
         </div>
       </div>
       {/* Countdown */}
@@ -147,13 +151,97 @@ export function ScenarioRevealScreen() {
  *   Team Card
  * ----------------------------------------------- */
 
-function TeamCard({ backgroundImage, isMyTeam }: { backgroundImage: string; isMyTeam: boolean }) {
+const teamConfig = {
+  blue: {
+    label: 'Blue',
+    fillStyle: {
+      background: 'linear-gradient(to bottom, #FFFFFF 0%, #75ccf4 30%, #0692dd 100%)',
+      WebkitBackgroundClip: 'text',
+      WebkitTextFillColor: 'transparent',
+    } as CSSProperties,
+    firstStrokeColor: '#0D2E6E',
+    secondStrokeColor: '#1565C0',
+    missionFirstStroke: '#062B5E',
+    missionSecondStroke: '#0D47A1',
+  },
+  red: {
+    label: 'Red',
+    fillStyle: {
+      background: 'linear-gradient(to bottom, #f9c0dc 0%, #ec83a6 40%, #C2185B 100%)',
+      WebkitBackgroundClip: 'text',
+      WebkitTextFillColor: 'transparent',
+    } as CSSProperties,
+    firstStrokeColor: '#4A0A2A',
+    secondStrokeColor: '#880E4F',
+    missionFirstStroke: '#3E0723',
+    missionSecondStroke: '#7B0E42',
+  },
+} as const;
+
+function TeamCard({
+  team,
+  backgroundImage,
+  isMyTeam,
+}: {
+  team: TeamId;
+  backgroundImage: string;
+  isMyTeam: boolean;
+}) {
+  const cfg = teamConfig[team];
+
   return (
     <div className="relative">
       <div
-        className={`flex h-[380px] w-[580px] flex-col bg-contain bg-center bg-no-repeat p-6 ${isMyTeam ? 'neon-glow-yellow' : ''} lg:h-[300px] lg:w-[500px]`}
+        className={`flex h-[360px] w-[560px] flex-col items-center justify-center gap-4 bg-contain bg-center bg-no-repeat p-6 select-none ${isMyTeam ? 'neon-glow-yellow' : ''} lg:h-[300px] lg:w-[500px]`}
         style={{ backgroundImage: `url(${backgroundImage})` }}
-      ></div>
+      >
+        {/* Team label */}
+        <p className="flex items-end gap-3">
+          <StrokeShadowText
+            className="t28-eb lg:t24-eb"
+            firstStrokeColor={cfg.firstStrokeColor}
+            secondStrokeColor={cfg.secondStrokeColor}
+            firstStrokeWidth={6}
+            secondStrokeWidth={4}
+            shadowOffsetY="0.15rem"
+          >
+            Team
+          </StrokeShadowText>
+          <StrokeShadowText
+            className="t32-eb lg:t28-eb"
+            fillStyle={cfg.fillStyle}
+            firstStrokeColor={cfg.firstStrokeColor}
+            secondStrokeColor={cfg.secondStrokeColor}
+            firstStrokeWidth={8}
+            secondStrokeWidth={6}
+            shadowOffsetY="0.25rem"
+          >
+            {cfg.label}
+          </StrokeShadowText>
+        </p>
+
+        {/* Mission title */}
+        <StrokeShadowText
+          className="t48-eb lg:t40-eb"
+          fillStyle={{
+            background: 'linear-gradient(to bottom, #FFFFFF 0%, #E0E8F0 100%)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+          }}
+          firstStrokeColor={cfg.missionFirstStroke}
+          secondStrokeColor={cfg.missionSecondStroke}
+          firstStrokeWidth={10}
+          secondStrokeWidth={8}
+          shadowOffsetY="0.3rem"
+        >
+          Survive!
+        </StrokeShadowText>
+
+        {/* Mission description */}
+        <p className="max-w-[80%] text-center text-white/90 t18-b lg:t16-b font-nunito">
+          Stay alive until the timer runs out!
+        </p>
+      </div>
       {isMyTeam && (
         <div className="absolute -top-6 left-1/2 z-10 -translate-x-1/2">
           <YouBadge />
