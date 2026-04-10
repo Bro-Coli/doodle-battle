@@ -7,7 +7,7 @@ import { VictoryResultPage } from './VictoryResultPage';
 
 type ResultState = 'victory' | 'defeat';
 
-export function ResultMarkupScreen(): React.JSX.Element {
+export function ResultScreen(): React.JSX.Element {
   const [resultState, setResultState] = useState<ResultState>('victory');
   const lobbyStrokeStyle: CSSProperties & { '--stroke': string } = {
     '--stroke': '6px',
