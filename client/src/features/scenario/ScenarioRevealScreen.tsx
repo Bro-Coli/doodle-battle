@@ -155,7 +155,7 @@ function TeamCard({ backgroundImage, isMyTeam }: { backgroundImage: string; isMy
         style={{ backgroundImage: `url(${backgroundImage})` }}
       ></div>
       {isMyTeam && (
-        <div className="absolute -top-4 left-1/2 z-10 -translate-x-1/2">
+        <div className="absolute -top-6 left-1/2 z-10 -translate-x-1/2">
           <YouBadge />
         </div>
       )}

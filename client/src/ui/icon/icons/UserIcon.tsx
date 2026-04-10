@@ -8,9 +8,10 @@ export const userIcon = defineIcon({
   },
   element: (
     <>
-      <circle cx="32" cy="22.2" r="10.1" fill="#edfaff" stroke="#2f5f95" strokeWidth="3.1" />
+      <circle cx="32" cy="19.8" r="11.6" fill="#edfaff" stroke="#2f5f95" strokeWidth="3.1" />
+      <ellipse cx="32" cy="50" rx="22" ry="10" fill="#1f3f78" opacity="0.28" />
       <path
-        d="M14.6 49.4c0-8.4 7.7-14 17.4-14s17.4 5.6 17.4 14v2.8H14.6z"
+        d="M52.3 50.2C49.7 57 14.3 56.4 11.7 49.6C9.1 42.8 17.2 32.1 32.1 32C46 31.9 54.9 43.4 52.3 50.2Z"
         fill="#dff5ff"
         stroke="#2f5f95"
         strokeWidth="3.1"
