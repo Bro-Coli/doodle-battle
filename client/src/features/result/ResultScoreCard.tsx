@@ -1,17 +1,20 @@
 import type { CSSProperties } from 'react';
 
+import { Icon } from '@/ui';
 import { StrokeShadowText } from '@/ui/text/StrokeShadowText';
 
 type ResultScoreCardProps = {
   team: string;
   score: number;
   variant?: 'pink' | 'blue';
+  winner?: boolean;
 };
 
 export function ResultScoreCard({
   team,
   score,
   variant = 'pink',
+  winner = false,
 }: ResultScoreCardProps): React.JSX.Element {
   const isBlue = variant === 'blue';
   const cardGradient = isBlue
@@ -67,21 +70,31 @@ export function ResultScoreCard({
         </StrokeShadowText>
       </div>
       <div className="relative mt-[34%]">
-        <StrokeShadowText
-          className="t88-eb lg:t72-eb"
-          fillStyle={scoreFillStyle}
-          firstStrokeColor={scoreFirstStrokeColor}
-          secondStrokeColor={scoreSecondStrokeColor}
-          firstStrokeWidth={8}
-          secondStrokeWidth={6}
-          shadowOffsetY="0.4rem"
-          deepShadowColor={scoreDeepShadowColor}
-          deepShadowOffsetY="0.36rem"
-          deepShadowStrokeWidth={14}
-          deepShadowBlur="3px"
-        >
-          {score}
-        </StrokeShadowText>
+        <div className="relative inline-flex items-center justify-center">
+          <StrokeShadowText
+            className="t88-eb lg:t72-eb"
+            fillStyle={scoreFillStyle}
+            firstStrokeColor={scoreFirstStrokeColor}
+            secondStrokeColor={scoreSecondStrokeColor}
+            firstStrokeWidth={8}
+            secondStrokeWidth={6}
+            shadowOffsetY="0.4rem"
+            deepShadowColor={scoreDeepShadowColor}
+            deepShadowOffsetY="0.36rem"
+            deepShadowStrokeWidth={14}
+            deepShadowBlur="3px"
+          >
+            {score}
+          </StrokeShadowText>
+          {winner && (
+            <Icon
+              name="trophy"
+              size={64}
+              color={isBlue ? "#0a2a7a" : "#8b0a4a"}
+              className="absolute -right-24 top-1/2 -translate-y-1/2 rotate-12 drop-shadow-md"
+            />
+          )}
+        </div>
       </div>
     </article>
   );

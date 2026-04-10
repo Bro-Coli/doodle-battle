@@ -39,7 +39,7 @@ export function DefeatResultPage(): React.JSX.Element {
           </StrokeShadowText>
         </div>
         <div className="mt-16 flex w-full items-center justify-center gap-10 px-4">
-          <ResultScoreCard team="Blue Team" score={620} variant="blue" />
+          <ResultScoreCard team="Blue Team" score={3} variant="blue" />
 
           <img
             src={resultVsText}
@@ -48,7 +48,7 @@ export function DefeatResultPage(): React.JSX.Element {
             decoding="async"
           />
 
-          <ResultScoreCard team="Red Team" score={850} variant="pink" />
+          <ResultScoreCard team="Red Team" score={5} variant="pink" winner />
         </div>
       </div>
     </>

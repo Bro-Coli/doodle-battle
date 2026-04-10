@@ -3,6 +3,7 @@ import { closeIcon } from './CloseIcon';
 import { lightningIcon } from './LightningIcon';
 import { plusIcon } from './PlusIcon';
 import { searchIcon } from './SearchIcon';
+import { trophyIcon } from './TrophyIcon';
 import { userIcon } from './UserIcon';
 
 export const iconDefinitions: Record<IconName, IconDefinition> = {
@@ -10,5 +11,6 @@ export const iconDefinitions: Record<IconName, IconDefinition> = {
   lightning: lightningIcon,
   plus: plusIcon,
   search: searchIcon,
+  trophy: trophyIcon,
   user: userIcon,
 };

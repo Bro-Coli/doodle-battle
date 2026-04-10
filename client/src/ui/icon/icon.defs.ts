@@ -1,6 +1,6 @@
 import type { ReactElement, SVGProps } from 'react';
 
-export type IconName = 'close' | 'lightning' | 'plus' | 'search' | 'user';
+export type IconName = 'close' | 'lightning' | 'plus' | 'search' | 'trophy' | 'user';
 
 export type IconSize = '1em' | '1rem' | 16 | 20 | 24 | 32 | 48 | 64 | number | string;
 
