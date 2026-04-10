@@ -3,6 +3,57 @@ import { useState, type CSSProperties } from 'react';
 
 import { StrokeShadowText } from '@/ui/text/StrokeShadowText';
 
+type DecoItem =
+  | { type: 'star'; top: string; left: string; size: string; color?: string; glow?: string; dur?: string; delay?: string }
+  | { type: 'circle'; top: string; left: string; size: string; color?: string; glow?: string; dur?: string; delay?: string }
+  | { type: 'ring'; top: string; left: string; size: string; color?: string; glow?: string; dur?: string; delay?: string };
+
+const DECORATIONS: DecoItem[] = [
+  { type: 'star', top: '2%',  left: '6%',   size: '28px', glow: 'rgba(255,255,255,0.8)', dur: '2.2s', delay: '0s' },
+  { type: 'star', top: '8%',  left: '88%',  size: '24px', glow: 'rgba(200,180,255,0.8)', dur: '2.8s', delay: '0.4s' },
+  { type: 'star', top: '78%', left: '4%',   size: '20px', glow: 'rgba(255,220,255,0.7)', dur: '3.2s', delay: '1.1s' },
+  { type: 'star', top: '85%', left: '92%',  size: '32px', glow: 'rgba(255,255,255,0.9)', dur: '2.5s', delay: '0.6s' },
+  { type: 'star', top: '45%', left: '1%',   size: '18px', glow: 'rgba(200,200,255,0.7)', dur: '3s',   delay: '1.5s' },
+  { type: 'star', top: '30%', left: '96%',  size: '22px', glow: 'rgba(255,200,255,0.8)', dur: '2.6s', delay: '0.2s' },
+  { type: 'star', top: '62%', left: '95%',  size: '18px', glow: 'rgba(220,200,255,0.7)', dur: '3.4s', delay: '0.9s' },
+
+  { type: 'circle', top: '12%',  left: '14%',  size: '10px', color: 'rgba(255,255,255,0.7)', glow: 'rgba(200,180,255,0.5)', dur: '3.5s', delay: '0.3s' },
+  { type: 'circle', top: '18%',  left: '82%',  size: '8px',  color: 'rgba(255,220,255,0.8)', glow: 'rgba(255,200,255,0.5)', dur: '2.8s', delay: '1.2s' },
+  { type: 'circle', top: '70%',  left: '10%',  size: '12px', color: 'rgba(200,200,255,0.7)', glow: 'rgba(180,180,255,0.5)', dur: '3.2s', delay: '0.7s' },
+  { type: 'circle', top: '90%',  left: '80%',  size: '10px', color: 'rgba(255,255,255,0.6)', glow: 'rgba(255,255,255,0.4)', dur: '4s',   delay: '1.6s' },
+  { type: 'circle', top: '55%',  left: '97%',  size: '8px',  color: 'rgba(255,200,255,0.7)', glow: 'rgba(255,180,255,0.4)', dur: '3s',   delay: '0.5s' },
+  { type: 'circle', top: '40%',  left: '2%',   size: '7px',  color: 'rgba(200,220,255,0.8)', glow: 'rgba(180,200,255,0.5)', dur: '3.6s', delay: '2s' },
+
+  { type: 'ring', top: '5%',   left: '50%',  size: '24px', color: 'rgba(255,255,255,0.3)', glow: 'rgba(200,180,255,0.25)', dur: '5s',   delay: '0s' },
+  { type: 'ring', top: '92%',  left: '40%',  size: '18px', color: 'rgba(255,200,255,0.3)', glow: 'rgba(255,180,255,0.2)',  dur: '4.5s', delay: '1s' },
+  { type: 'ring', top: '50%',  left: '98%',  size: '20px', color: 'rgba(200,200,255,0.25)', glow: 'rgba(180,180,255,0.2)', dur: '5.5s', delay: '0.8s' },
+  { type: 'ring', top: '35%',  left: '0%',   size: '16px', color: 'rgba(255,220,255,0.3)', glow: 'rgba(220,200,255,0.2)',  dur: '4s',   delay: '1.4s' },
+];
+
+function ModalDecorations() {
+  return (
+    <div className="ui-modal-deco-wrap" aria-hidden>
+      {DECORATIONS.map((d, i) => {
+        const vars = {
+          '--size': d.size,
+          '--dur': d.dur,
+          '--delay': d.delay,
+          ...(d.color && { '--color': d.color }),
+          ...(d.glow && { '--glow': d.glow }),
+          top: d.top,
+          left: d.left,
+        } as CSSProperties;
+
+        if (d.type === 'star')
+          return <span key={i} className="ui-deco-star ui-deco-star--4pt" style={vars} />;
+        if (d.type === 'circle')
+          return <span key={i} className="ui-deco-circle" style={vars} />;
+        return <span key={i} className="ui-deco-ring" style={vars} />;
+      })}
+    </div>
+  );
+}
+
 export function LobbyNameModalButton() {
   const [name, setName] = useState('');
   const confirmStrokeStyle: CSSProperties & { '--stroke': string } = {
@@ -29,7 +80,9 @@ export function LobbyNameModalButton() {
             Enter your display name and close the modal.
           </Dialog.Description>
 
-          <div className="ui-purple-glass-modal">
+          <div className="relative">
+            <ModalDecorations />
+            <div className="ui-purple-glass-modal">
             <span className="ui-name-glass-spec" aria-hidden />
             <div className="relative z-1 flex h-full flex-col items-center justify-center text-center">
               <StrokeShadowText
@@ -75,6 +128,7 @@ export function LobbyNameModalButton() {
                 </Dialog.Close>
               </div>
             </div>
+          </div>
           </div>
         </Dialog.Content>
       </Dialog.Portal>

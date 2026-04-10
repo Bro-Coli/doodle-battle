@@ -14,7 +14,9 @@
     box-shadow:
       0 10px 20px rgba(130, 80, 255, 0.35),
       0 0 18px rgba(210, 180, 255, 0.25),
-      inset 0 1px 1px rgba(255, 255, 255, 0.7);
+      inset 0 1px 1px rgba(255, 255, 255, 0.7),
+      0 0 30px rgba(180, 140, 255, 0.4),
+      0 0 60px rgba(160, 120, 255, 0.2);
     overflow: hidden;
   }
 
@@ -106,6 +108,67 @@
       0 0 22px rgba(188, 224, 255, 0.85),
       0 0 32px rgba(201, 176, 255, 0.55);
   }
+
+  /* ── Star & circle decorations ── */
+
+  .ui-modal-deco-wrap {
+    position: absolute;
+    inset: -60px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .ui-deco-star {
+    position: absolute;
+    width: var(--size, 10px);
+    height: var(--size, 10px);
+    background: var(--color, rgba(255, 255, 255, 0.9));
+    clip-path: polygon(
+      50% 0%,
+      56% 38%,
+      100% 50%,
+      56% 62%,
+      50% 100%,
+      44% 62%,
+      0% 50%,
+      44% 38%
+    );
+  }
+
+  .ui-deco-star--4pt {
+    filter: drop-shadow(0 0 3px var(--glow, rgba(255, 255, 255, 0.7)));
+    animation: deco-twinkle var(--dur, 2.6s) ease-in-out var(--delay, 0s) infinite;
+  }
+
+  .ui-deco-circle {
+    position: absolute;
+    width: var(--size, 6px);
+    height: var(--size, 6px);
+    border-radius: 50%;
+    background: var(--color, rgba(255, 255, 255, 0.8));
+    box-shadow: 0 0 6px 1px var(--glow, rgba(255, 255, 255, 0.5));
+    animation: deco-twinkle var(--dur, 3s) ease-in-out var(--delay, 0s) infinite;
+  }
+
+  .ui-deco-ring {
+    position: absolute;
+    width: var(--size, 12px);
+    height: var(--size, 12px);
+    border-radius: 50%;
+    border: 2px solid var(--color, rgba(255, 255, 255, 0.5));
+    box-shadow: 0 0 8px 1px var(--glow, rgba(200, 180, 255, 0.35));
+    animation: deco-float var(--dur, 4s) ease-in-out var(--delay, 0s) infinite;
+  }
+}
+
+@keyframes deco-twinkle {
+  0%, 100% { opacity: 0.4; transform: scale(0.7); }
+  50% { opacity: 1; transform: scale(1.15); }
+}
+
+@keyframes deco-float {
+  0%, 100% { opacity: 0.35; transform: scale(0.85) translateY(0); }
+  50% { opacity: 0.7; transform: scale(1.05) translateY(-3px); }
 }
 
 @media (max-width: 768px) {
