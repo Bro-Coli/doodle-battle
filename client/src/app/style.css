@@ -263,6 +263,14 @@
   letter-spacing: 0.04em;
 }
 
+@utility t88-eb {
+  font-size: 8.8rem;
+  font-style: normal;
+  line-height: 8.8rem;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+}
+
 @utility t96-eb {
   font-size: 9.6rem;
   font-style: normal;

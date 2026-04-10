@@ -1,5 +1,7 @@
 import resultVictoryBg from './assets/result-victory-bg.webp';
 import resultVictoryTitle from './assets/result-victory-title.webp';
+import resultVsText from './assets/scenario-vs-text.webp';
+import { ResultScoreCard } from './ResultScoreCard';
 
 export function VictoryResultPage() {
   return (
@@ -17,6 +19,18 @@ export function VictoryResultPage() {
           className="w-full max-w-[760px] scale-x-106 object-contain"
           decoding="async"
         />
+        <div className="mt-12 flex w-full items-center justify-center gap-10 px-4">
+          <ResultScoreCard team="Blue Team" score={850} variant="blue" />
+
+          <img
+            src={resultVsText}
+            alt="VS"
+            className="h-20 w-auto shrink-0 object-contain lg:h-16"
+            decoding="async"
+          />
+
+          <ResultScoreCard team="Red Team" score={620} variant="pink" />
+        </div>
       </div>
     </>
   );

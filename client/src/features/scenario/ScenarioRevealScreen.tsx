@@ -12,7 +12,7 @@ import scenarioTeamRedBackground from './assets/scenario-team-red-bg.webp';
 import scenarioVsText from './assets/scenario-vs-text.webp';
 
 const textillStyle: CSSProperties = {
-  background: 'linear-gradient(to bottom, #FFFFFF 0%, #c5ddee 55%, #a8e4ee 100%)',
+  background: 'linear-gradient(to bottom, #FFFFFF 0%, #d3e2ed 55%, #79d8e9 92%)',
   WebkitBackgroundClip: 'text',
   WebkitTextFillColor: 'transparent',
 };
@@ -82,8 +82,8 @@ export function ScenarioRevealScreen() {
           fillStyle={textillStyle}
           firstStrokeColor="#1a2555"
           secondStrokeColor="#2c5890"
-          firstStrokeWidth={14}
-          secondStrokeWidth={11}
+          firstStrokeWidth={18}
+          secondStrokeWidth={12}
           shadowOffsetY="0.45rem"
         >
           Final Survivors
@@ -165,16 +165,6 @@ function TeamCard({
         {/* Team label */}
         <p className="flex items-end gap-3">
           <StrokeShadowText
-            className="t28-eb lg:t24-eb"
-            firstStrokeColor={cfg.firstStrokeColor}
-            secondStrokeColor={cfg.secondStrokeColor}
-            firstStrokeWidth={6}
-            secondStrokeWidth={4}
-            shadowOffsetY="0.15rem"
-          >
-            Team
-          </StrokeShadowText>
-          <StrokeShadowText
             className="t32-eb lg:t28-eb"
             fillStyle={cfg.fillStyle}
             firstStrokeColor={cfg.firstStrokeColor}
@@ -184,6 +174,16 @@ function TeamCard({
             shadowOffsetY="0.25rem"
           >
             {cfg.label}
+          </StrokeShadowText>
+          <StrokeShadowText
+            className="t28-eb lg:t24-eb"
+            firstStrokeColor={cfg.firstStrokeColor}
+            secondStrokeColor={cfg.secondStrokeColor}
+            firstStrokeWidth={6}
+            secondStrokeWidth={4}
+            shadowOffsetY="0.15rem"
+          >
+            Team
           </StrokeShadowText>
         </p>
 
