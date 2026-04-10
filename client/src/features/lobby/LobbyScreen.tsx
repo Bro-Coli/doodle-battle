@@ -6,7 +6,7 @@ import mainBtn2 from './assets/main-btn-2.webp';
 import mainBtn3 from './assets/main-btn-3.webp';
 import { cn } from '@/shared/lib/cn';
 
-import { LobbyNameModalButton } from './parts/LobbyNameModalButton';
+import { LobbyNameModal } from './parts/LobbyNameModal';
 import { LobbyActionButton, type LobbyAction } from './parts/LobbyActionButton';
 import { LobbyTutorialButton } from './parts/LobbyTutorialButton';
 import { LobbyUserIconButton } from './parts/LobbyUserIconButton';
@@ -79,11 +79,10 @@ export function LobbyScreen(): React.JSX.Element {
           >
             Scenario Markup (Temp)
           </button>
-          <LobbyNameModalButton />
         </div>
       </div>
       <div className="absolute top-6 right-6 z-10 sm:top-4 sm:right-4">
-        <LobbyUserIconButton />
+        <LobbyNameModal trigger={<LobbyUserIconButton />} />
       </div>
     </main>
   );
