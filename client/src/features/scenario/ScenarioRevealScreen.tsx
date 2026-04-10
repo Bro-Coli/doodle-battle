@@ -25,20 +25,8 @@ const roundBadgeStrokeStyle: React.CSSProperties & { '--stroke': string } = {
 type TeamId = 'red' | 'blue';
 
 export function ScenarioRevealScreen() {
-  const [remainingSeconds, setRemainingSeconds] = useState(10);
   // Local player's team in the active room; defaults to blue for safe initial render.
   const [myTeam, setMyTeam] = useState<TeamId>('blue');
-
-  useEffect(() => {
-    const intervalId = window.setInterval(() => {
-      setRemainingSeconds((prev) => {
-        if (prev <= 0) return 0;
-        return prev - 1;
-      });
-    }, 1_000);
-
-    return () => window.clearInterval(intervalId);
-  }, []);
 
   useEffect(() => {
     const room = getActiveRoom();
@@ -88,9 +76,9 @@ export function ScenarioRevealScreen() {
         </div>
       </div>
       {/* Round Title */}
-      <div className="pointer-events-none flex w-full justify-center pt-12 select-none">
+      <div className="pointer-events-none flex w-full justify-center mt-16 select-none lg:mt-8">
         <StrokeShadowText
-          className="t68-eb lg:t60-eb"
+          className="t72-eb lg:t60-eb"
           fillStyle={textillStyle}
           firstStrokeColor="#1a2555"
           secondStrokeColor="#2c5890"
@@ -102,7 +90,7 @@ export function ScenarioRevealScreen() {
         </StrokeShadowText>
       </div>
       {/* Scenario */}
-      <div className="flex w-full flex-1 items-center justify-center">
+      <div className="flex w-full mt-24 items-center justify-center lg:mt-16">
         <div className="flex shrink-0 items-center gap-8">
           <TeamCard
             team="blue"
@@ -118,33 +106,7 @@ export function ScenarioRevealScreen() {
           <TeamCard team="red" backgroundImage={scenarioTeamRedBackground} isMyTeam={!isBlueTeam} />
         </div>
       </div>
-      {/* Countdown */}
-      <div className="pointer-events-none flex w-full justify-center pt-8">
-        <p className="flex items-center gap-8 select-none" aria-live="polite" aria-atomic="true">
-          <StrokeShadowText
-            className="t72-eb lg:t60-eb"
-            firstStrokeColor="#1a2555"
-            secondStrokeColor="#2c5890"
-            firstStrokeWidth={12}
-            secondStrokeWidth={10}
-            shadowOffsetY="0.4rem"
-            fillStyle={textillStyle}
-          >
-            Starts In
-          </StrokeShadowText>
-          <StrokeShadowText
-            className="t96-eb lg:t68-eb"
-            firstStrokeColor="#331C57"
-            secondStrokeColor="#A01E75"
-            firstStrokeWidth={12}
-            secondStrokeWidth={10}
-            shadowOffsetY="0.4rem"
-            fillStyle={textillStyle}
-          >
-            {remainingSeconds}
-          </StrokeShadowText>
-        </p>
-      </div>
+      {/* Countdown intentionally hidden on lobby-flow scenario screen */}
     </main>
   );
 }
