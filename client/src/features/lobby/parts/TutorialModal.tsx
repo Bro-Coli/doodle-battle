@@ -30,12 +30,15 @@ export function TutorialModal() {
         <img
           src={tutorialTitle}
           alt="How to Play"
+          width={4747}
+          height={879}
           className="pointer-events-none absolute top-6 left-1/2 z-20 w-[min(84vw,720px)] -translate-x-1/2 -translate-y-1/2 select-none object-contain sm:w-[min(86vw,640px)]"
           style={{
             filter:
               'hue-rotate(12deg) saturate(1.08) brightness(1.01) drop-shadow(0 0 6px rgba(211, 176, 255, 0.8)) drop-shadow(0 0 16px rgba(198, 153, 255, 0.55))',
           }}
           draggable={false}
+          decoding="async"
         />
 
         <div className="ui-purple-glass-modal ui-purple-glass-modal--lg">

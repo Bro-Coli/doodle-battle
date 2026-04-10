@@ -100,8 +100,11 @@ export function ScenarioRevealScreen() {
           <img
             src={scenarioVsText}
             alt="VS"
+            width={1808}
+            height={1335}
             className="block h-30 w-auto select-none object-contain lg:h-26"
             draggable={false}
+            decoding="async"
           />
           <TeamCard team="red" backgroundImage={scenarioTeamRedBackground} isMyTeam={!isBlueTeam} />
         </div>
