@@ -6,7 +6,7 @@ import { StrokeShadowText } from '@/ui/text/StrokeShadowText';
 
 import { YouBadge } from './parts/YouBadge';
 
-import scenarioBackground from './assets/scenario-bg.png';
+import scenarioBackground from './assets/scenario-bg.webp';
 import scenarioTeamBlueBackground from './assets/scenario-team-blue-bg.webp';
 import scenarioTeamRedBackground from './assets/scenario-team-red-bg.webp';
 import scenarioVsText from './assets/scenario-vs-text.webp';
