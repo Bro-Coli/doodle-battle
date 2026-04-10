@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { createRoom, joinByCode, quickPlay } from '../../network/ColyseusClient';
 import { navigate } from '../../utils/navigate';
+import { setDisplayName, useDisplayNameStore } from './displayNameStore';
 
 function getFlow(): 'quick' | 'create' | 'join' {
   const params = new URLSearchParams(window.location.search);
@@ -19,7 +20,8 @@ const ROUND_OPTIONS = [3, 5, 10] as const;
 
 export function NameInputScreen(): React.JSX.Element {
   const flow = getFlow();
-  const [name, setName] = useState('');
+  const storedDisplayName = useDisplayNameStore((store) => store.displayName);
+  const [name, setName] = useState(storedDisplayName);
   const [code, setCode] = useState('');
   const [maxPlayers, setMaxPlayers] = useState(8);
   const [maxRounds, setMaxRounds] = useState(5);
@@ -34,18 +36,20 @@ export function NameInputScreen(): React.JSX.Element {
     setError(null);
 
     try {
+      const normalizedName = name.trim();
       if (flow === 'quick') {
-        await quickPlay(name.trim());
+        await quickPlay(normalizedName);
       } else if (flow === 'create') {
-        await createRoom({ name: name.trim(), maxPlayers, maxRounds, isPrivate: false });
+        await createRoom({ name: normalizedName, maxPlayers, maxRounds, isPrivate: false });
       } else {
         if (code.length !== 4) {
           setError('Please enter a 4-character room code.');
           setLoading(false);
           return;
         }
-        await joinByCode(code, name.trim());
+        await joinByCode(code, normalizedName);
       }
+      setDisplayName(normalizedName);
       navigate('/waiting');
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Failed to connect. Please try again.');
@@ -69,7 +73,7 @@ export function NameInputScreen(): React.JSX.Element {
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              maxLength={20}
+              maxLength={16}
               required
               placeholder="Enter your name…"
               className="rounded-lg bg-white/20 px-4 py-2 text-white placeholder-white/40 outline-none focus:ring-2 focus:ring-white/60"

@@ -4,6 +4,7 @@ import { App } from './app/App';
 import { initEnv } from './app/env';
 import { initGlobalFunctions } from './app/global';
 import { initStyle } from './app/style';
+import { hydrateDisplayName } from './features/lobby/displayNameStore';
 import { initApi } from './shared/api/api.config';
 
 import './app/style.css';
@@ -21,6 +22,7 @@ initEnv();
 initApi();
 initGlobalFunctions();
 initStyle();
+hydrateDisplayName();
 
 /* --------------------------------------------------
  *   Root Entry Component Rendering

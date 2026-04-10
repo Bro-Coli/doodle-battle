@@ -1,6 +1,7 @@
 import * as Dialog from '@radix-ui/react-dialog';
-import { useState, type CSSProperties } from 'react';
+import { useEffect, useState, type CSSProperties } from 'react';
 
+import { setDisplayName, useDisplayNameStore } from '@/features/lobby/displayNameStore';
 import { StrokeShadowText } from '@/ui/text/StrokeShadowText';
 
 type DecoItem =
@@ -59,14 +60,39 @@ interface LobbyNameModalProps {
 }
 
 export function LobbyNameModal({ trigger }: LobbyNameModalProps) {
+  const displayName = useDisplayNameStore((store) => store.displayName);
+  const isHydrated = useDisplayNameStore((store) => store.isHydrated);
   const [name, setName] = useState('');
+  const [open, setOpen] = useState(false);
   const confirmStrokeStyle: CSSProperties & { '--stroke': string } = {
     '--stroke': '5px',
     WebkitTextStroke: 'var(--stroke) #0f6b7f',
   };
+  const requiresName = isHydrated && !displayName.trim();
+  const canConfirm = !!name.trim();
+
+  useEffect(() => {
+    if (requiresName) setOpen(true);
+  }, [requiresName]);
+
+  useEffect(() => {
+    if (!open) return;
+    setName(displayName);
+  }, [open, displayName]);
+
+  function handleOpenChange(nextOpen: boolean): void {
+    if (requiresName && !nextOpen) return;
+    setOpen(nextOpen);
+  }
+
+  function handleConfirm(): void {
+    if (!canConfirm) return;
+    setDisplayName(name);
+    setOpen(false);
+  }
 
   return (
-    <Dialog.Root>
+    <Dialog.Root open={open} onOpenChange={handleOpenChange}>
       <Dialog.Trigger asChild>
         {trigger ?? (
           <button
@@ -80,7 +106,21 @@ export function LobbyNameModal({ trigger }: LobbyNameModalProps) {
 
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 z-50 bg-black/65" />
-        <Dialog.Content className="fixed top-1/2 left-1/2 z-50 w-[min(92vw,700px)] -translate-x-1/2 -translate-y-1/2 outline-none">
+        <Dialog.Content
+          className="fixed top-1/2 left-1/2 z-50 w-[min(92vw,700px)] -translate-x-1/2 -translate-y-1/2 outline-none"
+          onEscapeKeyDown={(event) => {
+            if (!requiresName) return;
+            event.preventDefault();
+          }}
+          onPointerDownOutside={(event) => {
+            if (!requiresName) return;
+            event.preventDefault();
+          }}
+          onInteractOutside={(event) => {
+            if (!requiresName) return;
+            event.preventDefault();
+          }}
+        >
           <Dialog.Title className="sr-only">Change Name</Dialog.Title>
           <Dialog.Description className="sr-only">
             Enter your display name and close the modal.
@@ -113,25 +153,25 @@ export function LobbyNameModal({ trigger }: LobbyNameModalProps) {
               <p className="text-white/90 t16-b font-nunito mt-4">Max 16 characters</p>
 
               <div className="mt-2 flex justify-center">
-                <Dialog.Close asChild>
-                  <button
-                    type="button"
-                    className="ui-pill-button ui-pill-button--mint px-8 mt-6"
-                  >
-                    <span className="relative z-1 inline-block">
-                      <span
-                        aria-hidden
-                        className="pointer-events-none absolute inset-0 text-center uppercase text-transparent t28-eb "
-                        style={confirmStrokeStyle}
-                      >
-                        Confirm
-                      </span>
-                      <span className="relative text-center uppercase text-white t28-eb">
-                        Confirm
-                      </span>
+                <button
+                  type="button"
+                  className="ui-pill-button ui-pill-button--mint px-8 mt-6 disabled:cursor-not-allowed disabled:opacity-65"
+                  onClick={handleConfirm}
+                  disabled={!canConfirm}
+                >
+                  <span className="relative z-1 inline-block">
+                    <span
+                      aria-hidden
+                      className="pointer-events-none absolute inset-0 text-center uppercase text-transparent t28-eb "
+                      style={confirmStrokeStyle}
+                    >
+                      Confirm
                     </span>
-                  </button>
-                </Dialog.Close>
+                    <span className="relative text-center uppercase text-white t28-eb">
+                      Confirm
+                    </span>
+                  </span>
+                </button>
               </div>
             </div>
           </div>
