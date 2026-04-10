@@ -18,6 +18,11 @@
     overflow: hidden;
   }
 
+  .ui-purple-glass-modal--lg {
+    width: min(96vw, 1120px);
+    height: min(84vh, 720px);
+  }
+
   .ui-purple-glass-modal::before {
     content: '';
     position: absolute;
@@ -107,6 +112,11 @@
   .ui-purple-glass-modal {
     width: 92vw;
     height: 420px;
+  }
+
+  .ui-purple-glass-modal--lg {
+    width: 94vw;
+    height: 82vh;
   }
 
   .ui-name-input {
