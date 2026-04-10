@@ -44,8 +44,8 @@ export function ResultScoreCard({
   return (
     <article
       className={[
-        'relative overflow-hidden rounded-3xl border-12 border-white px-20 py-8 text-center',
-        'w-[420px] sm:w-[270px] sm:px-6 sm:py-5',
+        'relative shrink-0 overflow-hidden rounded-3xl border-12 border-white px-20 py-8 text-center',
+        'w-[420px]',
         'translate-y-0 transition-transform',
         cardGradient,
         cardDepthShadow,
@@ -55,7 +55,7 @@ export function ResultScoreCard({
       <div className="pointer-events-none absolute inset-0 rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.22)_0%,transparent_45%,transparent_55%,rgba(0,0,0,0.08)_100%)]" />
       <div className="absolute inset-x-0 top-0 flex h-[34%] items-center justify-center">
         <StrokeShadowText
-          className="t32-eb sm:t28-eb"
+          className="t32-eb lg:t28-eb"
           // fillStyle={teamFillStyle}
           firstStrokeColor={teamFirstStrokeColor}
           secondStrokeColor={teamSecondStrokeColor}
@@ -68,7 +68,7 @@ export function ResultScoreCard({
       </div>
       <div className="relative mt-[34%]">
         <StrokeShadowText
-          className="t88-eb sm:t68-eb"
+          className="t88-eb lg:t72-eb"
           fillStyle={scoreFillStyle}
           firstStrokeColor={scoreFirstStrokeColor}
           secondStrokeColor={scoreSecondStrokeColor}

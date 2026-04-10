@@ -44,7 +44,7 @@ export function DefeatResultPage(): React.JSX.Element {
           <img
             src={resultVsText}
             alt="VS"
-            className="h-20 w-auto shrink-0 object-contain lg:h-16"
+            className="h-20 w-auto shrink-0 object-contain lg:h-16 md:h-14"
             decoding="async"
           />
 
