@@ -60,7 +60,7 @@ export function ResultMarkupScreen(): React.JSX.Element {
         </div>
       </div>
 
-      <div className="relative mt-12 flex-center gap-12 pb-12">
+      <div className="relative mt-12 flex-center gap-8 pb-12">
         <button
           type="button"
           onClick={() => navigate('/')}
