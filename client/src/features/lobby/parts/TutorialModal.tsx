@@ -1,39 +1,47 @@
 import * as Dialog from '@radix-ui/react-dialog';
-
-import { cn } from '@/shared/lib/cn';
+import { Icon } from '@/ui';
+import tutorialTitle from '../assets/tutorial-title.webp';
 
 /** Tutorial dialog panel. Render inside Radix `Dialog.Root` (same tree as `Dialog.Trigger`). */
 export function TutorialModal() {
   return (
     <Dialog.Portal>
       <Dialog.Overlay className="fixed inset-0 z-50 bg-black/70" />
-      <Dialog.Content className="fixed top-1/2 left-1/2 z-50 w-[min(96vw,1220px)] -translate-x-1/2 -translate-y-1/2 outline-none">
+      <Dialog.Content className="fixed top-1/2 left-1/2 z-50 w-[min(96vw,1120px)] -translate-x-1/2 -translate-y-1/2 outline-none">
         <Dialog.Title className="sr-only">Tutorial</Dialog.Title>
         <Dialog.Description className="sr-only">
           How to play Doodle Battle. Close this dialog with the button or by pressing Escape.
         </Dialog.Description>
 
+        <Dialog.Close
+          type="button"
+          aria-label="Close tutorial"
+          className="ui-icon-button ui-icon-button--modal-close absolute -top-8 -right-8 z-30 focus-visible:ring-2 focus-visible:ring-[#c7a5ff] focus-visible:ring-offset-2 focus-visible:outline-none sm:-top-4 sm:-right-4"
+        >
+          <Icon
+            name="close"
+            size={62}
+            color="#dbd4ef"
+            decorative
+            className="drop-shadow-[0_2px_0_rgba(53,28,115,0.55)]"
+          />
+        </Dialog.Close>
+
+        <img
+          src={tutorialTitle}
+          alt="How to Play"
+          className="pointer-events-none absolute top-6 left-1/2 z-20 w-[min(84vw,720px)] -translate-x-1/2 -translate-y-1/2 select-none object-contain sm:w-[min(86vw,640px)]"
+          style={{
+            filter:
+              'hue-rotate(12deg) saturate(1.08) brightness(1.01) drop-shadow(0 0 6px rgba(211, 176, 255, 0.8)) drop-shadow(0 0 16px rgba(198, 153, 255, 0.55))',
+          }}
+          draggable={false}
+        />
+
         <div className="ui-purple-glass-modal ui-purple-glass-modal--lg">
           <span className="ui-name-glass-spec" aria-hidden />
-          <Dialog.Close
-            type="button"
-            aria-label="Close tutorial"
-            className={cn(
-              'absolute top-7 right-7 z-20 flex h-10 w-10 items-center justify-center rounded-full',
-              'border-2 border-[#3d52b8] bg-white/90 text-[#2a3f9e] shadow-md',
-              't18-b leading-none transition-[transform,background-color] hover:scale-105 hover:bg-white',
-              'focus-visible:ring-2 focus-visible:ring-[#5890e8] focus-visible:ring-offset-2 focus-visible:outline-none',
-              'sm:top-5 sm:right-5 sm:h-11 sm:w-11',
-            )}
-          >
-            ×
-          </Dialog.Close>
 
-          <div className="relative z-1 flex h-full flex-col gap-7 px-12 py-12 text-white sm:px-7 sm:py-8">
-            <h2 className="t48-eb uppercase text-center drop-shadow-[0_4px_0_rgba(60,35,124,0.35)] sm:t32-eb">
-              How To Play
-            </h2>
-
+          <div className="relative z-1 flex h-full flex-col gap-7 px-12 pt-24 pb-12 text-white sm:px-7 sm:pt-18 sm:pb-8">
             <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
               <article className="rounded-2xl border border-white/35 bg-white/12 p-5 backdrop-blur-[1px]">
                 <h3 className="mb-2 t24-eb uppercase text-white">1. Draw</h3>
