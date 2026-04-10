@@ -1,0 +1,170 @@
+@layer components {
+  .ui-pill-button {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 5rem;
+    padding: 0 2.5rem;
+    border: 3px solid #3d52b8;
+    border-radius: 999px;
+    overflow: hidden;
+    background: linear-gradient(to bottom, #aee8ff 0%, #5890e8 55%, #3a56c8 100%);
+    box-shadow:
+      inset 0 0 0 4px rgba(255, 255, 255, 0.4),
+      inset 0 3px 0 rgba(255, 255, 255, 0.45),
+      inset 0 14px 28px -12px rgba(255, 255, 255, 0.42),
+      inset 14px 0 28px -12px rgba(255, 255, 255, 0.36),
+      inset 0 28px 52px -22px rgba(255, 255, 255, 0.16),
+      inset 28px 0 52px -22px rgba(255, 255, 255, 0.14),
+      inset 0 -6px 0 rgba(38, 58, 145, 0.32),
+      0 4px 0 #3552b0,
+      0 10px 20px rgba(38, 58, 145, 0.34),
+      0 12px 28px rgba(0, 0, 0, 0.2),
+      0 4px 10px rgba(0, 0, 0, 0.12);
+    cursor: pointer;
+    transition:
+      transform 0.15s linear,
+      box-shadow 0.15s linear,
+      filter 0.15s linear;
+  }
+
+  .ui-pill-button::before {
+    content: '';
+    position: absolute;
+    left: 14px;
+    right: 14px;
+    top: 8px;
+    height: 42%;
+    border-radius: 999px;
+    background: linear-gradient(to bottom, rgba(255, 255, 255, 0.55), rgba(255, 255, 255, 0.12));
+    pointer-events: none;
+  }
+
+  .ui-pill-button::after {
+    content: '';
+    position: absolute;
+    left: 18px;
+    top: 12px;
+    width: 16px;
+    height: 9px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.48);
+    transform: rotate(142deg);
+    pointer-events: none;
+  }
+
+  .ui-pill-button:hover {
+    transform: translateY(-2px) scale(1.02);
+    filter: brightness(1.03);
+  }
+
+  .ui-pill-button:active {
+    transform: translateY(3px) scale(0.99);
+    box-shadow:
+      inset 0 0 0 4px rgba(255, 255, 255, 0.45),
+      inset 0 4px 0 rgba(255, 255, 255, 0.35),
+      inset 0 12px 22px -10px rgba(255, 255, 255, 0.32),
+      inset 12px 0 22px -10px rgba(255, 255, 255, 0.28),
+      inset 0 22px 40px -18px rgba(255, 255, 255, 0.12),
+      inset 22px 0 40px -18px rgba(255, 255, 255, 0.1),
+      inset 0 -3px 0 rgba(38, 58, 145, 0.26),
+      0 1px 0 #3552b0,
+      0 4px 10px rgba(38, 58, 145, 0.28),
+      0 6px 16px rgba(0, 0, 0, 0.16),
+      0 2px 6px rgba(0, 0, 0, 0.1);
+  }
+
+  .ui-pill-button--static {
+    cursor: default;
+    transition: none;
+    user-select: none;
+  }
+
+  .ui-pill-button--static:hover {
+    transform: none;
+    filter: none;
+  }
+
+  .ui-pill-button--mint {
+    border-color: #0f8f95;
+    background: linear-gradient(to bottom, #9aff9c 0%, #37e59d 42%, #17c6b8 72%, #0aa5bd 100%);
+    box-shadow:
+      inset 0 0 0 4px rgba(182, 255, 223, 0.62),
+      inset 0 3px 0 rgba(255, 255, 255, 0.48),
+      inset 0 16px 32px -14px rgba(255, 255, 255, 0.45),
+      inset 0 -6px 0 rgba(9, 121, 132, 0.35),
+      0 4px 0 #0b7e8a,
+      0 10px 20px rgba(7, 143, 149, 0.38),
+      0 0 20px rgba(72, 245, 198, 0.45);
+  }
+
+  .ui-pill-button--mint::before {
+    background: linear-gradient(to bottom, rgba(255, 255, 255, 0.58), rgba(255, 255, 255, 0.12));
+  }
+
+  .ui-pill-button--mint:active {
+    box-shadow:
+      inset 0 0 0 4px rgba(182, 255, 223, 0.58),
+      inset 0 4px 0 rgba(255, 255, 255, 0.35),
+      inset 0 14px 28px -12px rgba(255, 255, 255, 0.35),
+      inset 0 -3px 0 rgba(9, 121, 132, 0.28),
+      0 2px 0 #0b7e8a,
+      0 5px 12px rgba(7, 143, 149, 0.34),
+      0 0 14px rgba(72, 245, 198, 0.36);
+  }
+
+  .ui-you-badge {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.5rem 2.5rem;
+    border: 4px solid #5c3a10;
+    border-radius: 14px;
+    overflow: hidden;
+    background: linear-gradient(to bottom, #ffe566 0%, #ffca28 30%, #f5a623 65%, #e89c00 100%);
+    box-shadow:
+      inset 0 0 0 3px rgba(255, 255, 255, 0.35),
+      inset 0 3px 0 rgba(255, 255, 255, 0.5),
+      inset 0 12px 24px -10px rgba(255, 255, 255, 0.5),
+      inset 12px 0 24px -10px rgba(255, 255, 255, 0.3),
+      inset 0 24px 44px -18px rgba(255, 255, 255, 0.2),
+      inset 24px 0 44px -18px rgba(255, 255, 255, 0.15),
+      inset 0 -5px 0 rgba(140, 80, 0, 0.35),
+      0 0 0 4px rgba(255, 255, 255, 0.8),
+      0 0 12px rgba(255, 255, 255, 0.85),
+      0 0 24px rgba(255, 255, 255, 0.62),
+      0 4px 0 #7a4d00,
+      0 8px 18px rgba(100, 60, 0, 0.35),
+      0 10px 24px rgba(0, 0, 0, 0.2),
+      0 4px 8px rgba(0, 0, 0, 0.12);
+    pointer-events: none;
+    user-select: none;
+  }
+
+  .ui-you-badge::before {
+    content: '';
+    position: absolute;
+    left: 10px;
+    right: 10px;
+    top: 6px;
+    height: 42%;
+    border-radius: 10px;
+    background: linear-gradient(to bottom, rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0.08));
+    pointer-events: none;
+  }
+
+  .ui-you-badge::after {
+    content: '';
+    position: absolute;
+    left: 14px;
+    top: 10px;
+    width: 14px;
+    height: 8px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.5);
+    transform: rotate(142deg);
+    pointer-events: none;
+  }
+}

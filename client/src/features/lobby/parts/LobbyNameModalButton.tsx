@@ -29,7 +29,7 @@ export function LobbyNameModalButton() {
             Enter your display name and close the modal.
           </Dialog.Description>
 
-          <div className="ui-name-glass-card">
+          <div className="ui-purple-glass-modal">
             <span className="ui-name-glass-spec" aria-hidden />
             <div className="relative z-1 flex h-full flex-col items-center justify-center text-center">
               <StrokeShadowText
@@ -57,7 +57,7 @@ export function LobbyNameModalButton() {
                 <Dialog.Close asChild>
                   <button
                     type="button"
-                    className="ui-pill-button ui-pill-button--confirm px-8 mt-6"
+                    className="ui-pill-button ui-pill-button--mint px-8 mt-6"
                   >
                     <span className="relative z-1 inline-block">
                       <span

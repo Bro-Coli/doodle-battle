@@ -7,6 +7,8 @@ import { initStyle } from './app/style';
 import { initApi } from './shared/api/api.config';
 
 import './app/style.css';
+import './style/button.css';
+import './style/modal.css';
 
 // Eagerly initialize Colyseus client singleton
 import './network/ColyseusClient';
