@@ -65,7 +65,7 @@ export function ScenarioRevealScreen() {
 
   return (
     <main
-      className="flex min-h-screen w-screen flex-col items-center overflow-hidden bg-cover bg-center bg-no-repeat"
+      className="flex min-h-screen w-screen flex-col items-center overflow-hidden bg-cover bg-center bg-no-repeat pb-12"
       style={{
         backgroundImage: `url(${scenarioBackground})`,
       }}
@@ -76,53 +76,31 @@ export function ScenarioRevealScreen() {
           <span className="relative z-1 inline-block">
             <span
               aria-hidden
-              className="pointer-events-none absolute inset-0 text-center uppercase text-transparent t24-b"
+              className="pointer-events-none absolute inset-0 text-center uppercase text-transparent t24-b lg:t20-b"
               style={roundBadgeStrokeStyle}
             >
               Round 1 / 5
             </span>
-            <span className="relative text-center uppercase text-white t24-b">Round 1 / 5</span>
+            <span className="relative text-center uppercase text-white t24-b lg:t20-b">
+              Round 1 / 5
+            </span>
           </span>
         </div>
       </div>
 
       {/* Scenario */}
-      <div className="flex w-full justify-center pt-8">
-        <div className="flex items-center gap-12">
-          <div className="relative">
-            <div
-              className={`flex h-[400px] w-[600px] flex-col bg-contain bg-center bg-no-repeat p-6 ${isBlueTeam ? 'neon-glow-yellow' : ''}`}
-              style={{
-                backgroundImage: `url(${scenarioTeamBlueBackground})`,
-              }}
-            ></div>
-            {isBlueTeam && (
-              <div className="absolute -top-4 left-1/2 z-10 -translate-x-1/2">
-                <YouBadge />
-              </div>
-            )}
-          </div>
+      <div className="flex w-full flex-1 items-center justify-center">
+        <div className="flex shrink-0 items-center gap-12">
+          <TeamCard backgroundImage={scenarioTeamBlueBackground} isMyTeam={isBlueTeam} />
 
           <img
             src={scenarioVsText}
             alt="VS"
-            className="block h-32 w-auto select-none object-contain"
+            className="block h-32 w-auto select-none object-contain lg:h-28"
             draggable={false}
           />
 
-          <div className="relative">
-            <div
-              className={`flex h-[400px] w-[600px] flex-col bg-contain bg-center bg-no-repeat p-6 ${!isBlueTeam ? 'neon-glow-yellow' : ''}`}
-              style={{
-                backgroundImage: `url(${scenarioTeamRedBackground})`,
-              }}
-            ></div>
-            {!isBlueTeam && (
-              <div className="absolute -top-4 left-1/2 z-10 -translate-x-1/2">
-                <YouBadge />
-              </div>
-            )}
-          </div>
+          <TeamCard backgroundImage={scenarioTeamRedBackground} isMyTeam={!isBlueTeam} />
         </div>
       </div>
 
@@ -130,7 +108,7 @@ export function ScenarioRevealScreen() {
       <div className="pointer-events-none flex w-full justify-center pt-8">
         <p className="flex items-center gap-8 select-none" aria-live="polite" aria-atomic="true">
           <StrokeShadowText
-            className="t72-eb"
+            className="t72-eb lg:t60-eb"
             firstStrokeColor="#1a2555"
             secondStrokeColor="#2c5890"
             firstStrokeWidth={12}
@@ -141,7 +119,7 @@ export function ScenarioRevealScreen() {
             Starts In
           </StrokeShadowText>
           <StrokeShadowText
-            className="t96-eb"
+            className="t96-eb lg:t68-eb"
             firstStrokeColor="#331C57"
             secondStrokeColor="#A01E75"
             firstStrokeWidth={12}
@@ -154,5 +132,25 @@ export function ScenarioRevealScreen() {
         </p>
       </div>
     </main>
+  );
+}
+
+/* --------------------------------------------------
+ *   Team Card
+ * ----------------------------------------------- */
+
+function TeamCard({ backgroundImage, isMyTeam }: { backgroundImage: string; isMyTeam: boolean }) {
+  return (
+    <div className="relative">
+      <div
+        className={`flex h-[380px] w-[580px] flex-col bg-contain bg-center bg-no-repeat p-6 ${isMyTeam ? 'neon-glow-yellow' : ''} lg:h-[300px] lg:w-[500px]`}
+        style={{ backgroundImage: `url(${backgroundImage})` }}
+      ></div>
+      {isMyTeam && (
+        <div className="absolute -top-4 left-1/2 z-10 -translate-x-1/2">
+          <YouBadge />
+        </div>
+      )}
+    </div>
   );
 }
