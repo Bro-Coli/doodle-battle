@@ -1,3 +1,4 @@
+import type { CSSProperties } from 'react';
 import { useState } from 'react';
 
 import { navigate } from '@/utils/navigate';
@@ -8,11 +9,19 @@ type ResultState = 'victory' | 'defeat';
 
 export function ResultMarkupScreen(): React.JSX.Element {
   const [resultState, setResultState] = useState<ResultState>('victory');
+  const lobbyStrokeStyle: CSSProperties & { '--stroke': string } = {
+    '--stroke': '6px',
+    WebkitTextStroke: 'var(--stroke) #6e6a95',
+  };
+  const playAgainStrokeStyle: CSSProperties & { '--stroke': string } = {
+    '--stroke': '6px',
+    WebkitTextStroke: 'var(--stroke) #0f6b7f',
+  };
 
   return (
-    <main className="relative flex min-h-screen w-screen items-start justify-center overflow-hidden bg-[#120c2d] px-6 py-8 sm:px-4">
+    <main className="relative flex min-h-screen w-screen flex-col overflow-hidden bg-[#120c2d] px-6 py-8">
       {resultState === 'victory' ? <VictoryResultPage /> : <DefeatResultPage />}
-      <div className="absolute top-8 left-1/2 z-20 w-full max-w-5xl -translate-x-1/2 px-6 sm:px-4">
+      <div className="absolute top-8 left-1/2 z-20 w-full max-w-5xl -translate-x-1/2 px-6">
         <div className="rounded-2xl border border-white/15 bg-black/28 p-4 backdrop-blur-[2px]">
           <div className="flex flex-wrap items-center gap-3">
             <button
@@ -49,6 +58,45 @@ export function ResultMarkupScreen(): React.JSX.Element {
             </span>
           </div>
         </div>
+      </div>
+
+      <div className="relative mt-12 flex-center gap-12 pb-12">
+        <button
+          type="button"
+          onClick={() => navigate('/')}
+          className="ui-pill-button ui-pill-button--gray ui-pill-button--less-round h-24 w-[400px]"
+        >
+          <span className="relative inline-block">
+            <span
+              aria-hidden
+              className="pointer-events-none absolute inset-0 text-center uppercase text-transparent t24-eb sm:t18-eb"
+              style={lobbyStrokeStyle}
+            >
+              Back to Lobby
+            </span>
+            <span className="relative text-center uppercase text-white t24-eb sm:t18-eb">
+              Back to Lobby
+            </span>
+          </span>
+        </button>
+        <button
+          type="button"
+          onClick={() => navigate('/lobby', '?flow=quick')}
+          className="ui-pill-button ui-pill-button--mint ui-pill-button--less-round h-24 w-[400px]"
+        >
+          <span className="relative inline-block">
+            <span
+              aria-hidden
+              className="pointer-events-none absolute inset-0 text-center uppercase text-transparent t24-eb sm:t18-eb"
+              style={playAgainStrokeStyle}
+            >
+              Play Again
+            </span>
+            <span className="relative text-center uppercase text-white t24-eb sm:t18-eb">
+              Play Again
+            </span>
+          </span>
+        </button>
       </div>
     </main>
   );
