@@ -52,6 +52,7 @@
     background: rgba(255, 255, 255, 0.48);
     transform: rotate(142deg);
     pointer-events: none;
+    filter: blur(1px);
   }
 
   .ui-pill-button:hover {

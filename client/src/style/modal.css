@@ -65,9 +65,9 @@
     width: 32px;
     height: 18px;
     border-radius: 999px;
-    background: rgba(255, 255, 255, 0.32);
+    background: rgba(255, 255, 255, 0.5);
     transform: rotate(-42deg);
-    filter: blur(0.2px);
+    filter: blur(2px);
     pointer-events: none;
   }
 
@@ -123,16 +123,7 @@
     width: var(--size, 10px);
     height: var(--size, 10px);
     background: var(--color, rgba(255, 255, 255, 0.9));
-    clip-path: polygon(
-      50% 0%,
-      56% 38%,
-      100% 50%,
-      56% 62%,
-      50% 100%,
-      44% 62%,
-      0% 50%,
-      44% 38%
-    );
+    clip-path: polygon(50% 0%, 56% 38%, 100% 50%, 56% 62%, 50% 100%, 44% 62%, 0% 50%, 44% 38%);
   }
 
   .ui-deco-star--4pt {
@@ -162,13 +153,27 @@
 }
 
 @keyframes deco-twinkle {
-  0%, 100% { opacity: 0.4; transform: scale(0.7); }
-  50% { opacity: 1; transform: scale(1.15); }
+  0%,
+  100% {
+    opacity: 0.4;
+    transform: scale(0.7);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.15);
+  }
 }
 
 @keyframes deco-float {
-  0%, 100% { opacity: 0.35; transform: scale(0.85) translateY(0); }
-  50% { opacity: 0.7; transform: scale(1.05) translateY(-3px); }
+  0%,
+  100% {
+    opacity: 0.35;
+    transform: scale(0.85) translateY(0);
+  }
+  50% {
+    opacity: 0.7;
+    transform: scale(1.05) translateY(-3px);
+  }
 }
 
 @media (max-width: 768px) {
