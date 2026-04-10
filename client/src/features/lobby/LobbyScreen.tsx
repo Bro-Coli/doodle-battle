@@ -6,6 +6,7 @@ import mainBtn2 from './assets/main-btn-2.webp';
 import mainBtn3 from './assets/main-btn-3.webp';
 import { cn } from '@/shared/lib/cn';
 
+import { LobbyNameModalButton } from './parts/LobbyNameModalButton';
 import { LobbyActionButton, type LobbyAction } from './parts/LobbyActionButton';
 import { LobbyTutorialButton } from './parts/LobbyTutorialButton';
 
@@ -69,13 +70,16 @@ export function LobbyScreen(): React.JSX.Element {
         <LobbyTutorialButton />
       </div>
       <div className="absolute top-6 left-6 z-10 sm:top-4 sm:left-4">
-        <button
-          type="button"
-          onClick={() => navigate('/scenario')}
-          className="rounded-full border border-white/25 bg-black/25 px-5 py-2 font-nunito t14-b text-white/90 backdrop-blur-sm hover:bg-black/35"
-        >
-          Scenario Markup (Temp)
-        </button>
+        <div className="flex flex-col items-start gap-3">
+          <button
+            type="button"
+            onClick={() => navigate('/scenario')}
+            className="rounded-full border border-white/25 bg-black/25 px-5 py-2 font-nunito t14-b text-white/90 backdrop-blur-sm hover:bg-black/35"
+          >
+            Scenario Markup (Temp)
+          </button>
+          <LobbyNameModalButton />
+        </div>
       </div>
     </main>
   );

@@ -421,4 +421,164 @@
     transform: none;
     filter: none;
   }
+
+  .ui-pill-button--confirm {
+    border-color: #0f8f95;
+    background: linear-gradient(to bottom, #9aff9c 0%, #37e59d 42%, #17c6b8 72%, #0aa5bd 100%);
+    box-shadow:
+      inset 0 0 0 4px rgba(182, 255, 223, 0.62),
+      inset 0 3px 0 rgba(255, 255, 255, 0.48),
+      inset 0 16px 32px -14px rgba(255, 255, 255, 0.45),
+      inset 0 -6px 0 rgba(9, 121, 132, 0.35),
+      0 4px 0 #0b7e8a,
+      0 10px 20px rgba(7, 143, 149, 0.38),
+      0 0 20px rgba(72, 245, 198, 0.45);
+  }
+
+  .ui-pill-button--confirm::before {
+    background: linear-gradient(to bottom, rgba(255, 255, 255, 0.58), rgba(255, 255, 255, 0.12));
+  }
+
+  .ui-pill-button--confirm:active {
+    box-shadow:
+      inset 0 0 0 4px rgba(182, 255, 223, 0.58),
+      inset 0 4px 0 rgba(255, 255, 255, 0.35),
+      inset 0 14px 28px -12px rgba(255, 255, 255, 0.35),
+      inset 0 -3px 0 rgba(9, 121, 132, 0.28),
+      0 2px 0 #0b7e8a,
+      0 5px 12px rgba(7, 143, 149, 0.34),
+      0 0 14px rgba(72, 245, 198, 0.36);
+  }
+
+  .ui-name-glass-card {
+    position: relative;
+    width: 700px;
+    height: 480px;
+    border-radius: 34px 34px 30px 30px / 28px 28px 34px 34px;
+    background: linear-gradient(
+      180deg,
+      rgba(255, 182, 230, 0.95) 0%,
+      rgba(190, 155, 255, 0.92) 55%,
+      rgba(165, 155, 255, 0.95) 100%
+    );
+    border: 6px solid rgba(255, 255, 255, 0.9);
+    box-shadow:
+      0 10px 20px rgba(130, 80, 255, 0.35),
+      0 0 18px rgba(210, 180, 255, 0.25),
+      inset 0 1px 1px rgba(255, 255, 255, 0.7);
+    overflow: hidden;
+  }
+
+  .ui-name-glass-card::before {
+    content: '';
+    position: absolute;
+    inset: 10px 10px auto 10px;
+    height: 48%;
+    border-radius: 26px 26px 90px 90px / 20px 20px 80px 80px;
+    background: linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.35) 0%,
+      rgba(255, 255, 255, 0.16) 40%,
+      rgba(255, 255, 255, 0.04) 100%
+    );
+    pointer-events: none;
+  }
+
+  .ui-name-glass-card::after {
+    content: '';
+    position: absolute;
+    left: -2%;
+    right: -2%;
+    bottom: -6%;
+    height: 62%;
+    background: radial-gradient(
+      120% 100% at 50% 0%,
+      rgba(150, 110, 255, 0.45) 0%,
+      rgba(150, 110, 255, 0.18) 45%,
+      transparent 70%
+    );
+    border-radius: 45% 55% 12% 12% / 28% 28% 18% 18%;
+    filter: blur(4px);
+    pointer-events: none;
+  }
+
+  .ui-name-glass-spec {
+    position: absolute;
+    top: 20px;
+    left: 14px;
+    width: 32px;
+    height: 18px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.32);
+    transform: rotate(-42deg);
+    filter: blur(0.2px);
+    pointer-events: none;
+    /* z-index: 2; */
+  }
+
+  .ui-name-input {
+    height: 92px;
+    width: 100%;
+    max-width: 580px;
+    border-radius: 30px;
+    border: 3px solid rgba(199, 196, 229, 0.95);
+    background: linear-gradient(180deg, #ffffff 0%, #f8f7ff 100%);
+    color: #7f8095;
+    text-align: center;
+    /* font-size: 58px; */
+    line-height: 1;
+    /* font-weight: 700; */
+    /* font-style: italic; */
+    letter-spacing: 0.01em;
+    box-shadow:
+      inset 0 3px 0 rgba(199, 173, 145, 0.55),
+      inset 0 0 0 5px rgba(255, 255, 255, 0.95),
+      0 0 0 4px rgba(208, 228, 255, 0.9),
+      0 0 0 9px rgba(192, 174, 255, 0.7),
+      0 0 16px rgba(182, 217, 255, 0.7),
+      0 0 24px rgba(194, 164, 255, 0.45);
+    outline: none;
+    transition: box-shadow 120ms ease;
+  }
+
+  .ui-name-input::placeholder {
+    color: #a7a6ba;
+    font-style: italic;
+    font-weight: 700;
+  }
+
+  .ui-name-input:focus {
+    box-shadow:
+      inset 0 4px 0 rgba(187, 158, 126, 0.55),
+      inset 0 0 0 5px rgba(255, 255, 255, 0.95),
+      0 0 0 4px rgba(221, 239, 255, 1),
+      0 0 0 9px rgba(201, 185, 255, 0.8),
+      0 0 22px rgba(188, 224, 255, 0.85),
+      0 0 32px rgba(201, 176, 255, 0.55);
+  }
+
+  /* .ui-name-glass-spec::after {
+    content: '';
+    position: absolute;
+    top: -10px;
+    left: 54px;
+    width: 28px;
+    height: 13px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.78);
+    transform: rotate(14deg);
+  } */
+}
+
+@media (max-width: 768px) {
+  .ui-name-glass-card {
+    width: 92vw;
+    height: 420px;
+  }
+
+  .ui-name-input {
+    height: 70px;
+    border-radius: 24px;
+    font-size: 42px;
+  }
 }
