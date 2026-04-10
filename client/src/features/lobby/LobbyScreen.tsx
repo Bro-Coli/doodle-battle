@@ -1,5 +1,4 @@
 import { navigate } from '../../utils/navigate';
-import mainBackground from './assets/main-bg.png';
 import mainTitle from './assets/main-title.png';
 import mainBtn1 from './assets/main-btn-1.webp';
 import mainBtn2 from './assets/main-btn-2.webp';
@@ -50,8 +49,10 @@ const lobbyActions: LobbyAction[] = [
 export function LobbyScreen(): React.JSX.Element {
   return (
     <main
-      className="relative flex min-h-screen w-full items-start justify-center overflow-x-auto overflow-y-hidden bg-cover bg-center bg-no-repeat px-6 pt-8 pb-8 sm:px-4 sm:pt-4"
-      style={{ backgroundImage: `url(${mainBackground})` }}
+      className="relative flex min-h-screen w-full items-start justify-center overflow-x-auto overflow-y-hidden px-6 pt-8 pb-8 sm:px-4 sm:pt-4"
+      style={{
+        background: 'radial-gradient(circle at center, #09C4F1 0%, #3E46E7 58%, #6612C5 100%)',
+      }}
     >
       <div className="flex min-w-[1680px] max-w-7xl flex-col items-center gap-6 pt-8 sm:gap-5 sm:pt-6">
         <img
