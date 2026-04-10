@@ -11,7 +11,7 @@ import scenarioTeamBlueBackground from './assets/scenario-team-blue-bg.webp';
 import scenarioTeamRedBackground from './assets/scenario-team-red-bg.webp';
 import scenarioVsText from './assets/scenario-vs-text.webp';
 
-const countdownFillStyle: CSSProperties = {
+const textillStyle: CSSProperties = {
   background: 'linear-gradient(to bottom, #FFFFFF 0%, #c5ddee 55%, #a8e4ee 100%)',
   WebkitBackgroundClip: 'text',
   WebkitTextFillColor: 'transparent',
@@ -87,23 +87,31 @@ export function ScenarioRevealScreen() {
           </span>
         </div>
       </div>
-
+      {/* Round Title */}
+      <div className="pointer-events-none flex w-full justify-center pt-12 select-none">
+        <span
+          className="uppercase t60-eb lg:t50-eb "
+          style={{
+            ...textillStyle,
+            filter: 'drop-shadow(0 4px 6px rgba(0,0,0,0.5))',
+          }}
+        >
+          FINAL SURVIVORS
+        </span>
+      </div>
       {/* Scenario */}
       <div className="flex w-full flex-1 items-center justify-center">
         <div className="flex shrink-0 items-center gap-12">
           <TeamCard backgroundImage={scenarioTeamBlueBackground} isMyTeam={isBlueTeam} />
-
           <img
             src={scenarioVsText}
             alt="VS"
             className="block h-32 w-auto select-none object-contain lg:h-28"
             draggable={false}
           />
-
           <TeamCard backgroundImage={scenarioTeamRedBackground} isMyTeam={!isBlueTeam} />
         </div>
       </div>
-
       {/* Countdown */}
       <div className="pointer-events-none flex w-full justify-center pt-8">
         <p className="flex items-center gap-8 select-none" aria-live="polite" aria-atomic="true">
@@ -114,7 +122,7 @@ export function ScenarioRevealScreen() {
             firstStrokeWidth={12}
             secondStrokeWidth={10}
             shadowOffsetY="0.4rem"
-            fillStyle={countdownFillStyle}
+            fillStyle={textillStyle}
           >
             Starts In
           </StrokeShadowText>
@@ -125,7 +133,7 @@ export function ScenarioRevealScreen() {
             firstStrokeWidth={12}
             secondStrokeWidth={10}
             shadowOffsetY="0.4rem"
-            fillStyle={countdownFillStyle}
+            fillStyle={textillStyle}
           >
             {remainingSeconds}
           </StrokeShadowText>

@@ -208,6 +208,14 @@
   letter-spacing: 0.04em;
 }
 
+@utility t48-eb {
+  font-size: 4.8rem;
+  font-style: normal;
+  line-height: 5rem;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+}
+
 @utility t50-eb {
   font-size: 5rem;
   font-style: normal;
