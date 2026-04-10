@@ -82,6 +82,13 @@ export function LobbyScreen(): React.JSX.Element {
           >
             Scenario Markup (Temp)
           </button>
+          <button
+            type="button"
+            onClick={() => navigate('/result')}
+            className="rounded-full border border-white/25 bg-black/25 px-5 py-2 font-nunito t14-b text-white/90 backdrop-blur-sm hover:bg-black/35"
+          >
+            Result Markup (Temp)
+          </button>
         </div>
       </div>
       <div className="absolute top-6 right-6 z-10 sm:top-4 sm:right-4">
