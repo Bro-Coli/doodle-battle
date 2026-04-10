@@ -1,5 +1,5 @@
 import * as Dialog from '@radix-ui/react-dialog';
-import { useEffect, useState, type CSSProperties } from 'react';
+import { useEffect, useRef, useState, type CSSProperties } from 'react';
 
 import { setDisplayName, useDisplayNameStore } from '@/features/lobby/displayNameStore';
 import { StrokeShadowText } from '@/ui/text/StrokeShadowText';
@@ -65,6 +65,7 @@ export function LobbyNameModal({ trigger }: LobbyNameModalProps) {
   const isHydrated = useDisplayNameStore((store) => store.isHydrated);
   const [name, setName] = useState('');
   const [open, setOpen] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
   const confirmStrokeStyle: CSSProperties & { '--stroke': string } = {
     '--stroke': '5px',
     WebkitTextStroke: 'var(--stroke) #0f6b7f',
@@ -110,6 +111,16 @@ export function LobbyNameModal({ trigger }: LobbyNameModalProps) {
         <Dialog.Overlay className="fixed inset-0 z-50 bg-black/65" />
         <Dialog.Content
           className="fixed top-1/2 left-1/2 z-50 w-[min(92vw,700px)] -translate-x-1/2 -translate-y-1/2 outline-none"
+          onOpenAutoFocus={(event) => {
+            event.preventDefault();
+            requestAnimationFrame(() => {
+              const input = inputRef.current;
+              if (!input) return;
+              input.focus({ preventScroll: true });
+              const cursorAt = input.value.length;
+              input.setSelectionRange(cursorAt, cursorAt);
+            });
+          }}
           onEscapeKeyDown={(event) => {
             if (!requiresName) return;
             event.preventDefault();
@@ -146,6 +157,7 @@ export function LobbyNameModal({ trigger }: LobbyNameModalProps) {
 
               <input
                 id="name-modal-input"
+                ref={inputRef}
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="Your Name..."
