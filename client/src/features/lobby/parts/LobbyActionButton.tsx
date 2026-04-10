@@ -1,21 +1,6 @@
 import { cn } from '@/shared/lib/cn';
 import { Icon, StrokeShadowText, type IconName } from '@/ui';
-import lobbyButtonClickPrimary from '../assets/lobby-button-click-primary.wav';
-
-let lobbyClickAudio: HTMLAudioElement | null = null;
-
-function playLobbyClickSound(): void {
-  if (typeof Audio === 'undefined') return;
-  if (!lobbyClickAudio) {
-    lobbyClickAudio = new Audio(lobbyButtonClickPrimary);
-    lobbyClickAudio.preload = 'auto';
-  }
-
-  lobbyClickAudio.currentTime = 0;
-  void lobbyClickAudio.play().catch(() => {
-    // Ignore autoplay/promise rejection noise.
-  });
-}
+import { playButtonSfx } from '../buttonSfx';
 
 export type LobbyAction = {
   action?: () => void;
@@ -35,7 +20,7 @@ type LobbyActionButtonProps = {
 
 export function LobbyActionButton({ action }: LobbyActionButtonProps) {
   const handleClick = () => {
-    playLobbyClickSound();
+    playButtonSfx();
     action.action?.();
   };
 

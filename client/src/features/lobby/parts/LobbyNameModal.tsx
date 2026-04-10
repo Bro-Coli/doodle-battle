@@ -3,6 +3,7 @@ import { useEffect, useState, type CSSProperties } from 'react';
 
 import { setDisplayName, useDisplayNameStore } from '@/features/lobby/displayNameStore';
 import { StrokeShadowText } from '@/ui/text/StrokeShadowText';
+import { playButtonSfx } from '../buttonSfx';
 
 type DecoItem =
   | { type: 'star'; top: string; left: string; size: string; color?: string; glow?: string; dur?: string; delay?: string }
@@ -87,6 +88,7 @@ export function LobbyNameModal({ trigger }: LobbyNameModalProps) {
 
   function handleConfirm(): void {
     if (!canConfirm) return;
+    playButtonSfx();
     setDisplayName(name);
     setOpen(false);
   }
