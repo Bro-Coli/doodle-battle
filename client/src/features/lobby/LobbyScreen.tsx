@@ -5,11 +5,11 @@ import mainBtn1 from './assets/main-btn-1.webp';
 import mainBtn2 from './assets/main-btn-2.webp';
 import mainBtn3 from './assets/main-btn-3.webp';
 import { cn } from '@/shared/lib/cn';
-import { Icon } from '@/ui/icon/Icon';
 
 import { LobbyNameModalButton } from './parts/LobbyNameModalButton';
 import { LobbyActionButton, type LobbyAction } from './parts/LobbyActionButton';
 import { LobbyTutorialButton } from './parts/LobbyTutorialButton';
+import { LobbyUserIconButton } from './parts/LobbyUserIconButton';
 
 const lobbyActions: LobbyAction[] = [
   {
@@ -83,13 +83,7 @@ export function LobbyScreen(): React.JSX.Element {
         </div>
       </div>
       <div className="absolute top-6 right-6 z-10 sm:top-4 sm:right-4">
-        <button
-          type="button"
-          aria-label="User profile"
-          className="ui-icon-button ui-icon-button--md sm:ui-icon-button--sm"
-        >
-          <Icon name="user" size={60} decorative />
-        </button>
+        <LobbyUserIconButton />
       </div>
     </main>
   );
