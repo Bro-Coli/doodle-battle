@@ -1,8 +1,12 @@
 import { StrokeShadowText } from '@/ui/text/StrokeShadowText';
 
-export function YouBadge() {
+type YouBadgeProps = {
+  className?: string;
+};
+
+export function YouBadge({ className = '' }: YouBadgeProps): React.JSX.Element {
   return (
-    <div className="ui-you-badge">
+    <div className={`ui-you-badge ${className}`.trim()}>
       <span className="relative">
         <StrokeShadowText
           className="t32-eb lg:t20-eb"

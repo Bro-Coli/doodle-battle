@@ -2,9 +2,8 @@ import type { CSSProperties } from 'react';
 import { useEffect, useState } from 'react';
 
 import { getActiveRoom } from '@/network/ColyseusClient';
+import { YouBadge } from '@/ui';
 import { StrokeShadowText } from '@/ui/text/StrokeShadowText';
-
-import { YouBadge } from './parts/YouBadge';
 
 import scenarioBackground from './assets/scenario-bg.webp';
 import scenarioTeamBlueBackground from './assets/scenario-team-blue-bg.webp';

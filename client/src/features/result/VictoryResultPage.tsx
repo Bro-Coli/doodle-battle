@@ -66,7 +66,7 @@ export function VictoryResultPage() {
           decoding="async"
         />
         <div className="mt-12 flex w-full items-center justify-center gap-10 px-4">
-          <ResultScoreCard team="Blue Team" score={5} variant="blue" winner />
+          <ResultScoreCard team="Blue Team" score={5} variant="blue" winner isMyTeam />
 
           <img
             src={resultVsText}
