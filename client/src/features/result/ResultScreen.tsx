@@ -81,7 +81,7 @@ export function ResultScreen(): React.JSX.Element {
         </button>
         <button
           type="button"
-          onClick={() => navigate('/lobby', '?flow=quick')}
+          onClick={() => navigate('/quick')}
           className="ui-pill-button ui-pill-button--mint ui-pill-button--less-round h-24 w-[400px]"
         >
           <span className="relative inline-block">

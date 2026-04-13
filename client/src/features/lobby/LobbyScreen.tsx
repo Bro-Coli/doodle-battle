@@ -19,7 +19,7 @@ const lobbyActions: LobbyAction[] = [
     firstStrokeColor: '#DD9B12',
     secondStrokeColor: '#8c3702',
     glowColor: 'rgba(255, 202, 73, 0.78)',
-    action: () => navigate('/lobby', '?flow=quick'),
+    action: () => navigate('/quick'),
     iconName: 'lightning',
   },
   {
@@ -30,7 +30,7 @@ const lobbyActions: LobbyAction[] = [
     firstStrokeColor: '#C93062',
     secondStrokeColor: '#820a48',
     glowColor: 'rgba(255, 137, 214, 0.78)',
-    action: () => navigate('/lobby', '?flow=create'),
+    action: () => navigate('/create'),
     iconName: 'plus',
   },
   {
@@ -41,7 +41,7 @@ const lobbyActions: LobbyAction[] = [
     firstStrokeColor: '#02A4A7',
     secondStrokeColor: '#00667D',
     glowColor: 'rgba(90, 237, 255, 0.78)',
-    action: () => navigate('/lobby', '?flow=join'),
+    action: () => navigate('/join'),
     iconName: 'search',
   },
 ];
