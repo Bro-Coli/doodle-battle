@@ -590,6 +590,9 @@ export class GameRoom extends Room<{ state: GameState }> {
     // Set cooldown
     this._fightCooldowns.set(cooldownKey, FIGHT_COOLDOWN_MS);
 
+    // Notify clients so they can play a lunge animation on the attacker.
+    this.broadcast('attack', { attackerId, targetId });
+
     // If HP reaches 0, mark for removal
     if (targetSchema.hp <= 0) {
       this._dyingEntities.add(targetId);
@@ -760,12 +763,21 @@ export class GameRoom extends Room<{ state: GameState }> {
     if (client.sessionId !== this.state.hostSessionId) return;
     if ((this.clients as unknown[]).length < 2) return;
 
-    // All players must be ready
+    // All non-host players must be ready
     let allReady = true;
-    this.state.players.forEach((player) => {
-      if (!player.ready) allReady = false;
+    this.state.players.forEach((player, sid) => {
+      if (sid !== this.state.hostSessionId && !player.ready) allReady = false;
     });
     if (!allReady) return;
+
+    // Teams must be balanced
+    let red = 0;
+    let blue = 0;
+    this.state.players.forEach((player) => {
+      if (player.team === 'red') red++;
+      else if (player.team === 'blue') blue++;
+    });
+    if (red !== blue) return;
 
     this.broadcast('game_starting', { startedBy: client.sessionId });
     this.lock();

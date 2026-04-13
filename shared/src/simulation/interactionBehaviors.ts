@@ -12,6 +12,10 @@ export const FIGHT_PROXIMITY_FRACTION = 0.02;
 export const FIGHT_COOLDOWN_MS = 2000;
 /** Befriend arrival damping radius as fraction of world diagonal */
 export const BEFRIEND_ARRIVE_FRACTION = 0.05;
+/** Chase/fight stop radius — chaser holds this distance so the target isn't overlapped. */
+export const CHASE_STOP_FRACTION = 0.018;
+/** Befriend stop radius — companions settle here instead of orbiting each other. */
+export const BEFRIEND_STOP_FRACTION = 0.012;
 
 // ---------------------------------------------------------------------------
 // Steering result type
@@ -257,6 +261,24 @@ export function resolveInteraction<T>(
 // ---------------------------------------------------------------------------
 
 /**
+ * Unit vector for a fleeing entity whose position coincides with the threat.
+ * Prefers current velocity, then heading, then a deterministic default.
+ */
+function getFleeFallback(state: EntityState): { x: number; y: number } {
+  const vx = 'vx' in state ? (state as { vx: number }).vx : 0;
+  const vy = 'vy' in state ? (state as { vy: number }).vy : 0;
+  const vMag = Math.sqrt(vx * vx + vy * vy);
+  if (vMag > 0.01) return { x: vx / vMag, y: vy / vMag };
+
+  if ('heading' in state) {
+    const h = (state as { heading: number }).heading;
+    return { x: Math.cos(h), y: Math.sin(h) };
+  }
+
+  return { x: 1, y: 0 };
+}
+
+/**
  * Apply interaction steering to an entity state, returning an updated state spread.
  * Preserves all archetype-specific fields.
  *
@@ -276,18 +298,48 @@ export function applyInteractionSteering<T>(
 
   let steering: SteeringResult;
 
+  const chaseStopRadius = worldDiagonal * CHASE_STOP_FRACTION;
+  const befriendStopRadius = worldDiagonal * BEFRIEND_STOP_FRACTION;
+
   switch (resolved.type) {
     case 'chase':
-      steering = seekPosition(state.x, state.y, targetState.x, targetState.y, speed, dt);
-      break;
-    case 'flee':
-      steering = fleePosition(state.x, state.y, targetState.x, targetState.y, speed * 1.1, dt);
-      break;
     case 'fight':
-      steering = seekPosition(state.x, state.y, targetState.x, targetState.y, speed, dt);
+      // Hold a small gap so the chaser doesn't stack on the target — gives the
+      // fleeing/defending entity a real offset direction to work with.
+      if (resolved.distance <= chaseStopRadius) {
+        steering = { x: state.x, y: state.y, vx: 0, vy: 0 };
+      } else {
+        steering = seekPosition(state.x, state.y, targetState.x, targetState.y, speed, dt);
+      }
       break;
+    case 'flee': {
+      // When coincident with the threat, fleePosition would return zero velocity
+      // and the entity freezes. Fall back to the entity's current heading/velocity
+      // so it commits to *some* direction and escapes.
+      const dx = state.x - targetState.x;
+      const dy = state.y - targetState.y;
+      if (dx * dx + dy * dy < 1) {
+        const fallback = getFleeFallback(state);
+        const fleeSpeed = speed * 1.1;
+        steering = {
+          x: state.x + fallback.x * fleeSpeed * dt,
+          y: state.y + fallback.y * fleeSpeed * dt,
+          vx: fallback.x * fleeSpeed,
+          vy: fallback.y * fleeSpeed,
+        };
+      } else {
+        steering = fleePosition(state.x, state.y, targetState.x, targetState.y, speed * 1.1, dt);
+      }
+      break;
+    }
     case 'befriend':
-      steering = befriendPosition(state.x, state.y, targetState.x, targetState.y, speed * 0.5, dt, worldDiagonal * BEFRIEND_ARRIVE_FRACTION);
+      // Settle near the companion rather than orbiting it. Two mutual befrienders
+      // would otherwise chase each other's small motion forever.
+      if (resolved.distance <= befriendStopRadius) {
+        steering = { x: state.x, y: state.y, vx: 0, vy: 0 };
+      } else {
+        steering = befriendPosition(state.x, state.y, targetState.x, targetState.y, speed * 0.5, dt, worldDiagonal * BEFRIEND_ARRIVE_FRACTION);
+      }
       break;
     case 'ignore':
       // No steering for ignore

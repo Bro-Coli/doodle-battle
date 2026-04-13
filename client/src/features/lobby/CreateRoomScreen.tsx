@@ -115,7 +115,11 @@ export function CreateRoomScreen() {
     else teamAPlayers.push([sid, p]);
   });
 
-  const allReady = players.size >= 2 && [...players.values()].every((p) => p.ready);
+  const othersReady =
+    players.size >= 2 &&
+    [...players.entries()].every(([sid, p]) => sid === hostSessionId || p.ready);
+  const teamsBalanced = teamAPlayers.length === teamBPlayers.length;
+  const canStart = othersReady && teamsBalanced;
 
   return (
     <main
@@ -411,10 +415,13 @@ export function CreateRoomScreen() {
                     friends to join!
                   </p>
                 )}
-                {players.size >= 2 && !allReady && (
+                {players.size >= 2 && !othersReady && (
                   <p>Waiting for all players to ready up…</p>
                 )}
-                {allReady && (
+                {players.size >= 2 && othersReady && !teamsBalanced && (
+                  <p>Teams must have an even number of players…</p>
+                )}
+                {canStart && (
                   <p className="text-emerald-300">All players ready — start the game!</p>
                 )}
               </div>
@@ -433,7 +440,7 @@ export function CreateRoomScreen() {
               {isHost && (
                 <button
                   type="button"
-                  disabled={!allReady}
+                  disabled={!canStart}
                   onClick={handleStartGame}
                   className="ui-pill-button ui-pill-button--mint h-[88px] w-[400px] disabled:cursor-not-allowed disabled:opacity-50"
                 >

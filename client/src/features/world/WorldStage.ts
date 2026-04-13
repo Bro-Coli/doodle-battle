@@ -55,6 +55,12 @@ export class WorldStage {
   private readonly _entityHp = new Map<Container, number>();
   private readonly _nameIdMap = new Map<string, string>();
   private readonly _fightCooldowns = new Map<string, number>();
+  // Active lunge animations — visual-only forward-and-back offset on the attacker
+  // container applied each tick after positions are set.
+  private readonly _lungeAnimations = new Map<
+    Container,
+    { elapsed: number; duration: number; dirX: number; dirY: number; amp: number }
+  >();
 
   // Multiplayer — UUID-keyed container maps for Schema-driven rendering
   private readonly _entityContainersById = new Map<string, Container>();
@@ -249,6 +255,7 @@ export class WorldStage {
     // In multiplayer mode, interpolate between server snapshots for smooth rendering
     if (this._multiplayerMode) {
       this._interpolateMultiplayer();
+      this._applyLunges(ticker.deltaMS);
       return;
     }
 
@@ -354,7 +361,12 @@ export class WorldStage {
       // Orientation for walking and flying — feet always face down.
       // Horizontal flip for left/right, tilt up to ±45° for vertical movement.
       if (newState.archetype === 'walking' || newState.archetype === 'flying') {
-        if (Math.abs(newState.vx) > 0.01) {
+        // Flip hysteresis: only change scale sign when horizontal motion is
+        // clearly dominant. Avoids sprite flicker when vx jitters near zero
+        // (e.g., target directly above/below, or micro-noise in steering).
+        const absVx = Math.abs(newState.vx);
+        const absVy = Math.abs(newState.vy);
+        if (absVx > 5 && absVx > absVy * 0.4) {
           container.scale.x =
             newState.vx < 0 ? -Math.abs(container.scale.x) : Math.abs(container.scale.x);
         }
@@ -382,6 +394,8 @@ export class WorldStage {
 
       this._entityStates.set(container, newState);
     }
+
+    this._applyLunges(ticker.deltaMS);
   };
 
   /**
@@ -468,6 +482,71 @@ export class WorldStage {
     }
 
     this._fightCooldowns.set(cooldownKey, FIGHT_COOLDOWN_MS);
+
+    // Visual: attacker lunges toward target and returns.
+    this._triggerLunge(attackerContainer, targetContainer);
+  }
+
+  /**
+   * Start a lunge animation on `attacker` directed at `target`. Plays even if
+   * one is already active — the new lunge overwrites it so rapid attacks stay
+   * visible. Safe no-op if the two containers are coincident.
+   */
+  private _triggerLunge(attacker: Container, target: Container): void {
+    const dx = target.x - attacker.x;
+    const dy = target.y - attacker.y;
+    const dist = Math.sqrt(dx * dx + dy * dy);
+    if (dist < 0.01) return;
+
+    const spriteH = this._entitySpriteHeights.get(attacker) ?? 60;
+    const amp = Math.min(spriteH * 0.5, dist * 0.6);
+
+    this._lungeAnimations.set(attacker, {
+      elapsed: 0,
+      duration: 220,
+      dirX: dx / dist,
+      dirY: dy / dist,
+      amp,
+    });
+  }
+
+  /**
+   * Trigger a lunge by entity ID (multiplayer path — server broadcasts an
+   * `attack` message with attacker/target IDs).
+   */
+  triggerAttackLungeById(attackerId: string, targetId: string): void {
+    const attacker = this._entityContainersById.get(attackerId);
+    const target = this._entityContainersById.get(targetId);
+    if (!attacker || !target) return;
+    this._triggerLunge(attacker, target);
+  }
+
+  /**
+   * Advance all active lunges by deltaMS and add their current offset to the
+   * attacker's container position. Called every tick AFTER positions are set,
+   * so the offset is purely visual and doesn't feed back into simulation.
+   */
+  private _applyLunges(deltaMS: number): void {
+    if (this._lungeAnimations.size === 0) return;
+    for (const [container, lunge] of this._lungeAnimations) {
+      lunge.elapsed += deltaMS;
+      const t = lunge.elapsed / lunge.duration;
+      if (t >= 1) {
+        this._lungeAnimations.delete(container);
+        continue;
+      }
+      // sin(π·t) peaks at t=0.5 then returns to 0 — forward-and-back.
+      const f = Math.sin(Math.PI * t);
+      const ox = lunge.dirX * lunge.amp * f;
+      const oy = lunge.dirY * lunge.amp * f;
+      container.x += ox;
+      container.y += oy;
+      const label = this._entityLabels.get(container);
+      if (label) {
+        label.x += ox;
+        label.y += oy;
+      }
+    }
   }
 
   // ─── Round lifecycle ──────────────────────────────────────────────────────
@@ -717,7 +796,9 @@ export class WorldStage {
     const profile = this._entityProfiles.get(container);
     const archetype = profile?.archetype;
     if (archetype === 'walking' || archetype === 'flying') {
-      if (Math.abs(data.vx) > 0.01) {
+      const absVx = Math.abs(data.vx);
+      const absVy = Math.abs(data.vy);
+      if (absVx > 5 && absVx > absVy * 0.4) {
         container.scale.x =
           data.vx < 0 ? -Math.abs(container.scale.x) : Math.abs(container.scale.x);
       }

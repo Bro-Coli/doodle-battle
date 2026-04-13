@@ -39,6 +39,7 @@ export class MultiplayerWorldBridge {
   private readonly _knownEntityIds = new Set<string>();
   private _stateChangeCallback: ((state: unknown) => void) | null = null;
   private _removeTextureHandler: (() => void) | null = null;
+  private _removeAttackHandler: (() => void) | null = null;
   // Entity textures received from server — entityId → Texture
   private readonly _entityTextures = new Map<string, Texture>();
   // Copies waiting for parent texture — parentEntityId → set of child entityIds
@@ -60,6 +61,10 @@ export class MultiplayerWorldBridge {
     // Listen for entity texture broadcasts — server sends drawing PNGs as base64.
     // The exported PNGs have a white background (for Claude API), so we strip it
     // to transparent by clearing white pixels before creating the texture.
+    this._removeAttackHandler = room.onMessage('attack', (msg: { attackerId: string; targetId: string }) => {
+      this._worldStage.triggerAttackLungeById(msg.attackerId, msg.targetId);
+    });
+
     this._removeTextureHandler = room.onMessage('entity_textures', (textures: Record<string, string>) => {
       for (const [entityId, dataUrl] of Object.entries(textures)) {
         const img = new Image();
@@ -184,6 +189,10 @@ export class MultiplayerWorldBridge {
     if (this._removeTextureHandler) {
       this._removeTextureHandler();
       this._removeTextureHandler = null;
+    }
+    if (this._removeAttackHandler) {
+      this._removeAttackHandler();
+      this._removeAttackHandler = null;
     }
     this._worldStage.multiplayerMode = false;
     this._knownEntityIds.clear();
