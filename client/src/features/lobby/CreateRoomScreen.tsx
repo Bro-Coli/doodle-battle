@@ -369,7 +369,7 @@ export function CreateRoomScreen() {
               {/* Team columns */}
               <div className="flex w-full gap-3">
                 {/* Team A */}
-                <div className="flex flex-1 flex-col gap-3">
+                <div className="flex flex-1 flex-col gap-4">
                   {Array.from({ length: TEAM_SLOT_COUNT }).map((_, i) => {
                     const entry = teamAPlayers[i];
                     return (
@@ -396,7 +396,7 @@ export function CreateRoomScreen() {
                 </div>
 
                 {/* Team B */}
-                <div className="flex flex-1 flex-col gap-3">
+                <div className="flex flex-1 flex-col gap-4">
                   {Array.from({ length: TEAM_SLOT_COUNT }).map((_, i) => {
                     const entry = teamBPlayers[i];
                     return (
@@ -601,23 +601,27 @@ function TeamSlot({
   isReady?: boolean;
 }) {
   if (!playerName) {
-    return <div className="ui-team-slot ui-team-slot--empty font-nunito">Waiting...</div>;
+    return (
+      <div className="ui-team-slot ui-team-slot--empty font-nunito">
+        <span className="relative z-2">Waiting...</span>
+      </div>
+    );
   }
 
   return (
     <div
       className={
-        'ui-team-slot ui-team-slot--filled font-nunito' + (isMe ? ' ring-2 ring-white/40' : '')
+        'ui-team-slot ui-team-slot--filled font-nunito' + (isMe ? ' ui-team-slot--me' : '')
       }
     >
-      <div className="relative flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-linear-to-b from-blue-300 to-blue-500 text-sm">
-        <span>😊</span>
-        {isHost && <span className="absolute -top-2.5 left-1/2 -translate-x-1/2 text-xs">👑</span>}
+      <div className="ui-team-avatar">
+        <span className="relative z-1">😊</span>
+        {isHost && <span className="ui-team-crown">👑</span>}
       </div>
       <span className="truncate t16-b">{playerName}</span>
       {isReady && (
-        <span className="ml-auto text-emerald-400">
-          <svg viewBox="0 0 20 20" className="h-5 w-5" fill="currentColor">
+        <span className="ml-auto rounded-full bg-emerald-400/20 p-1">
+          <svg viewBox="0 0 20 20" className="h-5 w-5 text-emerald-300 drop-shadow-[0_0_6px_rgba(52,211,153,0.6)]" fill="currentColor">
             <path
               fillRule="evenodd"
               d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"

@@ -2,51 +2,141 @@
   /* ── Team player slot ── */
 
   .ui-team-slot {
+    position: relative;
     display: flex;
     align-items: center;
     justify-content: center;
-    height: 68px;
-    border-radius: 16px;
+    height: 72px;
+    border-radius: 20px;
     font-weight: 700;
     font-size: 1.6rem;
+    overflow: hidden;
     transition:
-      transform 0.1s ease,
-      filter 0.1s ease;
+      transform 0.12s ease,
+      filter 0.12s ease,
+      box-shadow 0.12s ease;
   }
 
+  /* ── Empty slot (waiting) ── */
+
   .ui-team-slot--empty {
+    border: 3px solid rgba(120, 110, 180, 0.45);
     background: linear-gradient(
       180deg,
-      rgba(255, 255, 255, 0.08) 0%,
-      rgba(255, 255, 255, 0.03) 100%
+      rgba(180, 170, 220, 0.22) 0%,
+      rgba(140, 130, 190, 0.14) 50%,
+      rgba(120, 110, 170, 0.1) 100%
     );
-    border: 2px solid rgba(255, 255, 255, 0.1);
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
-    color: rgba(255, 255, 255, 0.35);
+    box-shadow:
+      inset 0 0 0 2px rgba(255, 255, 255, 0.08),
+      inset 0 2px 0 rgba(255, 255, 255, 0.12),
+      inset 0 -4px 0 rgba(40, 30, 80, 0.12),
+      0 3px 0 rgba(40, 30, 80, 0.15),
+      0 6px 14px rgba(0, 0, 0, 0.12);
+    color: rgba(255, 255, 255, 0.38);
     text-transform: uppercase;
     letter-spacing: 0.08em;
   }
 
-  .ui-team-slot--filled {
+  .ui-team-slot--empty::before {
+    content: '';
+    position: absolute;
+    inset: 5px;
+    border-radius: 14px;
+    border: 2.5px dashed rgba(255, 255, 255, 0.2);
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  .ui-team-slot--empty::after {
+    content: '';
+    position: absolute;
+    left: 10%;
+    right: 10%;
+    top: 4px;
+    height: 38%;
+    border-radius: 999px;
     background: linear-gradient(
       180deg,
-      rgba(255, 255, 255, 0.2) 0%,
-      rgba(255, 255, 255, 0.08) 100%
+      rgba(255, 255, 255, 0.1) 0%,
+      rgba(255, 255, 255, 0.02) 100%
     );
-    border: 2px solid rgba(255, 255, 255, 0.28);
+    pointer-events: none;
+    z-index: 2;
+  }
+
+  /* ── Filled slot (player present) ── */
+
+  .ui-team-slot--filled {
+    border: 3px solid #3d52b8;
+    background: linear-gradient(
+      180deg,
+      #a0d4ff 0%,
+      #6fb8f7 22%,
+      #4a96ec 50%,
+      #3a7ce0 72%,
+      #2d62c8 100%
+    );
     box-shadow:
-      inset 0 1px 0 rgba(255, 255, 255, 0.22),
-      0 2px 8px rgba(0, 0, 0, 0.15);
+      inset 0 0 0 3px rgba(160, 215, 255, 0.45),
+      inset 0 3px 0 rgba(255, 255, 255, 0.42),
+      inset 0 14px 28px -12px rgba(255, 255, 255, 0.35),
+      inset 0 -5px 0 rgba(30, 50, 130, 0.3),
+      0 3px 0 #2a4aaa,
+      0 6px 16px rgba(30, 60, 150, 0.3),
+      0 0 14px rgba(80, 160, 255, 0.2);
     color: white;
     padding: 0 1rem;
     justify-content: flex-start;
     gap: 0.75rem;
   }
 
+  .ui-team-slot--filled::before {
+    content: '';
+    position: absolute;
+    left: 10px;
+    right: 10px;
+    top: 5px;
+    height: 42%;
+    border-radius: 14px;
+    background: linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.48) 0%,
+      rgba(255, 255, 255, 0.15) 55%,
+      rgba(255, 255, 255, 0.02) 100%
+    );
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .ui-team-slot--filled > * {
+    position: relative;
+    z-index: 1;
+  }
+
+  .ui-team-slot--filled:hover {
+    transform: translateY(-1px) scale(1.01);
+    filter: brightness(1.03);
+  }
+
+  /* "me" highlight ring */
+  .ui-team-slot--me {
+    border-color: #e8a020;
+    box-shadow:
+      inset 0 0 0 3px rgba(255, 220, 120, 0.4),
+      inset 0 3px 0 rgba(255, 255, 255, 0.42),
+      inset 0 14px 28px -12px rgba(255, 255, 255, 0.35),
+      inset 0 -5px 0 rgba(30, 50, 130, 0.3),
+      0 3px 0 #2a4aaa,
+      0 6px 16px rgba(30, 60, 150, 0.3),
+      0 0 18px rgba(255, 200, 60, 0.35),
+      0 0 36px rgba(255, 200, 60, 0.15);
+  }
+
   /* ── Team area dashed border ── */
 
   .ui-team-area {
-    border: 4px dashed rgba(255, 255, 255, 0.18);
+    border: 4px dashed rgba(255, 255, 255, 1);
     border-radius: 20px;
     padding: 1.5rem;
     transition: border 0.3s ease;
@@ -56,13 +146,61 @@
     border: none;
   }
 
+  /* ── Player avatar bubble ── */
+
+  .ui-team-avatar {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    flex-shrink: 0;
+    border-radius: 999px;
+    border: 2.5px solid #2d5ac0;
+    background: linear-gradient(180deg, #b8e0ff 0%, #6ab4f5 45%, #3a8ce0 100%);
+    box-shadow:
+      inset 0 2px 4px rgba(255, 255, 255, 0.5),
+      inset 0 -3px 4px rgba(30, 60, 140, 0.25),
+      0 2px 0 #2250a8,
+      0 3px 8px rgba(30, 60, 150, 0.3);
+    font-size: 1.1rem;
+    line-height: 1;
+    overflow: hidden;
+  }
+
+  .ui-team-avatar::before {
+    content: '';
+    position: absolute;
+    left: 15%;
+    right: 15%;
+    top: 3px;
+    height: 40%;
+    border-radius: 999px;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.6) 0%, rgba(255, 255, 255, 0.1) 100%);
+    pointer-events: none;
+  }
+
+  /* ── Host crown ── */
+
+  .ui-team-crown {
+    position: absolute;
+    top: -11px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 0.7rem;
+    line-height: 1;
+    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3));
+    z-index: 3;
+  }
+
   /* ── Team label color dot (lobby headers) ── */
 
   .ui-team-dot {
     display: inline-block;
     flex-shrink: 0;
-    width: 1.125rem;
-    height: 1.125rem;
+    width: 1.2rem;
+    height: 1.2rem;
     border-radius: 9999px;
     box-sizing: border-box;
   }
@@ -70,8 +208,9 @@
   .ui-team-dot--blue {
     background: linear-gradient(180deg, #2fd5f7 0%, #0593dc 52%, #086cbf 100%);
     border: 2px solid #044174;
-    box-shadow: 0 0 12px rgba(56, 189, 248, 0.55) inset 0 2px 3px rgba(45, 215, 250, 0.45);
-    /* inset 0 -2px 4px rgba(1, 124, 255, 0.35); */
+    box-shadow:
+      0 0 12px rgba(56, 189, 248, 0.55),
+      inset 0 2px 3px rgba(45, 215, 250, 0.45);
   }
 
   .ui-team-dot--red {
@@ -80,6 +219,5 @@
     box-shadow:
       0 0 12px rgba(251, 113, 133, 0.55),
       inset 0 2px 3px rgba(255, 255, 255, 0.4);
-    /* inset 0 -2px 4px rgba(136, 19, 55, 0.35); */
   }
 }
