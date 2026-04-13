@@ -14,11 +14,11 @@ import type {
 import {
   resolveInteraction,
   applyInteractionSteering,
-  DETECTION_RANGE_FRACTION,
   FIGHT_PROXIMITY_FRACTION,
   FIGHT_COOLDOWN_MS,
 } from '@crayon-world/shared/src/simulation/interactionBehaviors.js';
 import type { EntityProfile, InteractionMatrix, Archetype } from '@crayon-world/shared/src/types.js';
+import { DEFAULT_STYLE_BY_ARCHETYPE } from '@crayon-world/shared/src/types.js';
 
 // ---------------------------------------------------------------------------
 // Schemas
@@ -29,6 +29,7 @@ export class EntitySchema extends Schema {
   @type('number') x: number = 0;
   @type('number') y: number = 0;
   @type('number') hp: number = 1;
+  @type('number') maxHp: number = 1;
   @type('string') name: string = '';
   @type('string') archetype: string = '';
   @type('string') teamId: string = '';
@@ -221,8 +222,9 @@ export class GameRoom extends Room<{ state: GameState }> {
     const dt = deltaMS / 1000;
     const world = WORLD_BOUNDS;
     const worldDiag = Math.sqrt(world.width * world.width + world.height * world.height);
-    const detectionRange = worldDiag * DETECTION_RANGE_FRACTION;
     const fightProximity = worldDiag * FIGHT_PROXIMITY_FRACTION;
+    const consumeRadius = worldDiag * 0.05;
+    const spawnOrigins = new Map<string, { x: number; y: number }>();
 
     // Decrement fight cooldowns
     for (const [key, remaining] of this._fightCooldowns) {
@@ -251,12 +253,19 @@ export class GameRoom extends Room<{ state: GameState }> {
       toRemove.push(entityId);
     }
 
+    // Build per-tick team lookup so interaction resolution can force hostility
+    // between opposing teams and peace within a team, regardless of matrix.
+    const teamLookup = new Map<string, string>();
+    for (const [id, schema] of this.state.entities) {
+      if (schema.teamId) teamLookup.set(id, schema.teamId);
+    }
+
     for (const [entityId, state] of this._entityStates) {
       // Skip dying entities — handled in toRemove above
       if (this._dyingEntities.has(entityId)) continue;
 
       let newState: EntityState;
-      const isMovable = state.archetype !== 'rooted' && state.archetype !== 'stationary';
+      const isMovable = state.archetype === 'walking' || state.archetype === 'flying';
 
       // Resolve interaction steering if matrix exists, entity is movable, and not bouncing
       const isBouncing = this._bounceCooldowns.has(entityId);
@@ -268,7 +277,8 @@ export class GameRoom extends Room<{ state: GameState }> {
           this._dyingEntities,
           this._interactionMatrix,
           this._nameIdMap,
-          detectionRange,
+          Infinity,
+          teamLookup,
         );
 
         if (resolved) {
@@ -290,23 +300,56 @@ export class GameRoom extends Room<{ state: GameState }> {
         newState = dispatchBehavior(state, dt, world);
       }
 
-      // Bounce off world borders — reverse velocity and set cooldown to suppress steering
+      // Bounce off world borders — reverse velocity AND reflect heading so
+      // heading-driven behaviors (flying, walking after timer expiry) don't
+      // immediately re-derive a velocity pointing back into the wall.
       const halfSize = 40;
       let bounced = false;
       if (newState.x < halfSize || newState.x > world.width - halfSize) {
         const clampedX = Math.max(halfSize, Math.min(world.width - halfSize, newState.x));
         const vx = 'vx' in newState ? -(newState as { vx: number }).vx : 0;
-        newState = { ...newState, x: clampedX, vx } as EntityState;
+        const patch: Record<string, number> = { x: clampedX, vx };
+        if ('heading' in newState) {
+          patch.heading = Math.PI - (newState as { heading: number }).heading;
+        }
+        newState = { ...newState, ...patch } as EntityState;
         bounced = true;
       }
       if (newState.y < halfSize || newState.y > world.height - halfSize) {
         const clampedY = Math.max(halfSize, Math.min(world.height - halfSize, newState.y));
         const vy = 'vy' in newState ? -(newState as { vy: number }).vy : 0;
-        newState = { ...newState, y: clampedY, vy } as EntityState;
+        const patch: Record<string, number> = { y: clampedY, vy };
+        if ('heading' in newState) {
+          patch.heading = -(newState as { heading: number }).heading;
+        }
+        newState = { ...newState, ...patch } as EntityState;
         bounced = true;
       }
       if (bounced) {
         this._bounceCooldowns.set(entityId, 500); // 500ms cooldown
+      }
+
+      // Spreading consume pass — deal contact damage to nearby non-spreading
+      // entities; a kill this tick triggers a single copy spawn at the victim's
+      // position. Spreading entities never move and ignore the matrix, so this
+      // is the only way they propagate.
+      if (newState.archetype === 'spreading') {
+        for (const [victimId, victimState] of this._entityStates) {
+          if (victimId === entityId) continue;
+          if (victimState.archetype === 'spreading') continue;
+          if (this._dyingEntities.has(victimId)) continue;
+          const dx = victimState.x - newState.x;
+          const dy = victimState.y - newState.y;
+          if (dx * dx + dy * dy > consumeRadius * consumeRadius) continue;
+
+          const alreadyDying = this._dyingEntities.has(victimId);
+          this._handleFightContact(entityId, victimId, toRemove);
+          if (!alreadyDying && this._dyingEntities.has(victimId)) {
+            spawnOrigins.set(entityId, { x: victimState.x, y: victimState.y });
+            newState = { ...(newState as SpreadingState), pendingSpawn: true };
+            break;
+          }
+        }
       }
 
       // Handle spreading pendingSpawn
@@ -316,17 +359,34 @@ export class GameRoom extends Room<{ state: GameState }> {
           // Clear the flag
           newState = { ...spreadState, pendingSpawn: false };
 
-          // Create a new entity copy
           const newEntityId = crypto.randomUUID();
-          const offsetX = (Math.random() - 0.5) * 2 * spreadState.spawnRadius;
-          const offsetY = (Math.random() - 0.5) * 2 * spreadState.spawnRadius;
-          const spawnX = Math.max(halfSize, Math.min(world.width - halfSize, spreadState.x + offsetX));
-          const spawnY = Math.max(halfSize, Math.min(world.height - halfSize, spreadState.y + offsetY));
+
+          // Spawn at the consumed victim's position when available; otherwise
+          // fall back to a random offset around the spreader.
+          const origin = spawnOrigins.get(entityId);
+          const offsetX = origin ? 0 : (Math.random() - 0.5) * 2 * spreadState.spawnRadius;
+          const offsetY = origin ? 0 : (Math.random() - 0.5) * 2 * spreadState.spawnRadius;
+          const baseX = origin?.x ?? spreadState.x;
+          const baseY = origin?.y ?? spreadState.y;
+          const spawnX = Math.max(halfSize, Math.min(world.width - halfSize, baseX + offsetX));
+          const spawnY = Math.max(halfSize, Math.min(world.height - halfSize, baseY + offsetY));
 
           // Get original profile for copying
           const originalProfile = this._entityProfiles.get(entityId);
 
-          const newEntityState = initEntityState('spreading', originalProfile?.speed ?? 3, spawnX, spawnY);
+          const newEntityState = initEntityState(
+            originalProfile
+              ? originalProfile
+              : {
+                  archetype: 'spreading',
+                  movementStyle: 'creeping',
+                  speed: 3,
+                  agility: 5,
+                  energy: 5,
+                },
+            spawnX,
+            spawnY,
+          );
           const newCopyState = { ...newEntityState as SpreadingState, isACopy: true };
 
           const newSchema = new EntitySchema();
@@ -334,7 +394,8 @@ export class GameRoom extends Room<{ state: GameState }> {
           newSchema.entityId = newEntityId;
           newSchema.x = spawnX;
           newSchema.y = spawnY;
-          newSchema.hp = 1;
+          newSchema.hp = originalProfile?.maxHealth ?? 1;
+          newSchema.maxHp = originalProfile?.maxHealth ?? 1;
           newSchema.name = originalSchema?.name ?? '';
           newSchema.archetype = 'spreading';
           newSchema.teamId = originalSchema?.teamId ?? '';
@@ -411,9 +472,10 @@ export class GameRoom extends Room<{ state: GameState }> {
         schema.ownerSessionId = sessionId;
         schema.x = x;
         schema.y = y;
-        schema.hp = 1;
+        schema.hp = profile.maxHealth;
+        schema.maxHp = profile.maxHealth;
 
-        const entityState = initEntityState(profile.archetype as Archetype, profile.speed, x, y);
+        const entityState = initEntityState(profile, x, y);
 
         this.state.entities.set(entityId, schema);
         this._entityStates.set(entityId, entityState);
@@ -517,8 +579,13 @@ export class GameRoom extends Room<{ state: GameState }> {
     const targetSchema = this.state.entities.get(targetId);
     if (!targetSchema) return;
 
-    // Decrement HP
-    targetSchema.hp = targetSchema.hp - 1;
+    // Decrement HP. Attack damage scales with attacker speed (fast = more dangerous).
+    // Fallback to a flat 10 if the attacker profile is missing.
+    const attackerProfile = this._entityProfiles.get(attackerId);
+    const damage = attackerProfile
+      ? Math.max(5, Math.round(5 + attackerProfile.speed))
+      : 10;
+    targetSchema.hp = Math.max(0, targetSchema.hp - damage);
 
     // Set cooldown
     this._fightCooldowns.set(cooldownKey, FIGHT_COOLDOWN_MS);
@@ -568,6 +635,18 @@ export class GameRoom extends Room<{ state: GameState }> {
       teamId: string;
     };
 
+    // Build a profile using defaults for fields the client message omits.
+    const profile: EntityProfile = {
+      name,
+      archetype,
+      movementStyle: (data.movementStyle as EntityProfile['movementStyle'])
+        ?? DEFAULT_STYLE_BY_ARCHETYPE[archetype],
+      speed,
+      agility: typeof data.agility === 'number' ? data.agility : 5,
+      energy: typeof data.energy === 'number' ? data.energy : 5,
+      maxHealth: typeof data.maxHealth === 'number' ? data.maxHealth : 30,
+    };
+
     // Create EntitySchema for network sync
     const schema = new EntitySchema();
     schema.entityId = entityId;
@@ -576,19 +655,11 @@ export class GameRoom extends Room<{ state: GameState }> {
     schema.teamId = teamId;
     schema.x = x;
     schema.y = y;
-    schema.hp = 1;
+    schema.hp = profile.maxHealth;
+    schema.maxHp = profile.maxHealth;
 
     // Create EntityState for server-side simulation
-    const entityState = initEntityState(archetype, speed, x, y);
-
-    // Create EntityProfile for interaction resolution
-    const profile: EntityProfile = {
-      name,
-      archetype,
-      traits: [],
-      role: '',
-      speed,
-    };
+    const entityState = initEntityState(profile, x, y);
 
     this.state.entities.set(entityId, schema);
     this._entityStates.set(entityId, entityState);
@@ -766,6 +837,10 @@ export class GameRoom extends Room<{ state: GameState }> {
    * Returns 'red', 'blue', 'draw', or null (game still ongoing).
    */
   _computeWinner(): 'red' | 'blue' | 'draw' | null {
+    // The full round count is always played — no mid-game elimination.
+    // Player forfeit (last teammate disconnects) is handled separately in onLeave.
+    if (this.state.currentRound < this.state.maxRounds) return null;
+
     let red = 0;
     let blue = 0;
     this.state.entities.forEach((entity) => {
@@ -773,20 +848,9 @@ export class GameRoom extends Room<{ state: GameState }> {
       else if (entity.teamId === 'blue') blue++;
     });
 
-    // Elimination: one or both teams at 0
-    if (red === 0 && blue === 0) return 'draw';
-    if (red === 0) return 'blue';
-    if (blue === 0) return 'red';
-
-    // Round limit reached
-    if (this.state.currentRound >= this.state.maxRounds) {
-      if (red > blue) return 'red';
-      if (blue > red) return 'blue';
-      return 'draw';
-    }
-
-    // Game still ongoing
-    return null;
+    if (red > blue) return 'red';
+    if (blue > red) return 'blue';
+    return 'draw';
   }
 
   /**

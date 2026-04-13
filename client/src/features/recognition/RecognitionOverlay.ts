@@ -79,13 +79,14 @@ export class RecognitionOverlay {
       'mb-3.5 inline-block rounded bg-neutral-800 px-2.5 py-0.5 text-[0.7em] font-bold tracking-[0.1em] text-white uppercase';
     archetypeEl.textContent = profile.archetype.toUpperCase();
 
-    const traitsEl = document.createElement('div');
-    traitsEl.className = 'mb-2.5 text-[0.9em] italic text-neutral-600';
-    traitsEl.textContent = profile.traits.join(', ');
+    const styleEl = document.createElement('div');
+    styleEl.className = 'mb-2.5 text-[0.9em] italic text-neutral-600';
+    styleEl.textContent =
+      profile.movementStyle.charAt(0).toUpperCase() + profile.movementStyle.slice(1);
 
-    const roleEl = document.createElement('div');
-    roleEl.className = 'mb-4 text-[0.95em] text-neutral-700';
-    roleEl.textContent = profile.role;
+    const statsEl = document.createElement('div');
+    statsEl.className = 'mb-4 text-[0.85em] text-neutral-700';
+    statsEl.textContent = `HP ${profile.maxHealth} \u00B7 Speed ${profile.speed} \u00B7 Agility ${profile.agility} \u00B7 Energy ${profile.energy}`;
 
     const hintEl = document.createElement('div');
     hintEl.className = 'text-xs text-neutral-400';
@@ -93,8 +94,8 @@ export class RecognitionOverlay {
 
     card.appendChild(nameEl);
     card.appendChild(archetypeEl);
-    card.appendChild(traitsEl);
-    card.appendChild(roleEl);
+    card.appendChild(styleEl);
+    card.appendChild(statsEl);
     card.appendChild(hintEl);
     document.body.appendChild(card);
 

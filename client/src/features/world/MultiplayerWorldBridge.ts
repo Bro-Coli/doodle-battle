@@ -2,6 +2,7 @@ import type { Room } from '@colyseus/sdk';
 import { Assets, Texture } from 'pixi.js';
 import type { WorldStage } from './WorldStage';
 import type { Archetype, EntityProfile } from '@crayon-world/shared/src/types';
+import { DEFAULT_STYLE_BY_ARCHETYPE } from '@crayon-world/shared/src/types';
 
 /**
  * Lightweight shape matching EntitySchema fields received via onStateChange.
@@ -12,6 +13,7 @@ interface EntitySchemaLike {
   x: number;
   y: number;
   hp: number;
+  maxHp: number;
   name: string;
   archetype: string;
   teamId: string;
@@ -125,9 +127,11 @@ export class MultiplayerWorldBridge {
           const profile: EntityProfile = {
             name: schema.name,
             archetype: schema.archetype as Archetype,
-            traits: [],
-            role: '',
+            movementStyle: DEFAULT_STYLE_BY_ARCHETYPE[schema.archetype as Archetype],
             speed: 0,
+            agility: 5,
+            energy: 5,
+            maxHealth: schema.maxHp ?? 1,
           };
           // Resolve texture: own entity → captured drawing, copy → parent's texture, otherwise → server-sent
           const isMyEntity = this._room && schema.ownerSessionId === this._room.sessionId;

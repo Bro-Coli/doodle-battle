@@ -48,8 +48,12 @@ function makeSpawnMsg(overrides: Record<string, unknown> = {}) {
     entityId: 'entity-1',
     name: 'Wolf',
     archetype: 'walking',
+    movementStyle: 'prowling',
     teamId: 'red',
     speed: 5,
+    agility: 5,
+    energy: 5,
+    maxHealth: 1, // tests assume one-hit kills
     x: 100,
     y: 200,
     ...overrides,

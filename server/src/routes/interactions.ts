@@ -54,7 +54,6 @@ router.post('/', async (req, res) => {
   const promptEntities = uniqueProfiles.map((profile, index) => ({
     id: index,
     name: profile.name,
-    role: profile.role,
   }));
 
   if (promptEntities.length > 10) {

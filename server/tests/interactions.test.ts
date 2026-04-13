@@ -87,25 +87,31 @@ async function post(port: number, body: unknown): Promise<{ status: number; data
 const wolfProfile: EntityProfile = {
   name: 'Wolf',
   archetype: 'walking',
-  traits: ['predatory', 'pack animal'],
-  role: 'Apex predator',
+  movementStyle: 'prowling',
   speed: 7,
+  agility: 6,
+  energy: 5,
+  maxHealth: 45,
 };
 
 const eagleProfile: EntityProfile = {
   name: 'Eagle',
   archetype: 'flying',
-  traits: ['sharp vision'],
-  role: 'Aerial hunter',
+  movementStyle: 'swooping',
   speed: 8,
+  agility: 6,
+  energy: 5,
+  maxHealth: 30,
 };
 
 const oakProfile: EntityProfile = {
   name: 'Oak',
   archetype: 'rooted',
-  traits: ['sturdy', 'tall'],
-  role: 'Ancient forest tree',
-  speed: 0,
+  movementStyle: 'swaying',
+  speed: 1,
+  agility: 1,
+  energy: 2,
+  maxHealth: 80,
 };
 
 // ---- Tests ----

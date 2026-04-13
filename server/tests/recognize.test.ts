@@ -104,8 +104,8 @@ describe('POST /api/recognize — mock mode', () => {
       expect(['walking', 'flying', 'rooted', 'spreading', 'drifting', 'stationary']).toContain(
         profile['archetype'],
       );
-      expect(Array.isArray(profile['traits'])).toBe(true);
-      expect(typeof profile['role']).toBe('string');
+      expect(typeof profile['movementStyle']).toBe('string');
+      expect(typeof profile['maxHealth']).toBe('number');
     } finally {
       await stopServer(server);
     }
@@ -148,8 +148,11 @@ describe('POST /api/recognize — real mode with mocked Anthropic', () => {
           text: JSON.stringify({
             name: 'Dragon',
             archetype: 'flying',
-            traits: ['fierce', 'scaly'],
-            role: 'Ancient winged predator',
+            movementStyle: 'flapping',
+            speed: 7,
+            agility: 5,
+            energy: 6,
+            maxHealth: 90,
           }),
         },
       ],
@@ -231,8 +234,11 @@ describe('POST /api/recognize — real mode with mocked Anthropic', () => {
     const wolfProfile = {
       name: 'Wolf',
       archetype: 'walking',
-      traits: ['predatory', 'pack animal'],
-      role: 'Apex predator',
+      movementStyle: 'prowling',
+      speed: 7,
+      agility: 6,
+      energy: 5,
+      maxHealth: 45,
     };
     // Both calls return the same entity name
     mockCreate.mockResolvedValue({

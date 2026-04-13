@@ -386,7 +386,7 @@ export function GameScreen(): React.JSX.Element {
       await app.init({
         resizeTo: window,
         autoDensity: true,
-        background: '#1a1035',
+        background: '#3E46E7',
       });
       app.canvas.className = 'block h-screen w-screen';
       host.appendChild(app.canvas);

@@ -134,24 +134,20 @@ describe('onCreate maxRounds option', () => {
 // ---------------------------------------------------------------------------
 
 describe('_computeWinner', () => {
-  it('returns blue when red has 0 entities and blue has entities', () => {
+  it('returns null before the round limit even if one team has 0 entities', () => {
     const { room, anyRoom } = setupRoom();
     addEntity(room, 'b1', 'blue', 'p2');
-    // No red entities
-    expect(anyRoom._computeWinner()).toBe('blue');
+    // No red entities — but the full round count must still be played.
+    room.state.currentRound = 2;
+    room.state.maxRounds = 5;
+    expect(anyRoom._computeWinner()).toBeNull();
   });
 
-  it('returns red when blue has 0 entities and red has entities', () => {
+  it('returns null before the round limit when both teams have 0 entities', () => {
     const { room, anyRoom } = setupRoom();
-    addEntity(room, 'r1', 'red', 'p1');
-    // No blue entities
-    expect(anyRoom._computeWinner()).toBe('red');
-  });
-
-  it('returns draw when both teams have 0 entities', () => {
-    const { room, anyRoom } = setupRoom();
-    // No entities at all
-    expect(anyRoom._computeWinner()).toBe('draw');
+    room.state.currentRound = 2;
+    room.state.maxRounds = 5;
+    expect(anyRoom._computeWinner()).toBeNull();
   });
 
   it('returns null when both teams have entities and round limit not reached', () => {
@@ -177,6 +173,13 @@ describe('_computeWinner', () => {
     const { room, anyRoom } = setupRoom();
     addEntity(room, 'r1', 'red', 'p1');
     addEntity(room, 'b1', 'blue', 'p2');
+    room.state.currentRound = 5;
+    room.state.maxRounds = 5;
+    expect(anyRoom._computeWinner()).toBe('draw');
+  });
+
+  it('returns draw at round limit when both teams have 0 entities', () => {
+    const { room, anyRoom } = setupRoom();
     room.state.currentRound = 5;
     room.state.maxRounds = 5;
     expect(anyRoom._computeWinner()).toBe('draw');
@@ -237,19 +240,33 @@ describe('_advancePhase results->draw win condition', () => {
     expect(room.state.currentRound).toBe(2);
   });
 
-  it('transitions to finished when _computeWinner returns non-null', () => {
+  it('transitions to finished when the final round completes', () => {
     const { room, anyRoom } = setupRoom();
     room.state.currentPhase = 'results';
-    // Only blue entities — red wins... wait, blue team has entities so blue should win
+    room.state.currentRound = 4;
+    room.state.maxRounds = 5;
+    // Only blue entities — blue will win at the round limit.
     addEntity(room, 'b1', 'blue', 'p2');
-    // No red entities
 
     anyRoom._advancePhase();
 
     expect(room.state.currentPhase).toBe('finished');
   });
 
-  it('transitions to draw when _computeWinner returns null (both teams alive)', () => {
+  it('transitions to draw phase mid-game even if one team is wiped', () => {
+    const { room, anyRoom } = setupRoom();
+    room.state.currentPhase = 'results';
+    room.state.currentRound = 1;
+    room.state.maxRounds = 5;
+    // No red entities — but the round limit has not been reached, so we keep playing.
+    addEntity(room, 'b1', 'blue', 'p2');
+
+    anyRoom._advancePhase();
+
+    expect(room.state.currentPhase).toBe('draw');
+  });
+
+  it('transitions to draw when both teams alive and round limit not reached', () => {
     const { room, anyRoom } = setupRoom();
     room.state.currentPhase = 'results';
     room.state.currentRound = 1;
@@ -260,18 +277,6 @@ describe('_advancePhase results->draw win condition', () => {
     anyRoom._advancePhase();
 
     expect(room.state.currentPhase).toBe('draw');
-  });
-
-  it('does not set phase to draw when winner found', () => {
-    const { room, anyRoom } = setupRoom();
-    room.state.currentPhase = 'results';
-    addEntity(room, 'r1', 'red', 'p1');
-    // No blue entities — red wins
-
-    anyRoom._advancePhase();
-
-    expect(room.state.currentPhase).not.toBe('draw');
-    expect(room.state.currentPhase).toBe('finished');
   });
 });
 
@@ -300,7 +305,7 @@ describe('kill tracking', () => {
     const { room, anyRoom } = setupRoom();
     addEntity(room, 'attacker', 'red', 'p1');
     const target = addEntity(room, 'target', 'blue', 'p2');
-    target.hp = 3; // high HP — won't die
+    target.hp = 100; // high HP — won't die from a single hit
 
     const toRemove: string[] = [];
     anyRoom._handleFightContact('attacker', 'target', toRemove);

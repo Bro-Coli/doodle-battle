@@ -2,32 +2,14 @@ import type { SpreadingState } from '../EntitySimulation';
 import type { WorldBounds } from '../EntitySimulation';
 
 /**
- * Signals pendingSpawn at intervals. Copies never spawn.
- * Pure function — no mutation, no PixiJS imports.
+ * Spreading entities do not move or self-spawn on a timer. `pendingSpawn` is
+ * set externally by the simulation driver when the entity consumes (kills) a
+ * victim via proximity damage.
  */
 export function updateSpreading(
   state: SpreadingState,
-  dt: number,
+  _dt: number,
   _world: WorldBounds,
 ): SpreadingState {
-  // Copies never spread — return unchanged
-  if (state.isACopy) {
-    return state;
-  }
-
-  const newSpawnTimer = state.spawnTimer - dt * 1000;
-
-  if (newSpawnTimer <= 0) {
-    return {
-      ...state,
-      spawnTimer: state.spawnInterval,
-      pendingSpawn: true,
-    };
-  }
-
-  return {
-    ...state,
-    spawnTimer: newSpawnTimer,
-    pendingSpawn: false,
-  };
+  return state;
 }

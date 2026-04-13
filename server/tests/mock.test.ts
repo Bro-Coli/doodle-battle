@@ -6,12 +6,9 @@ describe('MOCK_ENTITIES', () => {
   it('contains exactly 6 entities, one per archetype', () => {
     expect(MOCK_ENTITIES).toHaveLength(6);
     const archetypes = MOCK_ENTITIES.map((e) => e.archetype);
-    expect(archetypes).toContain('walking');
-    expect(archetypes).toContain('flying');
-    expect(archetypes).toContain('rooted');
-    expect(archetypes).toContain('spreading');
-    expect(archetypes).toContain('drifting');
-    expect(archetypes).toContain('stationary');
+    for (const a of ['walking', 'flying', 'rooted', 'spreading', 'drifting', 'stationary']) {
+      expect(archetypes).toContain(a);
+    }
   });
 
   it('each entity has all required EntityProfile fields', () => {
@@ -19,19 +16,22 @@ describe('MOCK_ENTITIES', () => {
       expect(typeof entity.name).toBe('string');
       expect(entity.name.length).toBeGreaterThan(0);
       expect(typeof entity.archetype).toBe('string');
-      expect(Array.isArray(entity.traits)).toBe(true);
-      expect(entity.traits.length).toBeGreaterThan(0);
-      expect(typeof entity.role).toBe('string');
-      expect(entity.role.length).toBeGreaterThan(0);
+      expect(typeof entity.movementStyle).toBe('string');
+      expect(typeof entity.speed).toBe('number');
+      expect(typeof entity.agility).toBe('number');
+      expect(typeof entity.energy).toBe('number');
+      expect(typeof entity.maxHealth).toBe('number');
     }
   });
 
-  it('each entity has a valid speed between 1 and 10', () => {
+  it('each 1-10 stat is within range and maxHealth is 1-100', () => {
     for (const entity of MOCK_ENTITIES) {
-      expect(typeof entity.speed).toBe('number');
-      expect(Number.isInteger(entity.speed)).toBe(true);
-      expect(entity.speed).toBeGreaterThanOrEqual(1);
-      expect(entity.speed).toBeLessThanOrEqual(10);
+      for (const field of ['speed', 'agility', 'energy'] as const) {
+        expect(entity[field]).toBeGreaterThanOrEqual(1);
+        expect(entity[field]).toBeLessThanOrEqual(10);
+      }
+      expect(entity.maxHealth).toBeGreaterThanOrEqual(1);
+      expect(entity.maxHealth).toBeLessThanOrEqual(100);
     }
   });
 });
@@ -46,16 +46,10 @@ describe('isMockMode', () => {
   });
 
   afterEach(() => {
-    if (savedApiKey === undefined) {
-      delete process.env.ANTHROPIC_API_KEY;
-    } else {
-      process.env.ANTHROPIC_API_KEY = savedApiKey;
-    }
-    if (savedMockAi === undefined) {
-      delete process.env.MOCK_AI;
-    } else {
-      process.env.MOCK_AI = savedMockAi;
-    }
+    if (savedApiKey === undefined) delete process.env.ANTHROPIC_API_KEY;
+    else process.env.ANTHROPIC_API_KEY = savedApiKey;
+    if (savedMockAi === undefined) delete process.env.MOCK_AI;
+    else process.env.MOCK_AI = savedMockAi;
   });
 
   it('returns true when ANTHROPIC_API_KEY is undefined', () => {

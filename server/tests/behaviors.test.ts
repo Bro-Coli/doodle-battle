@@ -46,6 +46,9 @@ describe('updateRooted — no drift', () => {
   it('x stays near originX after many ticks', () => {
     let state: RootedState = {
       archetype: 'rooted',
+      movementStyle: 'swaying',
+      agility: 5,
+      energy: 5,
       x: 400,
       y: 300,
       originX: 400,
@@ -64,6 +67,9 @@ describe('updateFlying — no vertical drift', () => {
   it('bobOriginY stays near initial value after many ticks', () => {
     let state: FlyingState = {
       archetype: 'flying',
+      movementStyle: 'flapping',
+      agility: 5,
+      energy: 5,
       x: 400,
       y: 300,
       vx: 0,
@@ -73,6 +79,11 @@ describe('updateFlying — no vertical drift', () => {
       speed: 60,
       bobPhase: 0,
       bobOriginY: 300,
+      swoopPhase: 0,
+      hoverOriginX: 400,
+      hoverOriginY: 300,
+      dartBurstTimer: 0,
+      dartIdleTimer: 0,
     };
     const dt = 0.016;
     for (let i = 0; i < 500; i++) {
@@ -84,35 +95,22 @@ describe('updateFlying — no vertical drift', () => {
 });
 
 describe('updateSpreading', () => {
-  it('isACopy suppresses pendingSpawn', () => {
+  it('never self-triggers pendingSpawn — spreading is driven by consume kills', () => {
     const state: SpreadingState = {
       archetype: 'spreading',
+      movementStyle: 'creeping',
+      agility: 5,
+      energy: 5,
       x: 400,
       y: 300,
       spawnTimer: 0,
       spawnInterval: 4000,
       spawnRadius: 60,
-      isACopy: true,
-      pendingSpawn: false,
-    };
-    const result = updateSpreading(state, 0.02, world);
-    expect(result.pendingSpawn).toBe(false);
-  });
-
-  it('parent triggers pendingSpawn when timer expires', () => {
-    const state: SpreadingState = {
-      archetype: 'spreading',
-      x: 400,
-      y: 300,
-      spawnTimer: 10, // 10ms
-      spawnInterval: 4000,
-      spawnRadius: 60,
       isACopy: false,
       pendingSpawn: false,
     };
-    // dt = 0.02 means 20ms passes, which exceeds spawnTimer of 10ms
-    const result = updateSpreading(state, 0.02, world);
-    expect(result.pendingSpawn).toBe(true);
+    const result = updateSpreading(state, 10, world);
+    expect(result.pendingSpawn).toBe(false);
   });
 });
 
@@ -120,6 +118,9 @@ describe('updateStationary', () => {
   it('returns same state reference', () => {
     const state: StationaryState = {
       archetype: 'stationary',
+      movementStyle: 'still',
+      agility: 1,
+      energy: 1,
       x: 400,
       y: 300,
     };
@@ -132,6 +133,9 @@ describe('updateWalking — state machine', () => {
   it('decrements pauseTimer when pausing', () => {
     const state: WalkingState = {
       archetype: 'walking',
+      movementStyle: 'prowling',
+      agility: 5,
+      energy: 5,
       x: 400,
       y: 300,
       vx: 0,
@@ -140,6 +144,9 @@ describe('updateWalking — state machine', () => {
       speed: 60,
       pauseTimer: 500,
       walkTimer: 0,
+      hopPhase: 0,
+      hopInterval: 0,
+      hopOriginY: 300,
     };
     const result = updateWalking(state, 0.1, world); // 100ms
     expect(result.pauseTimer).toBeLessThan(500);
@@ -148,6 +155,9 @@ describe('updateWalking — state machine', () => {
   it('transitions from walk to pause when walkTimer expires', () => {
     const state: WalkingState = {
       archetype: 'walking',
+      movementStyle: 'prowling',
+      agility: 5,
+      energy: 5,
       x: 400,
       y: 300,
       vx: 30,
@@ -156,6 +166,9 @@ describe('updateWalking — state machine', () => {
       speed: 60,
       pauseTimer: 0,
       walkTimer: 10, // 10ms
+      hopPhase: 0,
+      hopInterval: 0,
+      hopOriginY: 300,
     };
     // dt = 0.02 means 20ms passes, which exceeds walkTimer of 10ms
     const result = updateWalking(state, 0.02, world);

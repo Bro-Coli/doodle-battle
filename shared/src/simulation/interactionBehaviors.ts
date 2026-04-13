@@ -175,18 +175,19 @@ export function resolveInteraction<T>(
   matrix: InteractionMatrix,
   nameIdMap: Map<string, string>,
   detectionRange: number,
+  teamLookup?: Map<T, string>,
 ): ResolvedInteraction<T> | null {
   const selfProfile = entityProfiles.get(selfContainer);
   if (!selfProfile) return null;
 
-  const selfId = nameIdMap.get(selfProfile.name);
-  if (!selfId) return null;
-
-  const selfEntry = matrix.entries.find((e) => e.entityId === selfId);
-  if (!selfEntry) return null;
-
   const selfState = entityStates.get(selfContainer);
   if (!selfState) return null;
+
+  const selfId = nameIdMap.get(selfProfile.name);
+  const selfEntry =
+    selfId !== undefined ? matrix.entries.find((e) => e.entityId === selfId) : undefined;
+
+  const selfTeam = teamLookup?.get(selfContainer);
 
   let nearestDistance = Infinity;
   let nearestContainer: T | null = null;
@@ -203,9 +204,29 @@ export function resolveInteraction<T>(
     if (!profile) continue;
 
     const otherId = nameIdMap.get(profile.name);
-    if (otherId === undefined) continue;
+    const matrixRel =
+      otherId !== undefined ? selfEntry?.relationships[otherId] : undefined;
+    const otherTeam = teamLookup?.get(container);
 
-    const relType = selfEntry.relationships[otherId];
+    let relType: InteractionType | undefined;
+    if (selfTeam && otherTeam && selfTeam === otherTeam) {
+      // Same team: never hostile. Downgrade chase/fight to ignore, keep
+      // befriend/flee so symbiotic behaviors still play out.
+      relType = matrixRel === 'chase' || matrixRel === 'fight' ? 'ignore' : matrixRel;
+    } else if (
+      selfTeam &&
+      otherTeam &&
+      selfTeam !== otherTeam &&
+      profile.name === selfProfile.name
+    ) {
+      // Opposing teams AND same species: force fight. Dedup collapses same-name
+      // entities in the matrix, so without this they would resolve to ignore.
+      relType = 'fight';
+    } else {
+      // Different teams with different species, or no team info: trust matrix.
+      relType = matrixRel;
+    }
+
     if (!relType || relType === 'ignore') continue;
 
     // Calculate distance

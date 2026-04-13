@@ -32,12 +32,12 @@ Rules:
  * Builds the user message text for the interaction classification prompt.
  * Entities use stable integer IDs so Haiku cannot rewrite names.
  *
- * @param entities - Array of entities with id, name, and role
+ * @param entities - Array of entities with id and name
  * @returns User content string to send as the user message
  */
 export function buildInteractionUserContent(
-  entities: Array<{ id: number; name: string; role: string }>
+  entities: Array<{ id: number; name: string }>
 ): string {
-  const lines = entities.map((e) => `- id ${e.id}: ${e.name} (${e.role})`);
+  const lines = entities.map((e) => `- id ${e.id}: ${e.name}`);
   return `Classify interactions for these entities:\n${lines.join('\n')}`;
 }

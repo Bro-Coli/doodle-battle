@@ -4,117 +4,146 @@ import { validateEntityProfile, mysteryBlob } from '../src/recognition/validateP
 const VALID_ARCHETYPES = ['walking', 'flying', 'rooted', 'spreading', 'drifting', 'stationary'];
 
 describe('validateEntityProfile', () => {
-  it('returns valid EntityProfile for well-formed input', () => {
+  it('returns a valid EntityProfile for well-formed input', () => {
     const result = validateEntityProfile({
       name: 'Wolf',
       archetype: 'walking',
-      traits: ['predatory'],
-      role: 'Apex predator',
+      movementStyle: 'prowling',
       speed: 7,
+      agility: 6,
+      energy: 5,
+      maxHealth: 45,
     });
     expect(result).toEqual({
       name: 'Wolf',
       archetype: 'walking',
-      traits: ['predatory'],
-      role: 'Apex predator',
+      movementStyle: 'prowling',
       speed: 7,
+      agility: 6,
+      energy: 5,
+      maxHealth: 45,
     });
   });
 
-  describe('speed validation', () => {
-    it('includes speed when valid', () => {
+  describe('name normalization', () => {
+    it('strips " or " alternatives and keeps the first option', () => {
       const result = validateEntityProfile({
-        name: 'Wolf',
-        archetype: 'walking',
-        traits: ['predatory'],
-        role: 'Apex predator',
+        name: 'Eagle or Hawk',
+        archetype: 'flying',
+        movementStyle: 'swooping',
         speed: 7,
       });
-      expect(result).not.toBeNull();
-      expect(result!.speed).toBe(7);
+      expect(result!.name).toBe('Eagle');
     });
 
-    it('defaults speed to 5 when missing', () => {
+    it('strips "/" alternatives', () => {
+      const result = validateEntityProfile({
+        name: 'dog/cat',
+        archetype: 'walking',
+        movementStyle: 'prowling',
+      });
+      expect(result!.name).toBe('Dog');
+    });
+
+    it('Title-Cases lowercase names', () => {
+      const result = validateEntityProfile({
+        name: 'red dragon',
+        archetype: 'flying',
+        movementStyle: 'flapping',
+      });
+      expect(result!.name).toBe('Red Dragon');
+    });
+
+    it('Title-Cases ALL-CAPS names', () => {
+      const result = validateEntityProfile({
+        name: 'DRAGON',
+        archetype: 'flying',
+        movementStyle: 'flapping',
+      });
+      expect(result!.name).toBe('Dragon');
+    });
+
+    it('handles hyphenated names', () => {
+      const result = validateEntityProfile({
+        name: 'saber-toothed tiger',
+        archetype: 'walking',
+        movementStyle: 'prowling',
+      });
+      expect(result!.name).toBe('Saber-Toothed Tiger');
+    });
+  });
+
+  describe('movementStyle validation', () => {
+    it('accepts a valid style for the archetype', () => {
+      const result = validateEntityProfile({
+        name: 'Hawk',
+        archetype: 'flying',
+        movementStyle: 'swooping',
+      });
+      expect(result!.movementStyle).toBe('swooping');
+    });
+
+    it('falls back to archetype default for invalid style', () => {
       const result = validateEntityProfile({
         name: 'Wolf',
         archetype: 'walking',
-        traits: ['predatory'],
-        role: 'Apex predator',
+        movementStyle: 'swooping', // wrong archetype
       });
-      expect(result).not.toBeNull();
-      expect(result!.speed).toBe(5);
+      expect(result!.movementStyle).toBe('prowling');
     });
 
-    it('defaults speed to 5 when non-number', () => {
+    it('falls back to default when style is missing', () => {
       const result = validateEntityProfile({
         name: 'Wolf',
         archetype: 'walking',
-        traits: ['predatory'],
-        role: 'Apex predator',
-        speed: 'fast',
       });
-      expect(result).not.toBeNull();
-      expect(result!.speed).toBe(5);
+      expect(result!.movementStyle).toBe('prowling');
+    });
+  });
+
+  describe('numeric clamping', () => {
+    it('clamps speed to 1-10', () => {
+      expect(validateEntityProfile({ name: 'X', archetype: 'walking', speed: 0 })!.speed).toBe(1);
+      expect(validateEntityProfile({ name: 'X', archetype: 'walking', speed: 100 })!.speed).toBe(10);
     });
 
-    it('clamps speed below 1 to 1', () => {
-      const result0 = validateEntityProfile({
-        name: 'Wolf',
+    it('clamps agility and energy to 1-10', () => {
+      const r = validateEntityProfile({
+        name: 'X',
         archetype: 'walking',
-        traits: ['x'],
-        role: 'y',
-        speed: 0,
+        agility: 99,
+        energy: -5,
       });
-      expect(result0!.speed).toBe(1);
-
-      const resultNeg = validateEntityProfile({
-        name: 'Wolf',
-        archetype: 'walking',
-        traits: ['x'],
-        role: 'y',
-        speed: -5,
-      });
-      expect(resultNeg!.speed).toBe(1);
+      expect(r!.agility).toBe(10);
+      expect(r!.energy).toBe(1);
     });
 
-    it('clamps speed above 10 to 10', () => {
-      const result11 = validateEntityProfile({
-        name: 'Wolf',
+    it('clamps maxHealth to 1-100', () => {
+      const r = validateEntityProfile({
+        name: 'X',
         archetype: 'walking',
-        traits: ['x'],
-        role: 'y',
-        speed: 11,
+        maxHealth: 500,
       });
-      expect(result11!.speed).toBe(10);
-
-      const result100 = validateEntityProfile({
-        name: 'Wolf',
-        archetype: 'walking',
-        traits: ['x'],
-        role: 'y',
-        speed: 100,
-      });
-      expect(result100!.speed).toBe(10);
+      expect(r!.maxHealth).toBe(100);
     });
 
-    it('rounds fractional speed', () => {
-      const result57 = validateEntityProfile({
-        name: 'Wolf',
+    it('defaults speed/agility/energy to 5 and maxHealth to 30 when missing', () => {
+      const r = validateEntityProfile({ name: 'X', archetype: 'walking' });
+      expect(r!.speed).toBe(5);
+      expect(r!.agility).toBe(5);
+      expect(r!.energy).toBe(5);
+      expect(r!.maxHealth).toBe(30);
+    });
+
+    it('rounds fractional values', () => {
+      const r = validateEntityProfile({
+        name: 'X',
         archetype: 'walking',
-        traits: ['x'],
-        role: 'y',
         speed: 5.7,
+        maxHealth: 33.3,
       });
-      expect(result57!.speed).toBe(6);
-
-      const result32 = validateEntityProfile({
-        name: 'Wolf',
-        archetype: 'walking',
-        traits: ['x'],
-        role: 'y',
-        speed: 3.2,
-      });
-      expect(result32!.speed).toBe(3);
+      expect(r!.speed).toBe(6);
+      expect(r!.maxHealth).toBe(33);
     });
   });
 
@@ -122,113 +151,51 @@ describe('validateEntityProfile', () => {
     const result = validateEntityProfile({
       name: 'Wolf',
       archetype: 'unknown_type',
-      traits: ['x'],
-      role: 'y',
     });
-    expect(result).not.toBeNull();
     expect(result!.archetype).toBe('stationary');
+    expect(result!.movementStyle).toBe('still');
   });
 
   it('returns null for null input', () => {
     expect(validateEntityProfile(null)).toBeNull();
   });
 
-  it('returns null for empty object (missing required fields)', () => {
+  it('returns null when name is missing or empty', () => {
     expect(validateEntityProfile({})).toBeNull();
+    expect(validateEntityProfile({ name: '', archetype: 'walking' })).toBeNull();
   });
 
-  it('returns null when name is empty string', () => {
-    expect(
-      validateEntityProfile({ name: '', archetype: 'walking', traits: ['x'], role: 'y' }),
-    ).toBeNull();
-  });
-
-  it('returns null when traits is empty array', () => {
-    expect(
-      validateEntityProfile({ name: 'Wolf', archetype: 'walking', traits: [], role: 'x' }),
-    ).toBeNull();
-  });
-
-  it('returns null when role is empty string', () => {
-    expect(
-      validateEntityProfile({ name: 'Wolf', archetype: 'walking', traits: ['x'], role: '' }),
-    ).toBeNull();
-  });
-
-  it('returns null for non-object input (string)', () => {
-    expect(validateEntityProfile('not an object')).toBeNull();
-  });
-
-  it('returns null for non-object input (number)', () => {
+  it('returns null for non-object input', () => {
+    expect(validateEntityProfile('nope')).toBeNull();
     expect(validateEntityProfile(42)).toBeNull();
-  });
-
-  it('validates traits must be array of strings', () => {
-    const result = validateEntityProfile({
-      name: 'Wolf',
-      archetype: 'walking',
-      traits: [1, 2],
-      role: 'Apex predator',
-    });
-    // traits contains non-strings — should return null
-    expect(result).toBeNull();
   });
 
   it('preserves all valid archetypes', () => {
     for (const archetype of VALID_ARCHETYPES) {
-      const result = validateEntityProfile({
-        name: 'Entity',
-        archetype,
-        traits: ['trait'],
-        role: 'A role',
-      });
-      expect(result).not.toBeNull();
-      expect(result!.archetype).toBe(archetype);
+      const r = validateEntityProfile({ name: 'Entity', archetype });
+      expect(r!.archetype).toBe(archetype);
     }
   });
 });
 
 describe('mysteryBlob', () => {
-  it('returns an EntityProfile with name "Mystery Blob"', () => {
+  it('returns a well-formed EntityProfile', () => {
     const blob = mysteryBlob();
     expect(blob.name).toBe('Mystery Blob');
-  });
-
-  it('returns a valid EntityProfile structure', () => {
-    const blob = mysteryBlob();
-    expect(typeof blob.name).toBe('string');
     expect(VALID_ARCHETYPES).toContain(blob.archetype);
-    expect(Array.isArray(blob.traits)).toBe(true);
-    expect(blob.traits.length).toBeGreaterThan(0);
-    expect(typeof blob.role).toBe('string');
-    expect(blob.role.length).toBeGreaterThan(0);
-    expect(typeof blob.speed).toBe('number');
-  });
-
-  it('returns speed 5', () => {
-    const blob = mysteryBlob();
+    expect(typeof blob.movementStyle).toBe('string');
     expect(blob.speed).toBe(5);
+    expect(blob.agility).toBe(5);
+    expect(blob.energy).toBe(5);
+    expect(blob.maxHealth).toBe(30);
   });
 
-  it('returns a random archetype from all 6 archetypes', () => {
-    // Use spyOn to control Math.random
+  it('returns a random archetype', () => {
     const spy = vi.spyOn(Math, 'random');
-
-    spy.mockReturnValue(0); // index 0 = 'walking'
+    spy.mockReturnValue(0);
     expect(mysteryBlob().archetype).toBe('walking');
-
-    spy.mockReturnValue(0.16); // index 0
-    expect(mysteryBlob().archetype).toBe('walking');
-
-    spy.mockReturnValue(0.17); // index 1 = 'flying'
-    expect(mysteryBlob().archetype).toBe('flying');
-
-    spy.mockReturnValue(0.5); // index 3 = 'spreading'
+    spy.mockReturnValue(0.5);
     expect(mysteryBlob().archetype).toBe('spreading');
-
-    spy.mockReturnValue(0.999); // index 5 = 'stationary'
-    expect(mysteryBlob().archetype).toBe('stationary');
-
     spy.mockRestore();
   });
 });

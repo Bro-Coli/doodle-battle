@@ -81,15 +81,12 @@ export class WorldStage {
     app.stage.addChild(this._drawingRoot);
     app.stage.addChild(this._worldRoot);
 
-    // Debug: outline the server's simulation bounds so wall mismatches are obvious.
-    // WORLD_BOUNDS is fixed (1280x720) while the client canvas is resizeTo:window,
-    // so this rectangle should show exactly where the server thinks the walls are.
-    const bounds = new Graphics();
-    bounds
-      .rect(0, 0, WORLD_BOUNDS.width, WORLD_BOUNDS.height)
-      .stroke({ color: 0xff00ff, width: 2, alignment: 0 });
-    bounds.eventMode = 'none';
-    this._worldRoot.addChild(bounds);
+    // White play-area fill — everything outside WORLD_BOUNDS stays on the blue
+    // canvas background, making the gutters visually distinct from the play area.
+    const playArea = new Graphics();
+    playArea.rect(0, 0, WORLD_BOUNDS.width, WORLD_BOUNDS.height).fill({ color: 0xffffff });
+    playArea.eventMode = 'none';
+    this._worldRoot.addChild(playArea);
 
     // Start in draw mode — world is hidden
     this._worldRoot.visible = false;
@@ -235,7 +232,7 @@ export class WorldStage {
     this._worldRoot.addChild(label);
 
     // Initialize simulation state for this entity
-    const state = initEntityState(profile.archetype, profile.speed, entity.x, entity.y);
+    const state = initEntityState(profile, entity.x, entity.y);
     this._entityStates.set(entity, state);
     this._entityTextures.set(entity, texture);
     this._entityProfiles.set(entity, profile);
@@ -414,7 +411,7 @@ export class WorldStage {
     copyLabel.y = copyY - copySpriteH / 2 - 6;
 
     // Initialize state as a copy (isACopy = true, so it never spawns further)
-    const copyState = initEntityState(profile.archetype, profile.speed, copyX, copyY);
+    const copyState = initEntityState(profile, copyX, copyY);
     if (copyState.archetype === 'spreading') {
       (copyState as SpreadingState).isACopy = true;
     }

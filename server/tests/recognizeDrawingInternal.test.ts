@@ -14,9 +14,11 @@ vi.mock('../src/mock-entities.js', () => ({
     {
       name: 'Wolf',
       archetype: 'walking',
-      traits: ['predatory'],
-      role: 'Apex predator',
+      movementStyle: 'prowling',
       speed: 7,
+      agility: 6,
+      energy: 5,
+      maxHealth: 45,
     },
   ],
 }));
@@ -56,7 +58,7 @@ describe('recognizeDrawingInternal', () => {
     expect(result.name).toBe('Mystery Creature');
     expect(result.archetype).toBe('walking');
     expect(result.speed).toBe(3);
-    expect(result.traits).toContain('mysterious');
+    expect(result.movementStyle).toBe('prowling');
   });
 
   it('returns Mystery Creature fallback on malformed JSON response', async () => {
@@ -86,9 +88,11 @@ describe('recognizeDrawingInternal', () => {
               text: JSON.stringify({
                 name: 'Dragon',
                 archetype: 'flying',
-                traits: ['fire-breathing', 'ancient'],
-                role: 'Legendary creature',
+                movementStyle: 'flapping',
                 speed: 9,
+                agility: 5,
+                energy: 6,
+                maxHealth: 90,
               }),
             },
           ],
@@ -118,9 +122,11 @@ describe('recognizeDrawingInternal', () => {
                 text: JSON.stringify({
                   name: 'Cat',
                   archetype: 'walking',
-                  traits: ['nimble'],
-                  role: 'Pet',
+                  movementStyle: 'prowling',
                   speed: 5,
+                  agility: 6,
+                  energy: 5,
+                  maxHealth: 20,
                 }),
               },
             ],

@@ -59,8 +59,10 @@ export async function recognizeDrawingInternal(imageDataUrl: string): Promise<En
   return {
     name: 'Mystery Creature',
     archetype: 'walking',
-    traits: ['mysterious'],
-    role: 'wanderer',
+    movementStyle: 'prowling',
     speed: 3,
+    agility: 5,
+    energy: 5,
+    maxHealth: 30,
   };
 }
