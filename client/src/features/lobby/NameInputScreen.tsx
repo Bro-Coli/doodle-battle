@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { createRoom, joinByCode, quickPlay } from '../../network/ColyseusClient';
 import { navigate } from '../../utils/navigate';
 import { setDisplayName, useDisplayNameStore } from './displayNameStore';
+import { Icon } from '@/ui/icon/Icon';
 
 function getFlow(): 'quick' | 'create' | 'join' {
   const params = new URLSearchParams(window.location.search);
@@ -59,11 +60,19 @@ export function NameInputScreen(): React.JSX.Element {
 
   return (
     <main
-      className="flex min-h-screen w-screen items-center justify-center px-4"
+      className="relative flex min-h-screen w-screen items-center justify-center px-4"
       style={{
         background: 'var(--gradient-lobby)',
       }}
     >
+      <button
+        type="button"
+        onClick={() => navigate('/')}
+        className="ui-icon-button ui-icon-button--sm absolute top-6 left-6 sm:top-4 sm:left-4"
+        aria-label="Back to lobby"
+      >
+        <Icon name="arrowLeft" size={48} decorative />
+      </button>
       <div className="w-full max-w-sm rounded-2xl bg-white/10 p-8 backdrop-blur-sm">
         <h1 className="mb-6 text-center text-2xl font-black uppercase tracking-tight text-white">
           {getTitle(flow)}
@@ -152,22 +161,13 @@ export function NameInputScreen(): React.JSX.Element {
             </p>
           )}
 
-          <div className="mt-2 flex gap-3">
-            <button
-              type="button"
-              onClick={() => navigate('/')}
-              className="flex-1 rounded-lg border border-white/30 py-2 font-bold text-white/70 transition hover:bg-white/10"
-            >
-              Back
-            </button>
-            <button
-              type="submit"
-              disabled={loading}
-              className="flex-1 rounded-lg bg-white/90 py-2 font-black uppercase text-[#1a1035] transition hover:bg-white disabled:opacity-60"
-            >
-              {loading ? 'Connecting…' : getTitle(flow)}
-            </button>
-          </div>
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full rounded-lg bg-white/90 py-2 font-black uppercase text-[#1a1035] transition hover:bg-white disabled:opacity-60"
+          >
+            {loading ? 'Connecting…' : getTitle(flow)}
+          </button>
         </form>
       </div>
     </main>
