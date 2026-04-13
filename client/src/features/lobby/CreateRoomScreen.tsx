@@ -336,83 +336,90 @@ export function CreateRoomScreen() {
 
         {/* Right: Teams + Action */}
         <div className="flex flex-1 flex-col items-center">
-          <div className="ui-team-area w-full">
-            {/* Team headers */}
-            <div className="mb-4 flex w-full items-center">
-              <div className="flex-1 text-center">
-                <span className="inline-flex items-center gap-2 t18-b font-nunito uppercase tracking-wider text-white">
-                  <span className="inline-block h-3.5 w-3.5 rounded-full bg-cyan-400 shadow-[0_0_8px_rgba(34,211,238,0.6)]" />
-                  Team A
-                </span>
-              </div>
-              <div className="w-12" />
-              <div className="flex-1 text-center">
-                <span className="inline-flex items-center gap-2 t18-b font-nunito uppercase tracking-wider text-white">
-                  <span className="inline-block h-3.5 w-3.5 rounded-full bg-rose-400 shadow-[0_0_8px_rgba(251,113,133,0.6)]" />
-                  Team B
-                </span>
-              </div>
+          {!created ? (
+            <div className="ui-team-area flex w-full min-h-[400px] items-center justify-center">
+              <p className="t24-b font-nunito text-center text-white/40">
+                Please create a room to get started!
+              </p>
             </div>
-
-            {/* Team columns */}
-            <div className="flex w-full gap-3">
-              {/* Team A */}
-              <div className="flex flex-1 flex-col gap-3">
-                {Array.from({ length: TEAM_SLOT_COUNT }).map((_, i) => {
-                  const entry = teamAPlayers[i];
-                  return (
-                    <TeamSlot
-                      key={entry ? entry[0] : `a-empty-${i}`}
-                      playerName={entry?.[1].name}
-                      isHost={entry ? entry[0] === hostSessionId : false}
-                      isMe={entry ? entry[0] === mySessionId : false}
-                      isReady={entry?.[1].ready}
-                    />
-                  );
-                })}
-              </div>
-
-              {/* Swap icon */}
-              <div className="flex items-center justify-center">
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white/10">
-                  <SwapIcon />
+          ) : (
+            <div className="ui-team-area w-full">
+              {/* Team headers */}
+              <div className="mb-4 flex w-full items-center">
+                <div className="flex-1 text-center">
+                  <span className="inline-flex items-center gap-2 t18-b font-nunito uppercase tracking-wider text-white">
+                    <span className="inline-block h-3.5 w-3.5 rounded-full bg-cyan-400 shadow-[0_0_8px_rgba(34,211,238,0.6)]" />
+                    Team A
+                  </span>
+                </div>
+                <div className="w-12" />
+                <div className="flex-1 text-center">
+                  <span className="inline-flex items-center gap-2 t18-b font-nunito uppercase tracking-wider text-white">
+                    <span className="inline-block h-3.5 w-3.5 rounded-full bg-rose-400 shadow-[0_0_8px_rgba(251,113,133,0.6)]" />
+                    Team B
+                  </span>
                 </div>
               </div>
 
-              {/* Team B */}
-              <div className="flex flex-1 flex-col gap-3">
-                {Array.from({ length: TEAM_SLOT_COUNT }).map((_, i) => {
-                  const entry = teamBPlayers[i];
-                  return (
-                    <TeamSlot
-                      key={entry ? entry[0] : `b-empty-${i}`}
-                      playerName={entry?.[1].name}
-                      isHost={entry ? entry[0] === hostSessionId : false}
-                      isMe={entry ? entry[0] === mySessionId : false}
-                      isReady={entry?.[1].ready}
-                    />
-                  );
-                })}
+              {/* Team columns */}
+              <div className="flex w-full gap-3">
+                {/* Team A */}
+                <div className="flex flex-1 flex-col gap-3">
+                  {Array.from({ length: TEAM_SLOT_COUNT }).map((_, i) => {
+                    const entry = teamAPlayers[i];
+                    return (
+                      <TeamSlot
+                        key={entry ? entry[0] : `a-empty-${i}`}
+                        playerName={entry?.[1].name}
+                        isHost={entry ? entry[0] === hostSessionId : false}
+                        isMe={entry ? entry[0] === mySessionId : false}
+                        isReady={entry?.[1].ready}
+                      />
+                    );
+                  })}
+                </div>
+
+                {/* Swap icon */}
+                <div className="flex items-center justify-center">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white/10">
+                    <SwapIcon />
+                  </div>
+                </div>
+
+                {/* Team B */}
+                <div className="flex flex-1 flex-col gap-3">
+                  {Array.from({ length: TEAM_SLOT_COUNT }).map((_, i) => {
+                    const entry = teamBPlayers[i];
+                    return (
+                      <TeamSlot
+                        key={entry ? entry[0] : `b-empty-${i}`}
+                        playerName={entry?.[1].name}
+                        isHost={entry ? entry[0] === hostSessionId : false}
+                        isMe={entry ? entry[0] === mySessionId : false}
+                        isReady={entry?.[1].ready}
+                      />
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Status text */}
+              <div className="mt-6 text-center font-nunito t16-b text-white/50">
+                {players.size < 2 && (
+                  <p>
+                    Share the code <span className="font-mono text-white/80">{roomCode}</span> with
+                    friends to join!
+                  </p>
+                )}
+                {players.size >= 2 && !allReady && (
+                  <p>Waiting for all players to ready up…</p>
+                )}
+                {allReady && (
+                  <p className="text-emerald-300">All players ready — start the game!</p>
+                )}
               </div>
             </div>
-
-            {/* Status text */}
-            <div className="mt-6 text-center font-nunito t16-b text-white/50">
-              {!created && <p>Configure settings and create the room!</p>}
-              {created && players.size < 2 && (
-                <p>
-                  Share the code <span className="font-mono text-white/80">{roomCode}</span> with
-                  friends to join!
-                </p>
-              )}
-              {created && players.size >= 2 && !allReady && (
-                <p>Waiting for all players to ready up…</p>
-              )}
-              {created && allReady && (
-                <p className="text-emerald-300">All players ready — start the game!</p>
-              )}
-            </div>
-          </div>
+          )}
 
           {error && (
             <p className="mt-4 rounded-xl bg-red-500/20 px-5 py-2.5 t14-b font-nunito text-red-300">
