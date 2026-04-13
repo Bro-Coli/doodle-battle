@@ -1,7 +1,7 @@
 import { Application, Container, Graphics, Ticker, Texture } from 'pixi.js';
 import { EntityProfile, InteractionMatrix } from '@crayon-world/shared/src/types';
 import { captureEntityTexture } from './captureEntityTexture';
-import { buildEntityContainer, buildEntitySprite } from './EntitySprite';
+import { buildEntityContainer, buildEntitySprite, updateHealthBar } from './EntitySprite';
 import { EntityState, SpreadingState, initEntityState, dispatchBehavior, WORLD_BOUNDS } from '@crayon-world/shared/src/simulation/EntitySimulation';
 import { fetchInteractions } from './fetchInteractions';
 import { RoundOverlay, RoundOutcome } from './RoundOverlay';
@@ -53,6 +53,8 @@ export class WorldStage {
   private readonly _entityLabels = new Map<Container, Container>();
   private readonly _entitySpriteHeights = new Map<Container, number>();
   private readonly _entityHp = new Map<Container, number>();
+  private readonly _entityMaxHp = new Map<Container, number>();
+  private readonly _entityHealthBars = new Map<Container, Graphics>();
   private readonly _nameIdMap = new Map<string, string>();
   private readonly _fightCooldowns = new Map<string, number>();
   // Active lunge animations — visual-only forward-and-back offset on the attacker
@@ -223,7 +225,7 @@ export class WorldStage {
    */
   spawnEntity(app: Application, strokeContainer: Container, profile: EntityProfile): void {
     const texture = captureEntityTexture(app, strokeContainer);
-    const { entity, label, spriteHeight } = buildEntityContainer(texture, profile, app);
+    const { entity, label, spriteHeight, healthBar } = buildEntityContainer(texture, profile, app);
 
     // Position randomly within canvas with 50px margin from edges
     const margin = 50;
@@ -245,6 +247,8 @@ export class WorldStage {
     this._entityLabels.set(entity, label);
     this._entitySpriteHeights.set(entity, spriteHeight);
     this._entityHp.set(entity, 1);
+    this._entityMaxHp.set(entity, 1);
+    this._entityHealthBars.set(entity, healthBar);
   }
 
   /**
@@ -418,6 +422,7 @@ export class WorldStage {
       entity: copyContainer,
       label: copyLabel,
       spriteHeight: copySpriteH,
+      healthBar: copyHealthBar,
     } = buildEntityContainer(texture, profile, this._app);
     copyContainer.x = copyX;
     copyContainer.y = copyY;
@@ -438,6 +443,8 @@ export class WorldStage {
     this._entityLabels.set(copyContainer, copyLabel);
     this._entitySpriteHeights.set(copyContainer, copySpriteH);
     this._entityHp.set(copyContainer, 1);
+    this._entityMaxHp.set(copyContainer, 1);
+    this._entityHealthBars.set(copyContainer, copyHealthBar);
   }
 
   // ─── Interaction helpers ──────────────────────────────────────────────────
@@ -476,6 +483,10 @@ export class WorldStage {
     const currentHp = this._entityHp.get(targetContainer) ?? 1;
     const newHp = currentHp - 1;
     this._entityHp.set(targetContainer, newHp);
+
+    const maxHp = this._entityMaxHp.get(targetContainer) ?? 1;
+    const bar = this._entityHealthBars.get(targetContainer);
+    if (bar) updateHealthBar(bar, newHp / maxHp);
 
     if (newHp <= 0) {
       this.removeEntity(targetContainer);
@@ -650,7 +661,7 @@ export class WorldStage {
   ): void {
     // Use provided texture or 1x1 white placeholder
     const tex = texture ?? Texture.WHITE;
-    const { entity, label, spriteHeight } = buildEntityContainer(tex, profile, this._app, teamId);
+    const { entity, label, spriteHeight, healthBar } = buildEntityContainer(tex, profile, this._app, teamId);
 
     entity.x = x;
     entity.y = y;
@@ -663,7 +674,10 @@ export class WorldStage {
     // Store in Container-keyed maps (shared infrastructure)
     this._entityLabels.set(entity, label);
     this._entitySpriteHeights.set(entity, spriteHeight);
-    this._entityHp.set(entity, 1);
+    const maxHp = profile.maxHealth ?? 1;
+    this._entityHp.set(entity, maxHp);
+    this._entityMaxHp.set(entity, maxHp);
+    this._entityHealthBars.set(entity, healthBar);
     this._entityProfiles.set(entity, profile);
 
     // Store in UUID-keyed maps (multiplayer lookup)
@@ -710,11 +724,16 @@ export class WorldStage {
   ): void {
     // Handle deaths immediately (no interpolation delay for removal)
     for (const [entityId, data] of entities) {
-      if (data.hp <= 0) {
-        const container = this._entityContainersById.get(entityId);
-        if (container && !this._dyingEntities.has(container)) {
-          this.removeEntity(container);
-        }
+      const container = this._entityContainersById.get(entityId);
+      if (!container) continue;
+
+      // Update health bar from server hp
+      const bar = this._entityHealthBars.get(container);
+      const maxHp = this._entityMaxHp.get(container) ?? 1;
+      if (bar) updateHealthBar(bar, data.hp / maxHp);
+
+      if (data.hp <= 0 && !this._dyingEntities.has(container)) {
+        this.removeEntity(container);
       }
     }
 
@@ -859,6 +878,8 @@ export class WorldStage {
         this._entityLabels.delete(container);
         this._entitySpriteHeights.delete(container);
         this._entityHp.delete(container);
+        this._entityMaxHp.delete(container);
+        this._entityHealthBars.delete(container);
         this._dyingEntities.delete(container);
 
         // Clean UUID-keyed maps (multiplayer mode)

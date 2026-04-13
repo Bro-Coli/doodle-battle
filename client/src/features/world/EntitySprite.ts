@@ -1,4 +1,4 @@
-import { Application, Container, Sprite, Text, TextStyle, Texture, Ticker } from 'pixi.js';
+import { Application, Container, Graphics, Sprite, Text, TextStyle, Texture, Ticker } from 'pixi.js';
 import { DropShadowFilter } from 'pixi-filters';
 import { EntityProfile } from '@crayon-world/shared/src/types';
 import { showTooltip, hideTooltip } from './EntityTooltip';
@@ -7,6 +7,25 @@ export interface EntityBuildResult {
   entity: Container;
   label: Container;
   spriteHeight: number;
+  healthBar: Graphics;
+}
+
+const HEALTH_BAR_HEIGHT = 4;
+
+/** Redraw a health bar for the given hp fraction (0..1). */
+export function updateHealthBar(bar: Graphics, fraction: number): void {
+  const width = (bar as unknown as { _barWidth: number })._barWidth;
+  const clamped = Math.max(0, Math.min(1, fraction));
+  const fillColor = clamped > 0.5 ? 0x4caf50 : clamped > 0.25 ? 0xffc107 : 0xf44336;
+  bar.clear();
+  bar
+    .roundRect(-width / 2, 0, width, HEALTH_BAR_HEIGHT, 2)
+    .fill({ color: 0x000000, alpha: 0.45 });
+  if (clamped > 0) {
+    bar
+      .roundRect(-width / 2, 0, width * clamped, HEALTH_BAR_HEIGHT, 2)
+      .fill({ color: fillColor });
+  }
 }
 
 /**
@@ -102,6 +121,14 @@ export function buildEntityContainer(
   labelText.anchor.set(0.5, 1);
   label.addChild(labelText);
 
+  // Health bar — sits just beneath the nametag, above the sprite
+  const barWidth = Math.max(36, Math.min(80, sprite.width * 0.6));
+  const healthBar = new Graphics();
+  (healthBar as unknown as { _barWidth: number })._barWidth = barWidth;
+  healthBar.y = 3;
+  updateHealthBar(healthBar, 1);
+  label.addChild(healthBar);
+
   const spriteHeight = sprite.height;
 
   // Fade-in over ~300ms using app.ticker — fade both entity and label together
@@ -121,5 +148,5 @@ export function buildEntityContainer(
 
   app.ticker.add(fadeIn);
 
-  return { entity, label, spriteHeight };
+  return { entity, label, spriteHeight, healthBar };
 }
