@@ -9,7 +9,6 @@ import { StrokeShadowText } from '@/ui/text/StrokeShadowText';
 
 const MAX_PLAYER_OPTIONS = [2, 4, 6, 8] as const;
 const ROUND_OPTIONS = [3, 5, 10] as const;
-const TEAM_SLOT_COUNT = 4;
 
 interface PlayerSnapshot {
   name: string;
@@ -121,6 +120,7 @@ export function CreateRoomScreen() {
     [...players.entries()].every(([sid, p]) => sid === hostSessionId || p.ready);
   const teamsBalanced = teamAPlayers.length === teamBPlayers.length;
   const canStart = othersReady && teamsBalanced;
+  const teamSlotCount = maxPlayers / 2;
 
   return (
     <main
@@ -370,7 +370,7 @@ export function CreateRoomScreen() {
               <div className="flex w-full gap-3">
                 {/* Team A */}
                 <div className="flex flex-1 flex-col gap-4">
-                  {Array.from({ length: TEAM_SLOT_COUNT }).map((_, i) => {
+                  {Array.from({ length: teamSlotCount }).map((_, i) => {
                     const entry = teamAPlayers[i];
                     return (
                       <TeamSlot
@@ -397,7 +397,7 @@ export function CreateRoomScreen() {
 
                 {/* Team B */}
                 <div className="flex flex-1 flex-col gap-4">
-                  {Array.from({ length: TEAM_SLOT_COUNT }).map((_, i) => {
+                  {Array.from({ length: teamSlotCount }).map((_, i) => {
                     const entry = teamBPlayers[i];
                     return (
                       <TeamSlot
