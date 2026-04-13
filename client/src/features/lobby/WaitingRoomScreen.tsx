@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { getActiveRoom } from '../../network/ColyseusClient';
+import { getActiveRoom, leaveActiveRoom } from '../../network/ColyseusClient';
 import { navigate } from '../../utils/navigate';
 
 interface PlayerSnapshot {
@@ -44,6 +44,17 @@ export function WaitingRoomScreen(): React.JSX.Element {
 
   useEffect(() => {
     if (!room) {
+      navigate('/');
+      return;
+    }
+
+    // Defense in depth: if a stale room is lingering in a non-idle phase
+    // (e.g. a game is already in progress), treat this landing as invalid.
+    // Leave the room and redirect to the main menu — the player cannot
+    // meaningfully ready-up back into an active game.
+    const phase = (room.state as { currentPhase?: string }).currentPhase;
+    if (phase && phase !== 'idle') {
+      leaveActiveRoom();
       navigate('/');
       return;
     }

@@ -16,6 +16,22 @@ export function getActiveRoom(): Room | null {
   return activeRoom;
 }
 
+/**
+ * Leave the active room (if any) and clear the singleton reference.
+ * Safe to call when no room is active. Idempotent.
+ */
+export function leaveActiveRoom(): void {
+  const room = activeRoom;
+  activeRoom = null;
+  if (room) {
+    try {
+      room.leave();
+    } catch {
+      // Ignore — connection may already be closed
+    }
+  }
+}
+
 export async function createRoom(options: {
   name: string;
   maxPlayers?: number;

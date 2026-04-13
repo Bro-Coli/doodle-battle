@@ -7,7 +7,7 @@ import { exportPng } from '../drawing/exportPng';
 import { captureEntityTexture } from '../world/captureEntityTexture';
 import { setStrokeColor } from '../drawing/StrokeRenderer';
 import { TEAM_TINTS } from '../world/EntitySprite';
-import { getActiveRoom } from '../../network/ColyseusClient';
+import { getActiveRoom, leaveActiveRoom } from '../../network/ColyseusClient';
 import { navigate } from '../../utils/navigate';
 
 // ─── Snapshot types ───────────────────────────────────────────────────────────
@@ -362,6 +362,12 @@ export function GameScreen(): React.JSX.Element {
   // Track my team (derived from room state once, stable)
   const myTeamRef = useRef<string>('red');
 
+  // When true, the unmount cleanup will NOT leave the room.
+  // Set by handlers that intentionally keep the player in the room (e.g., Back to Lobby),
+  // so browser back / tab close / uncontrolled unmounts still trigger room.leave() and
+  // the server's onLeave forfeit logic fires for remaining players.
+  const intentionalStayRef = useRef(false);
+
   useEffect(() => {
     if (!room) {
       navigate('/');
@@ -519,6 +525,12 @@ export function GameScreen(): React.JSX.Element {
       room.onStateChange.remove(stateCallback);
       removeGameFinished();
       cleanupPixi?.();
+      // Browser back, route change, or tab close while mid-game: leave the room
+      // so the server's onLeave handler runs and forfeits on behalf of the player.
+      // Skipped when an in-app handler intentionally kept us in the room.
+      if (!intentionalStayRef.current) {
+        leaveActiveRoom();
+      }
     };
   }, [room]);
 
@@ -567,12 +579,16 @@ export function GameScreen(): React.JSX.Element {
   }
 
   function handleBackToLobby(): void {
+    // Intentional in-room navigation: stay in the room so we can re-ready up.
+    intentionalStayRef.current = true;
     room?.send('return_to_lobby');
     navigate('/waiting');
   }
 
   function handleMainMenu(): void {
-    room?.leave();
+    // Prevent the unmount cleanup from double-leaving (harmless, but cleaner).
+    intentionalStayRef.current = true;
+    leaveActiveRoom();
     navigate('/');
   }
 
