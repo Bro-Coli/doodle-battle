@@ -1,83 +1,56 @@
-import type { InteractionMatrix } from '@crayon-world/shared';
+import type { InteractionMatrix, InteractionType } from '@crayon-world/shared';
 
 /**
- * Hardcoded interaction matrix for the 6 mock entities.
- * Entity IDs match MOCK_ENTITIES order: Wolf=0, Eagle=1, Oak=2, Fire=3, Cloud=4, Rock=5
+ * Name-keyed mock relationships for the 6 mock entities.
+ *
+ * This is NOT a positional InteractionMatrix — it's a lookup from
+ * `attacker name -> target name -> interaction`. The positional matrix is
+ * built at request time by `buildMockMatrix` against whichever subset of
+ * mock entities is actually in play, since `recognizeDrawingInternal` picks
+ * mock entities randomly and insertion order in `_entityProfiles` is not
+ * guaranteed to match MOCK_ENTITIES order. A fixed positional matrix would
+ * (and did) hand the wrong row to the wrong entity — e.g. whichever entity
+ * landed in slot 3 would inherit Fire's "chase everything" row.
  *
  * Relationships are ecologically plausible and asymmetric:
- * - Wolf and Eagle both flee fire, ignore each other (different ecological niches)
- * - Oak flees fire and benefits from cloud (rain), ignored by most
- * - Fire chases Wolf, Eagle, Oak (consumes all organic life)
- * - Cloud befriends Oak (nourishes) and chases Fire (extinguishes)
+ * - Wolf and Eagle both flee Fire, ignore each other (different niches)
+ * - Oak flees Fire and befriends Cloud (rain nourishes), ignored by most
+ * - Fire ignores everything — the `spreading` archetype already handles
+ *   "consumes by propagation"; giving Fire a chase row on top would double-dip
+ * - Cloud befriends Oak (nourishes), ignores everything else
  * - Rock ignores everything (immovable, inert)
  */
-export const MOCK_INTERACTION_MATRIX: InteractionMatrix = {
-  entries: [
-    {
-      // Wolf (id: 0)
-      entityId: '0',
-      relationships: {
-        '1': 'ignore',   // toward Eagle
-        '2': 'ignore',   // toward Oak
-        '3': 'flee',     // toward Fire
-        '4': 'ignore',   // toward Cloud
-        '5': 'ignore',   // toward Rock
-      },
-    },
-    {
-      // Eagle (id: 1)
-      entityId: '1',
-      relationships: {
-        '0': 'ignore',   // toward Wolf
-        '2': 'ignore',   // toward Oak
-        '3': 'flee',     // toward Fire
-        '4': 'ignore',   // toward Cloud
-        '5': 'ignore',   // toward Rock
-      },
-    },
-    {
-      // Oak (id: 2)
-      entityId: '2',
-      relationships: {
-        '0': 'ignore',   // toward Wolf
-        '1': 'ignore',   // toward Eagle
-        '3': 'flee',     // toward Fire
-        '4': 'befriend', // toward Cloud (rain nourishes)
-        '5': 'ignore',   // toward Rock
-      },
-    },
-    {
-      // Fire (id: 3)
-      entityId: '3',
-      relationships: {
-        '0': 'chase',    // toward Wolf
-        '1': 'chase',    // toward Eagle
-        '2': 'chase',    // toward Oak
-        '4': 'ignore',   // toward Cloud
-        '5': 'ignore',   // toward Rock
-      },
-    },
-    {
-      // Cloud (id: 4)
-      entityId: '4',
-      relationships: {
-        '0': 'ignore',   // toward Wolf
-        '1': 'ignore',   // toward Eagle
-        '2': 'befriend', // toward Oak (nourishes with rain)
-        '3': 'chase',    // toward Fire (rain extinguishes)
-        '5': 'ignore',   // toward Rock
-      },
-    },
-    {
-      // Rock (id: 5)
-      entityId: '5',
-      relationships: {
-        '0': 'ignore',   // toward Wolf
-        '1': 'ignore',   // toward Eagle
-        '2': 'ignore',   // toward Oak
-        '3': 'ignore',   // toward Fire
-        '4': 'ignore',   // toward Cloud
-      },
-    },
-  ],
-} satisfies InteractionMatrix;
+const MOCK_RELATIONSHIPS: Record<string, Record<string, InteractionType>> = {
+  Wolf:  { Eagle: 'ignore', Oak: 'ignore',   Fire: 'flee',     Cloud: 'ignore',   Rock: 'ignore' },
+  Eagle: { Wolf:  'ignore', Oak: 'ignore',   Fire: 'flee',     Cloud: 'ignore',   Rock: 'ignore' },
+  Oak:   { Wolf:  'ignore', Eagle: 'ignore', Fire: 'flee',     Cloud: 'befriend', Rock: 'ignore' },
+  Fire:  { Wolf:  'ignore', Eagle: 'ignore', Oak:  'ignore',   Cloud: 'ignore',   Rock: 'ignore' },
+  Cloud: { Wolf:  'ignore', Eagle: 'ignore', Oak:  'befriend', Fire:  'ignore',   Rock: 'ignore' },
+  Rock:  { Wolf:  'ignore', Eagle: 'ignore', Oak:  'ignore',   Fire:  'ignore',   Cloud: 'ignore' },
+};
+
+/**
+ * Build a positional InteractionMatrix for the given set of unique profiles,
+ * using name-based lookups against the mock relationship table. Any pair that
+ * isn't found in the table (e.g., a non-mock entity snuck in) defaults to 'ignore'.
+ *
+ * The caller must pass profiles in the same order it uses to assign prompt
+ * entity IDs — this function assigns entityId by index so the resulting matrix
+ * lines up with `_buildNameIdMap` on the GameRoom side.
+ */
+export function buildMockMatrix(profiles: Array<{ name: string }>): InteractionMatrix {
+  return {
+    entries: profiles.map((self, selfIdx) => {
+      const selfRels = MOCK_RELATIONSHIPS[self.name];
+      const relationships: Record<string, InteractionType> = {};
+      profiles.forEach((other, otherIdx) => {
+        if (otherIdx === selfIdx) return;
+        relationships[String(otherIdx)] = selfRels?.[other.name] ?? 'ignore';
+      });
+      return {
+        entityId: String(selfIdx),
+        relationships,
+      };
+    }),
+  };
+}

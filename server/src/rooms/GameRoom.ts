@@ -6,6 +6,7 @@ import {
   WORLD_BOUNDS,
 } from '@crayon-world/shared/src/simulation/EntitySimulation.js';
 import { recognizeDrawingInternal } from '../recognition/recognizeDrawingInternal.js';
+import { fetchInteractionsInternal } from '../interaction/fetchInteractionsInternal.js';
 import type {
   EntityState,
   SpreadingState,
@@ -434,6 +435,10 @@ export class GameRoom extends Room<{ state: GameState }> {
         this.broadcast('entity_textures', entityTextures);
       }
 
+      // Fetch interaction matrix before simulation begins
+      const allProfiles = Array.from(this._entityProfiles.values());
+      void this._fetchAndApplyInteractions(allProfiles);
+
       // Transition to simulate
       this.state.currentPhase = 'simulate';
       this.state.phaseTimer = 30;
@@ -599,6 +604,48 @@ export class GameRoom extends Room<{ state: GameState }> {
     }
   }
 
+  async _fetchAndApplyInteractions(profiles: EntityProfile[]): Promise<void> {
+    try {
+      const matrix = await fetchInteractionsInternal(profiles);
+      this._interactionMatrix = matrix;
+
+      if (matrix.entries) {
+        this._buildNameIdMap();
+      }
+
+      // Log relationships for debugging
+      console.log('[interactions] Matrix loaded:');
+      for (const entry of matrix.entries) {
+        const name = this._getEntityNameById(entry.entityId);
+        const rels = Object.entries(entry.relationships)
+          .map(([otherId, type]) => `${this._getEntityNameById(otherId)}: ${type}`)
+          .join(', ');
+        console.log(`  ${name} → ${rels}`);
+      }
+    } catch (err) {
+      console.error('[interactions] Failed to fetch interaction matrix:', err);
+      this._interactionMatrix = { entries: [] };
+    }
+  }
+
+  /** Look up entity name by the integer ID used in the interaction matrix. */
+  private _getEntityNameById(matrixId: string): string {
+    // Matrix uses integer IDs (0, 1, 2...) assigned by index during prompt building.
+    // Map back via _entityProfiles iteration order.
+    const profiles = Array.from(this._entityProfiles.values());
+    // Deduplicate by name (same as fetchInteractionsInternal)
+    const seen = new Set<string>();
+    const unique: EntityProfile[] = [];
+    for (const p of profiles) {
+      if (!seen.has(p.name)) {
+        seen.add(p.name);
+        unique.push(p);
+      }
+    }
+    const idx = parseInt(matrixId, 10);
+    return unique[idx]?.name ?? `entity#${matrixId}`;
+  }
+
   _handleRemoveAllEntities(): void {
     this._entityStates.clear();
     this._entityProfiles.clear();
@@ -699,7 +746,7 @@ export class GameRoom extends Room<{ state: GameState }> {
    */
   _buildNameIdMap(): void {
     this._nameIdMap.clear();
-    let id = 1;
+    let id = 0;
     const seen = new Set<string>();
 
     for (const profile of this._entityProfiles.values()) {

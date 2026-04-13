@@ -10,7 +10,7 @@ import {
   validateInteractionResponse,
   ignoreFallback,
 } from '../interaction/validateInteraction.js';
-import { MOCK_INTERACTION_MATRIX } from '../mock-interactions.js';
+import { buildMockMatrix } from '../mock-interactions.js';
 
 const router = Router();
 
@@ -42,9 +42,11 @@ router.post('/', async (req, res) => {
     return;
   }
 
-  // --- Mock mode ---
+  // --- Mock mode — build a name-based matrix for the actual entities present,
+  // rather than returning a fixed positional one that assumes the exact 6 mock
+  // entities in a specific order.
   if (isMockMode()) {
-    res.json(MOCK_INTERACTION_MATRIX);
+    res.json(buildMockMatrix(uniqueProfiles));
     return;
   }
 
