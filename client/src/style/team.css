@@ -5,7 +5,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    height: 56px;
+    height: 68px;
     border-radius: 16px;
     font-weight: 700;
     font-size: 1.6rem;
@@ -54,5 +54,32 @@
 
   .ui-team-area--filled {
     border: none;
+  }
+
+  /* ── Team label color dot (lobby headers) ── */
+
+  .ui-team-dot {
+    display: inline-block;
+    flex-shrink: 0;
+    width: 1.125rem;
+    height: 1.125rem;
+    border-radius: 9999px;
+    box-sizing: border-box;
+  }
+
+  .ui-team-dot--blue {
+    background: linear-gradient(180deg, #2fd5f7 0%, #0593dc 52%, #086cbf 100%);
+    border: 2px solid #044174;
+    box-shadow: 0 0 12px rgba(56, 189, 248, 0.55) inset 0 2px 3px rgba(45, 215, 250, 0.45);
+    /* inset 0 -2px 4px rgba(1, 124, 255, 0.35); */
+  }
+
+  .ui-team-dot--red {
+    background: linear-gradient(180deg, #fe7e93 0%, #f93d5c 52%, #e7325c 100%);
+    border: 2px solid #5b1b4e;
+    box-shadow:
+      0 0 12px rgba(251, 113, 133, 0.55),
+      inset 0 2px 3px rgba(255, 255, 255, 0.4);
+    /* inset 0 -2px 4px rgba(136, 19, 55, 0.35); */
   }
 }

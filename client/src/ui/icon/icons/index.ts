@@ -1,5 +1,6 @@
 import type { IconDefinition, IconName } from '../icon.defs';
 import { arrowLeftIcon } from './ArrowLeftIcon';
+import { arrowSwapIcon } from './ArrowSwapIcon';
 import { closeIcon } from './CloseIcon';
 import { lightningIcon } from './LightningIcon';
 import { plusIcon } from './PlusIcon';
@@ -9,6 +10,7 @@ import { userIcon } from './UserIcon';
 
 export const iconDefinitions: Record<IconName, IconDefinition> = {
   arrowLeft: arrowLeftIcon,
+  arrowSwap: arrowSwapIcon,
   close: closeIcon,
   lightning: lightningIcon,
   plus: plusIcon,

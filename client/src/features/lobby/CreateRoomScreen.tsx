@@ -4,6 +4,7 @@ import { createRoom, getActiveRoom } from '../../network/ColyseusClient';
 import { navigate } from '../../utils/navigate';
 import { setDisplayName, useDisplayNameStore } from './displayNameStore';
 import { Icon } from '@/ui/icon/Icon';
+import { NeonIcon } from '@/ui/icon/NeonIcon';
 import { StrokeShadowText } from '@/ui/text/StrokeShadowText';
 
 const MAX_PLAYER_OPTIONS = [2, 4, 6, 8] as const;
@@ -137,9 +138,9 @@ export function CreateRoomScreen() {
       </button>
 
       {/* Title */}
-      <div className="mb-8">
+      <div className="mb-12">
         <StrokeShadowText
-          className="t48-eb uppercase sm:t38-eb"
+          className="t60-eb uppercase"
           firstStrokeColor="#1a2555"
           secondStrokeColor="#2c5890"
           firstStrokeWidth={10}
@@ -352,15 +353,15 @@ export function CreateRoomScreen() {
               <div className="mb-4 flex w-full items-center">
                 <div className="flex-1 text-center">
                   <span className="inline-flex items-center gap-2 t18-b font-nunito uppercase tracking-wider text-white">
-                    <span className="inline-block h-3.5 w-3.5 rounded-full bg-cyan-400 shadow-[0_0_8px_rgba(34,211,238,0.6)]" />
-                    Team A
+                    <span className="ui-team-dot ui-team-dot--blue" aria-hidden />
+                    Blue Team
                   </span>
                 </div>
                 <div className="w-12" />
                 <div className="flex-1 text-center">
                   <span className="inline-flex items-center gap-2 t18-b font-nunito uppercase tracking-wider text-white">
-                    <span className="inline-block h-3.5 w-3.5 rounded-full bg-rose-400 shadow-[0_0_8px_rgba(251,113,133,0.6)]" />
-                    Team B
+                    <span className="ui-team-dot ui-team-dot--red" aria-hidden />
+                    Red Team
                   </span>
                 </div>
               </div>
@@ -385,9 +386,13 @@ export function CreateRoomScreen() {
 
                 {/* Swap icon */}
                 <div className="flex items-center justify-center">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white/10">
-                    <SwapIcon />
-                  </div>
+                  <NeonIcon
+                    name="arrowSwap"
+                    size={48}
+                    color="currentColor"
+                    neonColor="#71bff0"
+                    neonIntensity={2}
+                  />
                 </div>
 
                 {/* Team B */}
@@ -415,9 +420,7 @@ export function CreateRoomScreen() {
                     friends to join!
                   </p>
                 )}
-                {players.size >= 2 && !othersReady && (
-                  <p>Waiting for all players to ready up…</p>
-                )}
+                {players.size >= 2 && !othersReady && <p>Waiting for all players to ready up…</p>}
                 {players.size >= 2 && othersReady && !teamsBalanced && (
                   <p>Teams must have an even number of players…</p>
                 )}
@@ -582,28 +585,6 @@ function HeartIcon() {
   return (
     <svg width="18" height="16" viewBox="0 0 18 16" fill="currentColor">
       <path d="M9 15.3l-1.45-1.32C3.1 9.84 0 7.06 0 3.64 0 1.63 1.58 0 3.56 0c1.12 0 2.2.52 2.94 1.36L9 4.1l2.5-2.74C12.24.52 13.32 0 14.44 0 16.42 0 18 1.63 18 3.64c0 3.42-3.1 6.2-7.55 10.34L9 15.3z" />
-    </svg>
-  );
-}
-
-function SwapIcon() {
-  return (
-    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" className="text-white/50">
-      <path
-        d="M6 14L2 10L6 6"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M14 6L18 10L14 14"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <path d="M2 10H18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
     </svg>
   );
 }
