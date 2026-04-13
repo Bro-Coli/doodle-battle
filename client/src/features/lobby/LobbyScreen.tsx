@@ -1,5 +1,5 @@
 import { navigate } from '../../utils/navigate';
-import mainTitle from './assets/main-title.png';
+import mainTitle from './assets/main-title.webp';
 import mainBtn1 from './assets/main-btn-1.webp';
 import mainBtn2 from './assets/main-btn-2.webp';
 import mainBtn3 from './assets/main-btn-3.webp';
