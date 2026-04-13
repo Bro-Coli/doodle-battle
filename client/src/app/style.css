@@ -15,6 +15,10 @@
 
 @theme {
   --font-nunito: 'Nunito', sans-serif;
+  --color-lobby-gradient-start: #09C4F1;
+  --color-lobby-gradient-mid: #3E46E7;
+  --color-lobby-gradient-end: #6612C5;
+  --gradient-lobby: radial-gradient(circle at center, var(--color-lobby-gradient-start) 0%, var(--color-lobby-gradient-mid) 58%, var(--color-lobby-gradient-end) 100%);
 }
 
 @layer base {

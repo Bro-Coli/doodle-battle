@@ -51,7 +51,7 @@ export function LobbyScreen(): React.JSX.Element {
     <main
       className="relative flex min-h-screen w-full items-start justify-center overflow-x-auto overflow-y-hidden px-6 pt-8 pb-8 sm:px-4 sm:pt-4"
       style={{
-        background: 'radial-gradient(circle at center, #09C4F1 0%, #3E46E7 58%, #6612C5 100%)',
+        background: 'var(--gradient-lobby)',
       }}
     >
       <div className="flex min-w-[1680px] max-w-7xl flex-col items-center gap-6 pt-8 sm:gap-5 sm:pt-6">

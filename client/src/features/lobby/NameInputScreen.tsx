@@ -58,7 +58,12 @@ export function NameInputScreen(): React.JSX.Element {
   }
 
   return (
-    <main className="flex min-h-screen w-screen items-center justify-center bg-[#1a1035] px-4">
+    <main
+      className="flex min-h-screen w-screen items-center justify-center px-4"
+      style={{
+        background: 'var(--gradient-lobby)',
+      }}
+    >
       <div className="w-full max-w-sm rounded-2xl bg-white/10 p-8 backdrop-blur-sm">
         <h1 className="mb-6 text-center text-2xl font-black uppercase tracking-tight text-white">
           {getTitle(flow)}

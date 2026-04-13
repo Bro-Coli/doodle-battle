@@ -97,7 +97,16 @@ export function WaitingRoomScreen(): React.JSX.Element {
   }, [room]);
 
   if (!room) {
-    return <div className="flex min-h-screen items-center justify-center bg-[#1a1035] text-white">Redirecting…</div>;
+    return (
+      <div
+        className="flex min-h-screen items-center justify-center text-white"
+        style={{
+          background: 'var(--gradient-lobby)',
+        }}
+      >
+        Redirecting…
+      </div>
+    );
   }
 
   const { players, hostSessionId, maxPlayers, maxRounds } = snapshot;
@@ -123,7 +132,12 @@ export function WaitingRoomScreen(): React.JSX.Element {
   }
 
   return (
-    <main className="flex min-h-screen w-screen flex-col items-center justify-center gap-6 bg-[#1a1035] px-4 py-8 text-white">
+    <main
+      className="flex min-h-screen w-screen flex-col items-center justify-center gap-6 px-4 py-8 text-white"
+      style={{
+        background: 'var(--gradient-lobby)',
+      }}
+    >
       {/* Room code + info */}
       <div className="text-center">
         <p className="text-sm font-bold uppercase tracking-widest text-white/50">Room Code</p>
