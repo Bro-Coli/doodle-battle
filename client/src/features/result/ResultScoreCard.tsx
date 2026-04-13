@@ -1,6 +1,6 @@
 import type { CSSProperties } from 'react';
 
-import { Icon } from '@/ui';
+import { Icon, YouBadge } from '@/ui';
 import { StrokeShadowText } from '@/ui/text/StrokeShadowText';
 
 type ResultScoreCardProps = {
@@ -8,6 +8,7 @@ type ResultScoreCardProps = {
   score: number;
   variant?: 'pink' | 'blue';
   winner?: boolean;
+  isMyTeam?: boolean;
 };
 
 export function ResultScoreCard({
@@ -15,7 +16,8 @@ export function ResultScoreCard({
   score,
   variant = 'pink',
   winner = false,
-}: ResultScoreCardProps): React.JSX.Element {
+  isMyTeam = false,
+}: ResultScoreCardProps) {
   const isBlue = variant === 'blue';
   const cardGradient = isBlue
     ? 'bg-[linear-gradient(180deg,#9de3fc_0%,#1e90ff_55%,#2a63e0_100%)]'
@@ -45,57 +47,63 @@ export function ResultScoreCard({
   const scoreDeepShadowColor = isBlue ? '#041a44' : '#3a0622';
 
   return (
-    <article
-      className={[
-        'relative shrink-0 overflow-hidden rounded-3xl border-12 border-white px-20 py-8 text-center',
-        'w-[420px]',
-        'translate-y-0 transition-transform',
-        cardGradient,
-        cardDepthShadow,
-      ].join(' ')}
-    >
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-[34%] rounded-t-2xl bg-white/20" />
-      <div className="pointer-events-none absolute inset-0 rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.22)_0%,transparent_45%,transparent_55%,rgba(0,0,0,0.08)_100%)]" />
-      <div className="absolute inset-x-0 top-0 flex h-[34%] items-center justify-center">
-        <StrokeShadowText
-          className="t32-eb lg:t28-eb"
-          // fillStyle={teamFillStyle}
-          firstStrokeColor={teamFirstStrokeColor}
-          secondStrokeColor={teamSecondStrokeColor}
-          firstStrokeWidth={8}
-          secondStrokeWidth={6}
-          shadowOffsetY="0.22rem"
-        >
-          {team}
-        </StrokeShadowText>
-      </div>
-      <div className="relative mt-[34%]">
-        <div className="relative inline-flex items-center justify-center">
+    <div className="relative shrink-0 w-[420px]">
+      {isMyTeam && (
+        <div className="pointer-events-none absolute -left-8 -top-8 z-10 -rotate-24">
+          <YouBadge className="scale-85 origin-top-left" />
+        </div>
+      )}
+      <article
+        className={[
+          'relative overflow-hidden rounded-3xl border-12 border-white px-20 py-8 text-center',
+          'translate-y-0 transition-transform',
+          cardGradient,
+          cardDepthShadow,
+        ].join(' ')}
+      >
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-[34%] rounded-t-2xl bg-white/20" />
+        <div className="pointer-events-none absolute inset-0 rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.22)_0%,transparent_45%,transparent_55%,rgba(0,0,0,0.08)_100%)]" />
+        <div className="absolute inset-x-0 top-0 flex h-[34%] items-center justify-center">
           <StrokeShadowText
-            className="t88-eb lg:t72-eb"
-            fillStyle={scoreFillStyle}
-            firstStrokeColor={scoreFirstStrokeColor}
-            secondStrokeColor={scoreSecondStrokeColor}
+            className="t32-eb lg:t28-eb"
+            // fillStyle={teamFillStyle}
+            firstStrokeColor={teamFirstStrokeColor}
+            secondStrokeColor={teamSecondStrokeColor}
             firstStrokeWidth={8}
             secondStrokeWidth={6}
-            shadowOffsetY="0.4rem"
-            deepShadowColor={scoreDeepShadowColor}
-            deepShadowOffsetY="0.36rem"
-            deepShadowStrokeWidth={14}
-            deepShadowBlur="3px"
+            shadowOffsetY="0.22rem"
           >
-            {score}
+            {team}
           </StrokeShadowText>
-          {winner && (
-            <Icon
-              name="trophy"
-              size={64}
-              color={isBlue ? "#0a2a7a" : "#8b0a4a"}
-              className="absolute -right-24 top-1/2 -translate-y-1/2 rotate-12 drop-shadow-md"
-            />
-          )}
         </div>
-      </div>
-    </article>
+        <div className="relative mt-[34%]">
+          <div className="relative inline-flex items-center justify-center">
+            <StrokeShadowText
+              className="t88-eb lg:t72-eb"
+              fillStyle={scoreFillStyle}
+              firstStrokeColor={scoreFirstStrokeColor}
+              secondStrokeColor={scoreSecondStrokeColor}
+              firstStrokeWidth={8}
+              secondStrokeWidth={6}
+              shadowOffsetY="0.4rem"
+              deepShadowColor={scoreDeepShadowColor}
+              deepShadowOffsetY="0.36rem"
+              deepShadowStrokeWidth={14}
+              deepShadowBlur="3px"
+            >
+              {score}
+            </StrokeShadowText>
+            {winner && (
+              <Icon
+                name="trophy"
+                size={64}
+                color={isBlue ? '#0a2a7a' : '#8b0a4a'}
+                className="absolute -right-24 top-1/2 -translate-y-1/2 rotate-12 drop-shadow-md"
+              />
+            )}
+          </div>
+        </div>
+      </article>
+    </div>
   );
 }
