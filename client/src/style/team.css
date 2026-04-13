@@ -49,5 +49,10 @@
     border: 4px dashed rgba(255, 255, 255, 0.18);
     border-radius: 20px;
     padding: 1.5rem;
+    transition: border 0.3s ease;
+  }
+
+  .ui-team-area--filled {
+    border: none;
   }
 }

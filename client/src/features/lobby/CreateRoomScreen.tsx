@@ -343,7 +343,7 @@ export function CreateRoomScreen() {
               </p>
             </div>
           ) : (
-            <div className="ui-team-area w-full">
+            <div className="ui-team-area ui-team-area--filled w-full">
               {/* Team headers */}
               <div className="mb-4 flex w-full items-center">
                 <div className="flex-1 text-center">
