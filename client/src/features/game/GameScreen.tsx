@@ -412,6 +412,7 @@ export function GameScreen(): React.JSX.Element {
 
       cleanupPixi = () => {
         bridge.disconnect();
+        worldStage.destroy();
         app.destroy(true, { children: true });
         host.replaceChildren();
         appRef.current = null;

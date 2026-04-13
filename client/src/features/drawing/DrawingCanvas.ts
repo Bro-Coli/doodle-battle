@@ -101,6 +101,19 @@ export class DrawingCanvas {
 
   clear(): void {
     this._undoStack.clear();
+
+    // Defensive reset: if a pointerup was ever missed (e.g. user held through
+    // an auto-submit, or released on an HTML overlay that swallowed the event),
+    // `drawing` would stay true and the next round's pointerdown would bail at
+    // `if (this.drawing) return;`. Clearing between rounds makes that unrecoverable
+    // state self-healing.
+    this.drawing = false;
+    this.currentPoints = [];
+    if (this.liveGraphics) {
+      this.strokeContainer.removeChild(this.liveGraphics);
+      this.liveGraphics.destroy();
+      this.liveGraphics = null;
+    }
   }
 
   get isEmpty(): boolean {
