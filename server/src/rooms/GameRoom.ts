@@ -70,6 +70,7 @@ export class GameRoom extends Room<{ state: GameState }> {
   _entityProfiles: Map<string, EntityProfile> = new Map();
   _interactionMatrix: InteractionMatrix | null = null;
   _fightCooldowns: Map<string, number> = new Map();
+  _bounceCooldowns: Map<string, number> = new Map(); // ms remaining after wall bounce
   _nameIdMap: Map<string, string> = new Map();
   _dyingEntities: Set<string> = new Set();
   // Pending profiles buffered during draw phase — spawned simultaneously at simulate start
@@ -232,6 +233,16 @@ export class GameRoom extends Room<{ state: GameState }> {
       }
     }
 
+    // Decrement bounce cooldowns
+    for (const [entityId, remaining] of this._bounceCooldowns) {
+      const updated = remaining - deltaMS;
+      if (updated <= 0) {
+        this._bounceCooldowns.delete(entityId);
+      } else {
+        this._bounceCooldowns.set(entityId, updated);
+      }
+    }
+
     const toRemove: string[] = [];
 
     // Clean up dying entities immediately
@@ -246,8 +257,9 @@ export class GameRoom extends Room<{ state: GameState }> {
       let newState: EntityState;
       const isMovable = state.archetype !== 'rooted' && state.archetype !== 'stationary';
 
-      // Resolve interaction steering if matrix exists and entity is movable
-      if (isMovable && this._interactionMatrix) {
+      // Resolve interaction steering if matrix exists, entity is movable, and not bouncing
+      const isBouncing = this._bounceCooldowns.has(entityId);
+      if (isMovable && this._interactionMatrix && !isBouncing) {
         const resolved = resolveInteraction(
           entityId,
           this._entityStates,
@@ -277,12 +289,24 @@ export class GameRoom extends Room<{ state: GameState }> {
         newState = dispatchBehavior(state, dt, world);
       }
 
-      // Bounce off world borders (use 40px half-size as default entity radius)
+      // Bounce off world borders — reverse velocity and set cooldown to suppress steering
       const halfSize = 40;
-      if (newState.x < halfSize) newState = { ...newState, x: halfSize };
-      if (newState.x > world.width - halfSize) newState = { ...newState, x: world.width - halfSize };
-      if (newState.y < halfSize) newState = { ...newState, y: halfSize };
-      if (newState.y > world.height - halfSize) newState = { ...newState, y: world.height - halfSize };
+      let bounced = false;
+      if (newState.x < halfSize || newState.x > world.width - halfSize) {
+        const clampedX = Math.max(halfSize, Math.min(world.width - halfSize, newState.x));
+        const vx = 'vx' in newState ? -(newState as { vx: number }).vx : 0;
+        newState = { ...newState, x: clampedX, vx } as EntityState;
+        bounced = true;
+      }
+      if (newState.y < halfSize || newState.y > world.height - halfSize) {
+        const clampedY = Math.max(halfSize, Math.min(world.height - halfSize, newState.y));
+        const vy = 'vy' in newState ? -(newState as { vy: number }).vy : 0;
+        newState = { ...newState, y: clampedY, vy } as EntityState;
+        bounced = true;
+      }
+      if (bounced) {
+        this._bounceCooldowns.set(entityId, 500); // 500ms cooldown
+      }
 
       // Handle spreading pendingSpawn
       if (newState.archetype === 'spreading') {
@@ -357,7 +381,6 @@ export class GameRoom extends Room<{ state: GameState }> {
     if (this.state.currentPhase === 'draw') {
       // Wait for all recognition calls to complete before advancing
       if (this._pendingRecognitions > 0) {
-        console.warn(`[advancePhase] draw phase stuck: _pendingRecognitions=${this._pendingRecognitions}, allSubmitted=${this._allPlayersSubmitted()}`);
         // Keep timer at 0 — _tick will retry _advancePhase next tick
         this.state.phaseTimer = 0;
         return;
@@ -580,6 +603,7 @@ export class GameRoom extends Room<{ state: GameState }> {
     this._entityStates.clear();
     this._entityProfiles.clear();
     this._fightCooldowns.clear();
+    this._bounceCooldowns.clear();
     this._dyingEntities.clear();
     this._nameIdMap.clear();
     this._interactionMatrix = null;
