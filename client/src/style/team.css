@@ -1,0 +1,53 @@
+@layer components {
+  /* ── Team player slot ── */
+
+  .ui-team-slot {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 56px;
+    border-radius: 16px;
+    font-weight: 700;
+    font-size: 1.6rem;
+    transition:
+      transform 0.1s ease,
+      filter 0.1s ease;
+  }
+
+  .ui-team-slot--empty {
+    background: linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.08) 0%,
+      rgba(255, 255, 255, 0.03) 100%
+    );
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    color: rgba(255, 255, 255, 0.35);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  .ui-team-slot--filled {
+    background: linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.2) 0%,
+      rgba(255, 255, 255, 0.08) 100%
+    );
+    border: 2px solid rgba(255, 255, 255, 0.28);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.22),
+      0 2px 8px rgba(0, 0, 0, 0.15);
+    color: white;
+    padding: 0 1rem;
+    justify-content: flex-start;
+    gap: 0.75rem;
+  }
+
+  /* ── Team area dashed border ── */
+
+  .ui-team-area {
+    border: 4px dashed rgba(255, 255, 255, 0.18);
+    border-radius: 20px;
+    padding: 1.5rem;
+  }
+}

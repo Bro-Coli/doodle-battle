@@ -9,6 +9,12 @@ import { initApi } from './shared/api/api.config';
 
 import './app/style.css';
 import './style/button.css';
+import './style/badge.css';
+import './style/slider.css';
+import './style/select.css';
+import './style/team.css';
+import './style/panel.css';
+import './style/invite.css';
 import './style/modal.css';
 
 // Eagerly initialize Colyseus client singleton

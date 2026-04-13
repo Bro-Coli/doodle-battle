@@ -1,0 +1,142 @@
+@layer components {
+  /* ── Glossy select trigger (white pill, colored border) ── */
+
+  .ui-glossy-select-trigger {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 60px;
+    padding: 0 3rem 0 1.8rem;
+    border-radius: 999px;
+    overflow: hidden;
+    cursor: pointer;
+    color: #3a3a50;
+    font-weight: 800;
+    font-size: 1.7rem;
+    text-align: left;
+    justify-content: flex-start;
+    user-select: none;
+    background: linear-gradient(180deg, #ffffff 0%, #f4f2ff 50%, #eae8f8 100%);
+    transition:
+      transform 0.12s ease,
+      filter 0.12s ease,
+      box-shadow 0.12s ease;
+  }
+
+  .ui-glossy-select-trigger::before {
+    content: '';
+    position: absolute;
+    left: 8px;
+    right: 8px;
+    top: 3px;
+    height: 44%;
+    border-radius: 999px;
+    background: linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.95) 0%,
+      rgba(255, 255, 255, 0.4) 60%,
+      rgba(255, 255, 255, 0.05) 100%
+    );
+    pointer-events: none;
+  }
+
+  .ui-glossy-select-trigger:not([aria-disabled='true']):hover {
+    transform: translateY(-1px) scale(1.02);
+    filter: brightness(1.02);
+  }
+
+  .ui-glossy-select-trigger:not([aria-disabled='true']):active {
+    transform: translateY(2px) scale(0.99);
+  }
+
+  .ui-glossy-select-trigger[aria-disabled='true'] {
+    opacity: 0.5;
+    cursor: default;
+  }
+
+  .ui-glossy-select-trigger--cyan {
+    border: 3px solid #3ecad6;
+    box-shadow:
+      inset 0 0 0 3px rgba(255, 255, 255, 0.85),
+      inset 0 -3px 0 rgba(180, 210, 220, 0.4),
+      0 3px 0 #2aa8b8,
+      0 6px 14px rgba(40, 170, 190, 0.25),
+      0 0 0 1px rgba(62, 202, 214, 0.3);
+  }
+
+  .ui-glossy-select-trigger--cyan:not([aria-disabled='true']):active {
+    box-shadow:
+      inset 0 0 0 3px rgba(255, 255, 255, 0.8),
+      inset 0 2px 4px rgba(40, 160, 180, 0.2),
+      0 1px 0 #2aa8b8,
+      0 2px 6px rgba(40, 170, 190, 0.2);
+  }
+
+  .ui-glossy-select-trigger--pink {
+    border: 3px solid #d8728a;
+    box-shadow:
+      inset 0 0 0 3px rgba(255, 255, 255, 0.85),
+      inset 0 -3px 0 rgba(220, 180, 190, 0.4),
+      0 3px 0 #b85a72,
+      0 6px 14px rgba(200, 90, 120, 0.25),
+      0 0 0 1px rgba(216, 114, 138, 0.3);
+  }
+
+  .ui-glossy-select-trigger--pink:not([aria-disabled='true']):active {
+    box-shadow:
+      inset 0 0 0 3px rgba(255, 255, 255, 0.8),
+      inset 0 2px 4px rgba(200, 90, 120, 0.2),
+      0 1px 0 #b85a72,
+      0 2px 6px rgba(200, 90, 120, 0.2);
+  }
+
+  /* ── Glossy dropdown menu ── */
+
+  .ui-glossy-dropdown {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: calc(100% + 6px);
+    z-index: 20;
+    border-radius: 18px;
+    border: 3px solid rgba(255, 255, 255, 0.35);
+    background: linear-gradient(180deg, #ffffff 0%, #f0eeff 100%);
+    box-shadow:
+      0 8px 24px rgba(0, 0, 0, 0.25),
+      0 0 0 1px rgba(120, 100, 200, 0.15),
+      inset 0 1px 0 rgba(255, 255, 255, 0.9);
+    padding: 5px;
+    overflow: hidden;
+  }
+
+  .ui-glossy-dropdown-item {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 42px;
+    border-radius: 12px;
+    border: none;
+    background: transparent;
+    color: #5a5a70;
+    font-weight: 700;
+    font-size: 1.5rem;
+    cursor: pointer;
+    transition:
+      background 0.1s ease,
+      color 0.1s ease;
+  }
+
+  .ui-glossy-dropdown-item:hover {
+    background: rgba(120, 100, 220, 0.1);
+    color: #3a3a50;
+  }
+
+  .ui-glossy-dropdown-item--active {
+    background: rgba(120, 100, 220, 0.15);
+    color: #3a3a50;
+    font-weight: 800;
+  }
+}
