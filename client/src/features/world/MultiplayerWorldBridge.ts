@@ -71,8 +71,10 @@ export class MultiplayerWorldBridge {
           const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
           const data = imageData.data;
           for (let i = 0; i < data.length; i += 4) {
-            // If pixel is near-white, make it fully transparent
-            if (data[i] > 240 && data[i + 1] > 240 && data[i + 2] > 240) {
+            // Strip near-white pixels (including anti-aliased edges) to transparent.
+            // Threshold of 200 catches light grays from stroke anti-aliasing
+            // without affecting colored drawings.
+            if (data[i] > 200 && data[i + 1] > 200 && data[i + 2] > 200) {
               data[i + 3] = 0;
             }
           }

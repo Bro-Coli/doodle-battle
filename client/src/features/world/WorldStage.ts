@@ -1,8 +1,8 @@
-import { Application, Container, Ticker, Texture } from 'pixi.js';
+import { Application, Container, Graphics, Ticker, Texture } from 'pixi.js';
 import { EntityProfile, InteractionMatrix } from '@crayon-world/shared/src/types';
 import { captureEntityTexture } from './captureEntityTexture';
-import { buildEntityContainer } from './EntitySprite';
-import { EntityState, SpreadingState, initEntityState, dispatchBehavior } from '@crayon-world/shared/src/simulation/EntitySimulation';
+import { buildEntityContainer, buildEntitySprite } from './EntitySprite';
+import { EntityState, SpreadingState, initEntityState, dispatchBehavior, WORLD_BOUNDS } from '@crayon-world/shared/src/simulation/EntitySimulation';
 import { fetchInteractions } from './fetchInteractions';
 import { RoundOverlay, RoundOutcome } from './RoundOverlay';
 import { resolveInteraction, applyInteractionSteering, DETECTION_RANGE_FRACTION, FIGHT_PROXIMITY_FRACTION, FIGHT_COOLDOWN_MS } from '@crayon-world/shared/src/simulation/interactionBehaviors';
@@ -81,11 +81,55 @@ export class WorldStage {
     app.stage.addChild(this._drawingRoot);
     app.stage.addChild(this._worldRoot);
 
+    // Debug: outline the server's simulation bounds so wall mismatches are obvious.
+    // WORLD_BOUNDS is fixed (1280x720) while the client canvas is resizeTo:window,
+    // so this rectangle should show exactly where the server thinks the walls are.
+    const bounds = new Graphics();
+    bounds
+      .rect(0, 0, WORLD_BOUNDS.width, WORLD_BOUNDS.height)
+      .stroke({ color: 0xff00ff, width: 2, alignment: 0 });
+    bounds.eventMode = 'none';
+    this._worldRoot.addChild(bounds);
+
     // Start in draw mode — world is hidden
     this._worldRoot.visible = false;
 
+    // Fit the sim area uniformly into the canvas and keep it fitted on resize.
+    // Uniform scale preserves aspect ratio so circles stay circles across clients;
+    // gutters on one axis are left transparent.
+    //
+    // We listen to the renderer's own `resize` event — not `window.resize` —
+    // because Pixi's resizeTo:window updates `app.screen` during its own resize
+    // handler, and window.resize fires too early to read the new dimensions.
+    this._fitWorldToScreen();
+    this._onRendererResize = () => this._fitWorldToScreen();
+    app.renderer.on('resize', this._onRendererResize);
+
     // Register single shared ticker for all entity simulation
     app.ticker.add(this._gameTick);
+  }
+
+  private _onRendererResize: (() => void) | null = null;
+
+  /**
+   * Scale and center worldRoot so WORLD_BOUNDS fits uniformly inside the canvas.
+   * Called once in the constructor and on every renderer resize.
+   */
+  private _fitWorldToScreen(): void {
+    const screen = this._app.screen;
+    const scale = Math.min(screen.width / WORLD_BOUNDS.width, screen.height / WORLD_BOUNDS.height);
+    this._worldRoot.scale.set(scale);
+    this._worldRoot.x = (screen.width - WORLD_BOUNDS.width * scale) / 2;
+    this._worldRoot.y = (screen.height - WORLD_BOUNDS.height * scale) / 2;
+  }
+
+  /** Dispose listeners and tickers. Call from cleanupPixi. */
+  destroy(): void {
+    if (this._onRendererResize) {
+      this._app.renderer.off('resize', this._onRendererResize);
+      this._onRendererResize = null;
+    }
+    this._app.ticker.remove(this._gameTick);
   }
 
   get drawingRoot(): Container {
@@ -553,16 +597,29 @@ export class WorldStage {
 
   /**
    * Update an already-spawned entity's sprite texture (e.g., when texture arrives after spawn).
+   *
+   * The entity may have been built with Texture.WHITE as a placeholder, whose tiny
+   * dimensions produce the wrong finalScale. Simply swapping `sprite.texture` leaves
+   * the placeholder-derived scale in place and renders the real drawing at hundreds
+   * of px — effectively off-screen. Instead, destroy the old sprite entirely and
+   * rebuild via the same helper used at spawn time so scale, filters, and anchor
+   * are guaranteed to match the happy path.
    */
   updateEntityTexture(entityId: string, texture: Texture): void {
     const container = this._entityContainersById.get(entityId);
     if (!container) return;
 
-    // The sprite is the first child of the entity container
-    const sprite = container.children[0];
-    if (sprite && 'texture' in sprite) {
-      (sprite as { texture: Texture }).texture = texture;
+    const oldSprite = container.children[0];
+    if (oldSprite) {
+      container.removeChild(oldSprite);
+      oldSprite.destroy();
     }
+
+    const sprite = buildEntitySprite(texture);
+    container.addChildAt(sprite, 0);
+
+    // Sync sprite height so label positioning (_interpolateMultiplayer) stays correct
+    this._entitySpriteHeights.set(container, sprite.height);
   }
 
   /**
@@ -633,10 +690,12 @@ export class WorldStage {
       container.x = prev.x + (curr.x - prev.x) * t;
       container.y = prev.y + (curr.y - prev.y) * t;
 
-      // Lerp velocity for orientation (use interpolated values for smooth rotation)
-      const vx = prev.vx + (curr.vx - prev.vx) * t;
-      const vy = prev.vy + (curr.vy - prev.vy) * t;
-      this._applyOrientation(entityId, { vx, vy });
+      // Orientation uses the current server snapshot directly, NOT the interpolated
+      // velocity. When vx flips sign between ticks (e.g. wall bounce), the lerped
+      // value sweeps through zero over 50ms — and every frame on each side of zero
+      // would re-flip the sprite, causing visible flicker. curr.vx changes once
+      // per server tick, so the sprite flips exactly when direction actually changes.
+      this._applyOrientation(entityId, { vx: curr.vx, vy: curr.vy });
 
       // Sync label position
       const label = this._entityLabels.get(container);

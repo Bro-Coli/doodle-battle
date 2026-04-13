@@ -9,6 +9,29 @@ export interface EntityBuildResult {
   spriteHeight: number;
 }
 
+/**
+ * Build a scaled, drop-shadowed Sprite for an entity's drawing texture.
+ * Shared between the initial container build and updateEntityTexture so
+ * scale/filters stay consistent regardless of which path creates the sprite.
+ */
+export function buildEntitySprite(texture: Texture): Sprite {
+  const sprite = new Sprite(texture);
+  sprite.anchor.set(0.5, 0.5);
+
+  // Scale down to ~1:5, clamping so minimum dimension is at least 30px
+  const scaleFactor = 0.2;
+  const scaledW = texture.width * scaleFactor;
+  const scaledH = texture.height * scaleFactor;
+  const minDim = Math.min(scaledW, scaledH);
+  const finalScale = minDim < 30 ? scaleFactor * (30 / minDim) : scaleFactor;
+  sprite.scale.set(finalScale);
+
+  // Drop shadow filter — pixi-filters v6 uses `offset` (PointData), not `distance`
+  sprite.filters = [new DropShadowFilter({ blur: 3, offset: { x: 4, y: 6 }, alpha: 0.35 })];
+
+  return sprite;
+}
+
 /** Hex tint values applied to entity sprites by team. */
 export const TEAM_TINTS: Record<string, number> = {
   red: 0xff6666,
@@ -61,20 +84,7 @@ export function buildEntityContainer(
   entity.on('pointerout', () => hideTooltip());
 
   // Create sprite from texture
-  const sprite = new Sprite(texture);
-  sprite.anchor.set(0.5, 0.5);
-
-  // Scale down to ~1:5, clamping so minimum dimension is at least 30px
-  const scaleFactor = 0.2;
-  const scaledW = texture.width * scaleFactor;
-  const scaledH = texture.height * scaleFactor;
-  const minDim = Math.min(scaledW, scaledH);
-  const finalScale = minDim < 30 ? scaleFactor * (30 / minDim) : scaleFactor;
-  sprite.scale.set(finalScale);
-
-  // Drop shadow filter — pixi-filters v6 uses `offset` (PointData), not `distance`
-  sprite.filters = [new DropShadowFilter({ blur: 3, offset: { x: 4, y: 6 }, alpha: 0.35 })];
-
+  const sprite = buildEntitySprite(texture);
   entity.addChild(sprite);
 
   // Floating name label — separate container, not a child of entity
