@@ -81,7 +81,7 @@ export function CreateRoomScreen() {
     setLoading(true);
     setError(null);
     try {
-      const newRoom = await createRoom({ name, maxPlayers, maxRounds, isPrivate });
+      const newRoom = await createRoom({ name, maxPlayers, maxRounds, drawingTime, isPrivate });
       setDisplayName(name);
       setRoom(newRoom);
       setRoomCode(newRoom.roomId);
@@ -191,7 +191,7 @@ export function CreateRoomScreen() {
               <input
                 type="range"
                 min={10}
-                max={120}
+                max={600}
                 step={10}
                 value={drawingTime}
                 onChange={(e) => setDrawingTime(Number(e.target.value))}
