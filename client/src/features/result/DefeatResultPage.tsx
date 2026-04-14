@@ -19,7 +19,9 @@ export function DefeatResultPage(): React.JSX.Element {
           src={resultDefeatTitle}
           alt="Defeat"
           className="w-full max-w-[600px] scale-x-108 object-contain"
+          style={{ aspectRatio: '2156 / 711' }}
           decoding="async"
+          fetchPriority="high"
         />
         <div className="mt-6">
           <StrokeShadowText
@@ -45,6 +47,7 @@ export function DefeatResultPage(): React.JSX.Element {
             src={resultVsText}
             alt="VS"
             className="h-20 w-auto shrink-0 object-contain lg:h-16 md:h-14"
+            style={{ aspectRatio: '1808 / 1335' }}
             decoding="async"
           />
 

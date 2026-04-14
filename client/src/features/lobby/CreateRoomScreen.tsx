@@ -187,7 +187,7 @@ export function CreateRoomScreen() {
             <p className="mb-3 t14-b font-nunito text-center uppercase tracking-widest text-white/70">
               Drawing Time
             </p>
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2">
               <input
                 type="range"
                 min={10}
@@ -203,10 +203,12 @@ export function CreateRoomScreen() {
                   } as React.CSSProperties
                 }
               />
-              <span className={
-                'relative inline-flex w-[120px] shrink-0 items-center justify-end' +
-                (created ? ' opacity-50' : '')
-              }>
+              <span
+                className={
+                  'relative inline-flex w-[118px] shrink-0 items-center justify-end' +
+                  (created ? ' opacity-50' : '')
+                }
+              >
                 <span
                   aria-hidden
                   className="pointer-events-none absolute inset-0 text-right font-nunito t18-b text-transparent"
@@ -624,7 +626,11 @@ function TeamSlot({
       <span className="truncate t16-b">{playerName}</span>
       {isReady && (
         <span className="ml-auto rounded-full bg-emerald-400/20 p-1">
-          <svg viewBox="0 0 20 20" className="h-5 w-5 text-emerald-300 drop-shadow-[0_0_6px_rgba(52,211,153,0.6)]" fill="currentColor">
+          <svg
+            viewBox="0 0 20 20"
+            className="h-5 w-5 text-emerald-300 drop-shadow-[0_0_6px_rgba(52,211,153,0.6)]"
+            fill="currentColor"
+          >
             <path
               fillRule="evenodd"
               d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"

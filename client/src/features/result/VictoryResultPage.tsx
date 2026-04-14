@@ -63,7 +63,9 @@ export function VictoryResultPage() {
           src={resultVictoryTitle}
           alt="Victory"
           className="w-full max-w-[760px] scale-x-106 object-contain"
+          style={{ aspectRatio: '5306 / 2054' }}
           decoding="async"
+          fetchPriority="high"
         />
         <div className="mt-12 flex w-full items-center justify-center gap-10 px-4">
           <ResultScoreCard team="Blue Team" score={5} variant="blue" winner isMyTeam />
@@ -72,6 +74,7 @@ export function VictoryResultPage() {
             src={resultVsText}
             alt="VS"
             className="h-20 w-auto shrink-0 object-contain lg:h-16"
+            style={{ aspectRatio: '1808 / 1335' }}
             decoding="async"
           />
 
