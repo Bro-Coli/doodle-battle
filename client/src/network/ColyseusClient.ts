@@ -36,6 +36,7 @@ export async function createRoom(options: {
   name: string;
   maxPlayers?: number;
   maxRounds?: number;
+  drawingTime?: number;
   isPrivate?: boolean;
 }): Promise<Room> {
   const room = await getClient().create('game_room', options);

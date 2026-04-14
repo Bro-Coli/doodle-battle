@@ -41,7 +41,7 @@ export function NameInputScreen(): React.JSX.Element {
       if (flow === 'quick') {
         await quickPlay(normalizedName);
       } else if (flow === 'create') {
-        await createRoom({ name: normalizedName, maxPlayers, maxRounds, isPrivate: false });
+        await createRoom({ name: normalizedName, maxPlayers, maxRounds, drawingTime: 60, isPrivate: false });
       } else {
         if (code.length !== 4) {
           setError('Please enter a 4-character room code.');

@@ -55,6 +55,7 @@ export class GameState extends Schema {
   @type('number') phaseTimer: number = 0;
   @type('number') currentRound: number = 0;
   @type('number') maxRounds: number = 5;
+  @type('number') drawingTime: number = 60;
   @type('string') gameStatus: string = 'active';
 }
 
@@ -90,6 +91,7 @@ export class GameRoom extends Room<{ state: GameState }> {
     this.maxClients = maxPlayers;
     this.state.maxPlayers = maxPlayers;
     this.state.maxRounds = (options.maxRounds as number) ?? 5;
+    this.state.drawingTime = (options.drawingTime as number) ?? 60;
 
     // Override roomId with a 4-char human-readable code
     this.roomId = this._generate4CharCode();
@@ -524,7 +526,7 @@ export class GameRoom extends Room<{ state: GameState }> {
       }
 
       this.state.currentPhase = 'draw';
-      this.state.phaseTimer = 60;
+      this.state.phaseTimer = this.state.drawingTime;
     }
   }
 
@@ -797,7 +799,7 @@ export class GameRoom extends Room<{ state: GameState }> {
 
     // Start the draw phase
     this.state.currentPhase = 'draw';
-    this.state.phaseTimer = 60;
+    this.state.phaseTimer = this.state.drawingTime;
   }
 
   // ---------------------------------------------------------------------------
