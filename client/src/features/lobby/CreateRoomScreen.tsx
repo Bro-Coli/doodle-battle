@@ -203,7 +203,10 @@ export function CreateRoomScreen() {
                   } as React.CSSProperties
                 }
               />
-              <span className="relative inline-flex w-[120px] shrink-0 items-center justify-end">
+              <span className={
+                'relative inline-flex w-[120px] shrink-0 items-center justify-end' +
+                (created ? ' opacity-50' : '')
+              }>
                 <span
                   aria-hidden
                   className="pointer-events-none absolute inset-0 text-right font-nunito t18-b text-transparent"
