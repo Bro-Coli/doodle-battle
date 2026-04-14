@@ -596,7 +596,6 @@ function HeartIcon() {
 
 function TeamSlot({
   playerName,
-  isHost,
   isMe,
   isReady,
 }: {
