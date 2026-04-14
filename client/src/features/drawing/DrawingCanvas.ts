@@ -1,6 +1,8 @@
 import { Application, Graphics, Container } from 'pixi.js';
-import { renderStroke, ThicknessPreset } from './StrokeRenderer';
+import { renderStroke, setStrokeColor, ThicknessPreset } from './StrokeRenderer';
 import { UndoStack } from './UndoStack';
+
+export type DrawTool = 'brush' | 'eraser';
 
 export class DrawingCanvas {
   private app: Application;
@@ -12,6 +14,9 @@ export class DrawingCanvas {
   private liveGraphics: Graphics | null = null;
   private drawing = false;
   private activePreset: ThicknessPreset = 'medium';
+  private _activeTool: DrawTool = 'brush';
+  private _brushColor = 0x000000;
+  onToolChange: ((tool: DrawTool) => void) | null = null;
 
   constructor(app: Application) {
     this.app = app;
@@ -35,11 +40,16 @@ export class DrawingCanvas {
 
     this._undoStack = new UndoStack(this.strokeContainer);
 
-    // Pointer down on region starts a stroke
     this._region.on('pointerdown', (e) => {
       if (this.drawing) return;
       this.drawing = true;
       this.currentPoints = [];
+
+      if (this._activeTool === 'eraser') {
+        setStrokeColor(0xffffff);
+      } else {
+        setStrokeColor(this._brushColor);
+      }
 
       this.liveGraphics = new Graphics();
       this.strokeContainer.addChild(this.liveGraphics);
@@ -122,6 +132,23 @@ export class DrawingCanvas {
 
   setThickness(preset: ThicknessPreset): void {
     this.activePreset = preset;
+  }
+
+  setTool(tool: DrawTool): void {
+    this._activeTool = tool;
+    this._region.cursor = tool === 'eraser' ? 'cell' : 'crosshair';
+    this.onToolChange?.(tool);
+  }
+
+  get activeTool(): DrawTool {
+    return this._activeTool;
+  }
+
+  setBrushColor(color: number): void {
+    this._brushColor = color;
+    if (this._activeTool === 'brush') {
+      setStrokeColor(color);
+    }
   }
 
   get undoStack(): UndoStack {

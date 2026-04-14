@@ -3,12 +3,16 @@ import type { ReactElement, SVGProps } from 'react';
 export type IconName =
   | 'arrowLeft'
   | 'arrowSwap'
+  | 'brush'
   | 'check'
   | 'close'
+  | 'eraser'
   | 'lightning'
   | 'plus'
   | 'search'
+  | 'trash'
   | 'trophy'
+  | 'undo'
   | 'user';
 
 export type IconSize = '1em' | '1rem' | 16 | 20 | 24 | 32 | 48 | 64 | number | string;

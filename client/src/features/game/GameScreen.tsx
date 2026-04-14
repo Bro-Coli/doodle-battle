@@ -1,14 +1,15 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import { Application, Renderer } from 'pixi.js';
 import { DrawingCanvas } from '../drawing/DrawingCanvas';
+import type { DrawTool } from '../drawing/DrawingCanvas';
 import { WorldStage } from '../world/WorldStage';
 import { MultiplayerWorldBridge } from '../world/MultiplayerWorldBridge';
 import { exportPng } from '../drawing/exportPng';
 import { captureEntityTexture } from '../world/captureEntityTexture';
-import { setStrokeColor } from '../drawing/StrokeRenderer';
 import { TEAM_TINTS } from '../world/EntitySprite';
 import { getActiveRoom, leaveActiveRoom } from '../../network/ColyseusClient';
 import { navigate } from '../../utils/navigate';
+import { DrawToolbar } from './DrawToolbar';
 
 // ─── Snapshot types ───────────────────────────────────────────────────────────
 
@@ -342,6 +343,8 @@ export function GameScreen(): React.JSX.Element {
   const [hasSubmitted, setHasSubmitted] = useState(false);
   const [capturedImageUrl, setCapturedImageUrl] = useState<string | null>(null);
   const [winnerData, setWinnerData] = useState<WinnerData | null>(null);
+  const [activeTool, setActiveTool] = useState<DrawTool>('brush');
+  const [canvasEmpty, setCanvasEmpty] = useState(true);
 
   // Refs for PixiJS objects (stable across renders)
   const appRef = useRef<Application<Renderer> | null>(null);
@@ -404,6 +407,10 @@ export function GameScreen(): React.JSX.Element {
       const drawingCanvas = new DrawingCanvas(app);
       drawingCanvasRef.current = drawingCanvas;
       worldStage.drawingRoot.addChild(drawingCanvas.region);
+
+      drawingCanvas.undoStack.onChange = () => {
+        setCanvasEmpty(drawingCanvas.isEmpty);
+      };
 
       // Set up bridge
       const bridge = new MultiplayerWorldBridge(worldStage);
@@ -494,8 +501,13 @@ export function GameScreen(): React.JSX.Element {
           // Set stroke color to team color so drawings are visually team-coded
           const teamTint = TEAM_TINTS[myTeamRef.current];
           if (teamTint !== undefined) {
-            setStrokeColor(teamTint);
+            drawingCanvasRef.current?.setBrushColor(teamTint);
           }
+
+          // Reset tool back to brush for new round
+          drawingCanvasRef.current?.setTool('brush');
+          setActiveTool('brush');
+          setCanvasEmpty(true);
 
           // Show drawing root, hide world root
           const stage = worldStageRef.current;
@@ -545,6 +557,20 @@ export function GameScreen(): React.JSX.Element {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [snapshot.phaseTimer, snapshot.currentPhase]);
+
+  const handleToolChange = useCallback((tool: DrawTool) => {
+    drawingCanvasRef.current?.setTool(tool);
+    setActiveTool(tool);
+  }, []);
+
+  const handleUndo = useCallback(() => {
+    drawingCanvasRef.current?.undo();
+  }, []);
+
+  const handleClear = useCallback(() => {
+    drawingCanvasRef.current?.clear();
+    setCanvasEmpty(true);
+  }, []);
 
   function handleSubmit(): void {
     if (hasSubmittedRef.current) return;
@@ -611,12 +637,22 @@ export function GameScreen(): React.JSX.Element {
 
       {/* Phase overlays — React on top of canvas */}
       {currentPhase === 'draw' && !hasSubmitted && (
-        <DrawPhaseOverlay
-          phaseTimer={phaseTimer}
-          currentRound={currentRound}
-          maxRounds={maxRounds}
-          onSubmit={handleSubmit}
-        />
+        <>
+          <DrawPhaseOverlay
+            phaseTimer={phaseTimer}
+            currentRound={currentRound}
+            maxRounds={maxRounds}
+            onSubmit={handleSubmit}
+          />
+          <DrawToolbar
+            activeTool={activeTool}
+            canUndo={!canvasEmpty}
+            canClear={!canvasEmpty}
+            onToolChange={handleToolChange}
+            onUndo={handleUndo}
+            onClear={handleClear}
+          />
+        </>
       )}
 
       {currentPhase === 'draw' && hasSubmitted && (
