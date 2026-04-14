@@ -619,13 +619,8 @@ function TeamSlot({
         'ui-team-slot ui-team-slot--filled font-nunito' + (isMe ? ' ui-team-slot--me' : '')
       }
     >
-      <div className="ui-team-avatar">
-        <span className="relative z-1">😊</span>
-        {isHost && <span className="ui-team-crown">👑</span>}
-      </div>
-      <span className="truncate t16-b">{playerName}</span>
       {isReady && (
-        <span className="ml-auto rounded-full bg-emerald-400/20 p-1">
+        <span className="rounded-full bg-emerald-400/20 p-1">
           <svg
             viewBox="0 0 20 20"
             className="h-5 w-5 text-emerald-300 drop-shadow-[0_0_6px_rgba(52,211,153,0.6)]"
@@ -639,6 +634,7 @@ function TeamSlot({
           </svg>
         </span>
       )}
+      <span className="truncate t16-b">{playerName}</span>
     </div>
   );
 }
