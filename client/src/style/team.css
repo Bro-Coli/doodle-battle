@@ -87,7 +87,7 @@
       0 0 14px rgba(80, 160, 255, 0.2);
     color: white;
     padding: 0 1rem;
-    justify-content: center;
+    justify-content: space-between;
     gap: 0.5rem;
   }
 

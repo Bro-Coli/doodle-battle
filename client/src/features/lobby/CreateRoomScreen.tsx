@@ -618,22 +618,16 @@ function TeamSlot({
         'ui-team-slot ui-team-slot--filled font-nunito' + (isMe ? ' ui-team-slot--me' : '')
       }
     >
-      {isReady && (
-        <span className="rounded-full bg-emerald-400/20 p-1">
-          <svg
-            viewBox="0 0 20 20"
-            className="h-5 w-5 text-emerald-300 drop-shadow-[0_0_6px_rgba(52,211,153,0.6)]"
-            fill="currentColor"
-          >
-            <path
-              fillRule="evenodd"
-              d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-              clipRule="evenodd"
-            />
-          </svg>
-        </span>
-      )}
       <span className="truncate t16-b">{playerName}</span>
+      {isReady && (
+        <Icon
+          name="check"
+          size={32}
+          color="emerald-300"
+          className="shrink-0 text-emerald-300 drop-shadow-[0_0_6px_rgba(52,211,153,0.6)]"
+          decorative
+        />
+      )}
     </div>
   );
 }
