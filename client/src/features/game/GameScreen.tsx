@@ -395,7 +395,7 @@ export function GameScreen(): React.JSX.Element {
       await app.init({
         resizeTo: window,
         autoDensity: true,
-        background: '#3E46E7',
+        backgroundAlpha: 0,
       });
       app.canvas.className = 'block h-screen w-screen';
       host.appendChild(app.canvas);
@@ -631,9 +631,12 @@ export function GameScreen(): React.JSX.Element {
   const myTeam = myTeamRef.current;
 
   return (
-    <div className="relative h-screen w-screen overflow-hidden">
+    <div
+      className="relative h-screen w-screen overflow-hidden"
+      style={{ background: 'var(--gradient-lobby)' }}
+    >
       {/* PixiJS canvas host — always mounted */}
-      <div id="game-pixi-host" className="absolute inset-0" />
+      <div id="game-pixi-host" className="absolute inset-0" style={{ background: 'var(--gradient-lobby)' }} />
 
       {/* Phase overlays — React on top of canvas */}
       {currentPhase === 'draw' && !hasSubmitted && (
