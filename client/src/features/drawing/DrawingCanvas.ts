@@ -9,6 +9,7 @@ export class DrawingCanvas {
   private _region: Graphics;
   private strokeContainer: Container;
   private _undoStack: UndoStack;
+  private _canvasBounds: { x: number; y: number; width: number; height: number };
 
   private currentPoints: [number, number][] = [];
   private liveGraphics: Graphics | null = null;
@@ -25,10 +26,11 @@ export class DrawingCanvas {
     const h = Math.min(app.screen.height * 0.75, 560);
     const x = (app.screen.width - w) / 2;
     const y = (app.screen.height - h) / 2 + 28;
+    this._canvasBounds = { x, y, width: w, height: h };
 
     // Create drawing region as white-filled rectangle with subtle border
     this._region = new Graphics();
-    this._region.rect(0, 0, w, h).fill({ color: 0xffffff }).stroke({ color: 0xd0d0d0, width: 1 });
+    this._region.roundRect(0, 0, w, h, 20).fill({ color: 0xffffff }).stroke({ color: 0xd0d0d0, width: 1 });
     this._region.x = x;
     this._region.y = y;
     this._region.eventMode = 'static';
@@ -153,6 +155,20 @@ export class DrawingCanvas {
 
   get undoStack(): UndoStack {
     return this._undoStack;
+  }
+
+  reposition(screenWidth: number, screenHeight: number, leftReserved = 0): void {
+    const w = this._canvasBounds.width;
+    const h = this._canvasBounds.height;
+    const x = (screenWidth - w + leftReserved) / 2;
+    const y = (screenHeight - h) / 2 + 28;
+    this._region.x = x;
+    this._region.y = y;
+    this._canvasBounds = { x, y, width: w, height: h };
+  }
+
+  get canvasBounds(): { x: number; y: number; width: number; height: number } {
+    return this._canvasBounds;
   }
 
   get region(): Graphics {

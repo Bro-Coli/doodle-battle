@@ -1,3 +1,4 @@
+import { useRef, useState, useEffect } from 'react';
 import { Icon } from '../../ui/icon/Icon';
 import type { DrawTool } from '../drawing/DrawingCanvas';
 import brushImage from './assets/brush.png';
@@ -7,9 +8,11 @@ interface DrawToolbarProps {
   activeTool: DrawTool;
   canUndo: boolean;
   canClear: boolean;
+  canvasBounds: { x: number; y: number; width: number; height: number } | null;
   onToolChange: (tool: DrawTool) => void;
   onUndo: () => void;
   onClear: () => void;
+  onWidthMeasured?: (width: number) => void;
 }
 
 function ToolButton({
@@ -55,12 +58,40 @@ export function DrawToolbar({
   activeTool,
   canUndo,
   canClear,
+  canvasBounds,
   onToolChange,
   onUndo,
   onClear,
+  onWidthMeasured,
 }: DrawToolbarProps): React.JSX.Element {
+  const toolbarRef = useRef<HTMLDivElement>(null);
+  const [toolbarWidth, setToolbarWidth] = useState(0);
+  const onWidthMeasuredRef = useRef(onWidthMeasured);
+  onWidthMeasuredRef.current = onWidthMeasured;
+
+  useEffect(() => {
+    if (!toolbarRef.current) return;
+    const ro = new ResizeObserver(([entry]) => {
+      const w = entry.borderBoxSize[0].inlineSize;
+      setToolbarWidth(w);
+      onWidthMeasuredRef.current?.(w);
+    });
+    ro.observe(toolbarRef.current, { box: 'border-box' });
+    return () => ro.disconnect();
+  }, []);
+
+  const GAP = 24;
+  const positionStyle: React.CSSProperties =
+    canvasBounds && toolbarWidth > 0
+      ? { position: 'fixed', left: canvasBounds.x - toolbarWidth - GAP, top: canvasBounds.y }
+      : { position: 'fixed', left: 16, top: '50%', transform: 'translateY(-50%)' };
+
   return (
-    <div className="fixed left-4 top-1/2 z-20 flex -translate-y-1/2 flex-col gap-2 rounded-[28px] border border-white/20 bg-[linear-gradient(180deg,rgba(203,167,255,0.78)_0%,rgba(180,137,241,0.74)_38%,rgba(156,111,226,0.76)_72%,rgba(133,86,210,0.8)_100%)] p-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.38),inset_0_-8px_18px_rgba(104,63,173,0.3),0_10px_28px_rgba(34,12,84,0.28)] backdrop-blur-md">
+    <div
+      ref={toolbarRef}
+      style={positionStyle}
+      className="z-20 flex flex-col gap-2 rounded-[28px] border border-white/20 bg-[linear-gradient(180deg,rgba(203,167,255,0.78)_0%,rgba(180,137,241,0.74)_38%,rgba(156,111,226,0.76)_72%,rgba(133,86,210,0.8)_100%)] p-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.38),inset_0_-8px_18px_rgba(104,63,173,0.3),0_10px_28px_rgba(34,12,84,0.28)] backdrop-blur-md"
+    >
       <ToolButton
         active={activeTool === 'brush'}
         label="Brush"

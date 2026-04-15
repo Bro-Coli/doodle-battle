@@ -70,9 +70,7 @@ function DrawPhaseOverlay({
           Round {currentRound + 1}/{maxRounds}
         </span>
         <span className="text-white/30">|</span>
-        <span className="font-bold text-2xl text-white">
-          {Math.max(0, Math.ceil(phaseTimer))}s
-        </span>
+        <span className="font-bold text-2xl text-white">{Math.max(0, Math.ceil(phaseTimer))}s</span>
       </div>
       <div className="fixed bottom-8 left-1/2 z-20 -translate-x-1/2">
         <button
@@ -134,8 +132,12 @@ function WaitingOverlay({
       {/* Player statuses */}
       <div className="mb-8 flex gap-6">
         {/* Teammates */}
-        <div className={`rounded-xl px-4 py-3 ${myTeam === 'red' ? 'bg-red-900/60' : 'bg-blue-900/60'}`}>
-          <p className={`mb-2 text-xs font-black uppercase tracking-widest ${myTeam === 'red' ? 'text-red-300' : 'text-blue-300'}`}>
+        <div
+          className={`rounded-xl px-4 py-3 ${myTeam === 'red' ? 'bg-red-900/60' : 'bg-blue-900/60'}`}
+        >
+          <p
+            className={`mb-2 text-xs font-black uppercase tracking-widest ${myTeam === 'red' ? 'text-red-300' : 'text-blue-300'}`}
+          >
             Your Team ({myTeam === 'red' ? 'Red' : 'Blue'})
           </p>
           <ul className="flex flex-col gap-1">
@@ -145,15 +147,17 @@ function WaitingOverlay({
                 <span>{p.name}</span>
               </li>
             ))}
-            {teammates.length === 0 && (
-              <li className="text-xs text-white/40">No teammates</li>
-            )}
+            {teammates.length === 0 && <li className="text-xs text-white/40">No teammates</li>}
           </ul>
         </div>
 
         {/* Opponents */}
-        <div className={`rounded-xl px-4 py-3 ${myTeam === 'red' ? 'bg-blue-900/60' : 'bg-red-900/60'}`}>
-          <p className={`mb-2 text-xs font-black uppercase tracking-widest ${myTeam === 'red' ? 'text-blue-300' : 'text-red-300'}`}>
+        <div
+          className={`rounded-xl px-4 py-3 ${myTeam === 'red' ? 'bg-blue-900/60' : 'bg-red-900/60'}`}
+        >
+          <p
+            className={`mb-2 text-xs font-black uppercase tracking-widest ${myTeam === 'red' ? 'text-blue-300' : 'text-red-300'}`}
+          >
             Opponents
           </p>
           <ul className="flex flex-col gap-1">
@@ -163,9 +167,7 @@ function WaitingOverlay({
                 <span>{p.name}</span>
               </li>
             ))}
-            {opponents.length === 0 && (
-              <li className="text-xs text-white/40">No opponents</li>
-            )}
+            {opponents.length === 0 && <li className="text-xs text-white/40">No opponents</li>}
           </ul>
         </div>
       </div>
@@ -240,18 +242,10 @@ function WinnerOverlay({
   onMainMenu: () => void;
 }): React.JSX.Element {
   const winnerLabel =
-    winner === 'red'
-      ? 'Red Team Wins!'
-      : winner === 'blue'
-        ? 'Blue Team Wins!'
-        : "It's a Draw!";
+    winner === 'red' ? 'Red Team Wins!' : winner === 'blue' ? 'Blue Team Wins!' : "It's a Draw!";
 
   const winnerColor =
-    winner === 'red'
-      ? 'text-red-400'
-      : winner === 'blue'
-        ? 'text-blue-400'
-        : 'text-yellow-300';
+    winner === 'red' ? 'text-red-400' : winner === 'blue' ? 'text-blue-400' : 'text-yellow-300';
 
   // Sort by team then kills desc
   const rows = Object.entries(stats).sort(([, a], [, b]) => {
@@ -263,9 +257,7 @@ function WinnerOverlay({
     <div className="pointer-events-auto fixed inset-0 z-30 flex items-center justify-center bg-black/60">
       <div className="w-full max-w-lg rounded-2xl bg-[#1a1035]/95 px-8 py-8 shadow-2xl ring-1 ring-white/10">
         {/* Winner announcement */}
-        <h1 className={`mb-6 text-center text-4xl font-black ${winnerColor}`}>
-          {winnerLabel}
-        </h1>
+        <h1 className={`mb-6 text-center text-4xl font-black ${winnerColor}`}>{winnerLabel}</h1>
 
         {/* Per-player stats table */}
         <table className="mb-8 w-full text-sm">
@@ -345,12 +337,20 @@ export function GameScreen(): React.JSX.Element {
   const [winnerData, setWinnerData] = useState<WinnerData | null>(null);
   const [activeTool, setActiveTool] = useState<DrawTool>('brush');
   const [canvasEmpty, setCanvasEmpty] = useState(true);
+  const [canvasBounds, setCanvasBounds] = useState<{
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+  } | null>(null);
 
   // Refs for PixiJS objects (stable across renders)
   const appRef = useRef<Application<Renderer> | null>(null);
   const drawingCanvasRef = useRef<DrawingCanvas | null>(null);
   const worldStageRef = useRef<WorldStage | null>(null);
   const bridgeRef = useRef<MultiplayerWorldBridge | null>(null);
+  const toolbarWidthRef = useRef(0);
+  const TOOLBAR_GAP = 24;
 
   // Snapshot ref for imperative access from callbacks
   const snapshotRef = useRef<GameSnapshot>(snapshot);
@@ -406,6 +406,7 @@ export function GameScreen(): React.JSX.Element {
 
       const drawingCanvas = new DrawingCanvas(app);
       drawingCanvasRef.current = drawingCanvas;
+      setCanvasBounds(drawingCanvas.canvasBounds);
       worldStage.drawingRoot.addChild(drawingCanvas.region);
 
       drawingCanvas.undoStack.onChange = () => {
@@ -548,14 +549,9 @@ export function GameScreen(): React.JSX.Element {
 
   // Auto-submit when timer hits 0 and player hasn't submitted yet
   useEffect(() => {
-    if (
-      snapshot.currentPhase === 'draw' &&
-      snapshot.phaseTimer <= 0 &&
-      !hasSubmitted
-    ) {
+    if (snapshot.currentPhase === 'draw' && snapshot.phaseTimer <= 0 && !hasSubmitted) {
       handleSubmit();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [snapshot.phaseTimer, snapshot.currentPhase]);
 
   const handleToolChange = useCallback((tool: DrawTool) => {
@@ -571,6 +567,25 @@ export function GameScreen(): React.JSX.Element {
     drawingCanvasRef.current?.clear();
     setCanvasEmpty(true);
   }, []);
+
+  const repositionCanvas = useCallback(() => {
+    const dc = drawingCanvasRef.current;
+    if (!dc) return;
+    const leftReserved = toolbarWidthRef.current > 0 ? toolbarWidthRef.current + TOOLBAR_GAP : 0;
+    dc.reposition(window.innerWidth, window.innerHeight, leftReserved);
+    setCanvasBounds({ ...dc.canvasBounds });
+  }, [TOOLBAR_GAP]);
+
+  const handleToolbarWidthMeasured = useCallback((width: number) => {
+    toolbarWidthRef.current = width;
+    repositionCanvas();
+  }, [repositionCanvas]);
+
+  useEffect(() => {
+    const onResize = () => repositionCanvas();
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, [repositionCanvas]);
 
   function handleSubmit(): void {
     if (hasSubmittedRef.current) return;
@@ -593,7 +608,10 @@ export function GameScreen(): React.JSX.Element {
     // Capture transparent-background texture for entity sprite rendering
     const worldStage = worldStageRef.current;
     if (worldStage && drawingCanvas.strokeContainerRef.children.length > 0) {
-      worldStage.capturedDrawingTexture = captureEntityTexture(app, drawingCanvas.strokeContainerRef);
+      worldStage.capturedDrawingTexture = captureEntityTexture(
+        app,
+        drawingCanvas.strokeContainerRef,
+      );
     }
 
     // Send to server
@@ -636,7 +654,11 @@ export function GameScreen(): React.JSX.Element {
       style={{ background: 'var(--gradient-lobby)' }}
     >
       {/* PixiJS canvas host — always mounted */}
-      <div id="game-pixi-host" className="absolute inset-0" style={{ background: 'var(--gradient-lobby)' }} />
+      <div
+        id="game-pixi-host"
+        className="absolute inset-0"
+        style={{ background: 'var(--gradient-lobby)' }}
+      />
 
       {/* Phase overlays — React on top of canvas */}
       {currentPhase === 'draw' && !hasSubmitted && (
@@ -651,19 +673,17 @@ export function GameScreen(): React.JSX.Element {
             activeTool={activeTool}
             canUndo={!canvasEmpty}
             canClear={!canvasEmpty}
+            canvasBounds={canvasBounds}
             onToolChange={handleToolChange}
             onUndo={handleUndo}
             onClear={handleClear}
+            onWidthMeasured={handleToolbarWidthMeasured}
           />
         </>
       )}
 
       {currentPhase === 'draw' && hasSubmitted && (
-        <WaitingOverlay
-          capturedImageUrl={capturedImageUrl}
-          players={players}
-          myTeam={myTeam}
-        />
+        <WaitingOverlay capturedImageUrl={capturedImageUrl} players={players} myTeam={myTeam} />
       )}
 
       {currentPhase === 'simulate' && (
