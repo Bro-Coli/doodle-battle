@@ -53,7 +53,7 @@ function ObjectiveBanner({
     <div
       className="fixed z-20"
       style={{
-        left: canvasBounds ? canvasBounds.x + canvasBounds.width / 2 : '50%',
+        left: '50%',
         top: canvasBounds ? (56 + canvasBounds.y) / 2 : 76,
         transform: 'translate(-50%, -50%)',
       }}
@@ -152,7 +152,7 @@ function DrawPhaseOverlay({
         style={
           canvasBounds
             ? {
-                left: canvasBounds.x + canvasBounds.width / 2,
+                left: '50%',
                 top: canvasBounds.y + canvasBounds.height + 42,
                 transform: 'translateX(-50%)',
               }
