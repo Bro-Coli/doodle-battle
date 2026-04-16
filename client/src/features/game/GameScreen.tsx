@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useCallback } from 'react';
+import { useEffect, useRef, useState, useCallback, type CSSProperties } from 'react';
 import { Application, Renderer } from 'pixi.js';
 import { DrawingCanvas } from '../drawing/DrawingCanvas';
 import type { DrawTool } from '../drawing/DrawingCanvas';
@@ -124,13 +124,20 @@ function DrawPhaseOverlay({
   phaseTimer,
   currentRound,
   maxRounds,
+  canvasBounds,
   onSubmit,
 }: {
   phaseTimer: number;
   currentRound: number;
   maxRounds: number;
+  canvasBounds: { x: number; y: number; width: number; height: number } | null;
   onSubmit: () => void;
 }): React.JSX.Element {
+  const confirmStrokeStyle: CSSProperties & { '--stroke': string } = {
+    '--stroke': '5px',
+    WebkitTextStroke: 'var(--stroke) #0f6b7f',
+  };
+
   return (
     <>
       <div className="fixed left-1/2 top-4 z-20 -translate-x-1/2 flex items-center gap-3 rounded-xl bg-black/75 px-6 py-2">
@@ -140,13 +147,37 @@ function DrawPhaseOverlay({
         <span className="text-white/30">|</span>
         <span className="font-bold text-2xl text-white">{Math.max(0, Math.ceil(phaseTimer))}s</span>
       </div>
-      <div className="fixed bottom-8 left-1/2 z-20 -translate-x-1/2">
+      <div
+        className="fixed z-20"
+        style={
+          canvasBounds
+            ? {
+                left: canvasBounds.x + canvasBounds.width / 2,
+                top: canvasBounds.y + canvasBounds.height + 42,
+                transform: 'translateX(-50%)',
+              }
+            : {
+                left: '50%',
+                bottom: 24,
+                transform: 'translateX(-50%)',
+              }
+        }
+      >
         <button
           type="button"
           onClick={onSubmit}
-          className="rounded-2xl bg-green-500 px-10 py-4 text-xl font-black uppercase tracking-wide text-white shadow-lg transition hover:bg-green-400 active:scale-95"
+          className="ui-pill-button ui-pill-button--mint min-w-[212px] px-7 h-[72px]"
         >
-          Submit Drawing
+          <span className="relative z-1 inline-block">
+            <span
+              aria-hidden
+              className="pointer-events-none absolute inset-0 text-center uppercase text-transparent t20-eb"
+              style={confirmStrokeStyle}
+            >
+              Submit Drawing
+            </span>
+            <span className="relative text-center uppercase text-white t20-eb">Submit Drawing</span>
+          </span>
         </button>
       </div>
     </>
@@ -786,6 +817,7 @@ export function GameScreen(): React.JSX.Element {
             phaseTimer={phaseTimer}
             currentRound={currentRound}
             maxRounds={maxRounds}
+            canvasBounds={canvasBounds}
             onSubmit={handleSubmit}
           />
           <ObjectiveBanner canvasBounds={canvasBounds} />
