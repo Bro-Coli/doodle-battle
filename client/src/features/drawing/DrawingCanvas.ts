@@ -19,18 +19,32 @@ export class DrawingCanvas {
   private _brushColor = 0x000000;
   onToolChange: ((tool: DrawTool) => void) | null = null;
 
+  private computeCanvasSize(screenWidth: number, screenHeight: number, leftReserved = 0): {
+    width: number;
+    height: number;
+  } {
+    const availableWidth = Math.max(screenWidth - leftReserved - 48, 360);
+    const width = Math.min(availableWidth * 0.8, 860);
+    const height = Math.min(screenHeight * 0.7, 520);
+    return { width, height };
+  }
+
+  private updateRegionFrame(width: number, height: number): void {
+    this._region.clear();
+    this._region.roundRect(0, 0, width, height, 20).fill({ color: 0xffffff }).stroke({ color: 0xd0d0d0, width: 1 });
+  }
+
   constructor(app: Application) {
     this.app = app;
 
-    const w = Math.min(app.screen.width * 0.7, 680);
-    const h = Math.min(app.screen.height * 0.75, 560);
+    const { width: w, height: h } = this.computeCanvasSize(app.screen.width, app.screen.height);
     const x = (app.screen.width - w) / 2;
     const y = (app.screen.height - h) / 2 + 28;
     this._canvasBounds = { x, y, width: w, height: h };
 
     // Create drawing region as white-filled rectangle with subtle border
     this._region = new Graphics();
-    this._region.roundRect(0, 0, w, h, 20).fill({ color: 0xffffff }).stroke({ color: 0xd0d0d0, width: 1 });
+    this.updateRegionFrame(w, h);
     this._region.x = x;
     this._region.y = y;
     this._region.eventMode = 'static';
@@ -188,10 +202,10 @@ export class DrawingCanvas {
   }
 
   reposition(screenWidth: number, screenHeight: number, leftReserved = 0): void {
-    const w = this._canvasBounds.width;
-    const h = this._canvasBounds.height;
+    const { width: w, height: h } = this.computeCanvasSize(screenWidth, screenHeight, leftReserved);
     const x = (screenWidth - w + leftReserved) / 2;
     const y = (screenHeight - h) / 2 + 28;
+    this.updateRegionFrame(w, h);
     this._region.x = x;
     this._region.y = y;
     this._canvasBounds = { x, y, width: w, height: h };
