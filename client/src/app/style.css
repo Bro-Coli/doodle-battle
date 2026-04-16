@@ -283,6 +283,63 @@
   letter-spacing: 0.04em;
 }
 
+/* ── Objective banner (glossy pill) ── */
+
+.ui-objective-banner {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.6rem 2.4rem 0.6rem 1.6rem;
+  border: 2px solid rgba(255, 255, 255, 0.55);
+  border-radius: 18px;
+  overflow: hidden;
+  background: linear-gradient(
+    to bottom,
+    rgba(160, 140, 230, 0.4) 0%,
+    rgba(120, 100, 210, 0.38) 50%,
+    rgba(90, 70, 190, 0.42) 100%
+  );
+  box-shadow:
+    inset 0 0 0 2px rgba(255, 255, 255, 0.12),
+    inset 0 3px 0 rgba(255, 255, 255, 0.2),
+    inset 0 14px 28px -12px rgba(255, 255, 255, 0.18),
+    inset 14px 0 28px -12px rgba(255, 255, 255, 0.12),
+    inset 0 -6px 0 rgba(60, 40, 145, 0.12),
+    0 4px 0 rgba(80, 60, 176, 0.25),
+    0 10px 20px rgba(60, 40, 145, 0.12),
+    0 12px 28px rgba(0, 0, 0, 0.08);
+  backdrop-filter: blur(8px);
+  pointer-events: none;
+  user-select: none;
+}
+
+.ui-objective-banner::before {
+  content: '';
+  position: absolute;
+  left: 10px;
+  right: 10px;
+  top: 5px;
+  height: 44%;
+  border-radius: 14px;
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.05));
+  pointer-events: none;
+}
+
+.ui-objective-banner::after {
+  content: '';
+  position: absolute;
+  left: 18px;
+  top: 9px;
+  width: 16px;
+  height: 9px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.4);
+  transform: rotate(142deg);
+  pointer-events: none;
+  filter: blur(1px);
+}
+
 @keyframes neon-surge-yellow {
   0%,
   100% {
