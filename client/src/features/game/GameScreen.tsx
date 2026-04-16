@@ -424,6 +424,22 @@ export function GameScreen(): React.JSX.Element {
       // Start in draw mode — worldRoot hidden, drawingRoot visible
       // WorldStage starts with worldRoot hidden by default
 
+      // If already in draw phase (hot reload or reconnect), set brush color now.
+      // The normal phase-transition logic may have fired before DrawingCanvas existed.
+      const roomState = room.state as {
+        currentPhase?: string;
+        players?: Map<string, { team: string }>;
+      };
+      if (roomState.currentPhase === 'draw') {
+        const myPlayer = roomState.players?.get(room.sessionId);
+        if (myPlayer) {
+          const teamTint = TEAM_TINTS[myPlayer.team];
+          if (teamTint !== undefined) {
+            drawingCanvas.setBrushColor(teamTint);
+          }
+        }
+      }
+
       cleanupPixi = () => {
         bridge.disconnect();
         worldStage.destroy();
@@ -488,6 +504,27 @@ export function GameScreen(): React.JSX.Element {
       if (prevPhase !== currentPhase) {
         prevPhaseRef.current = currentPhase;
 
+        // Fallback auto-submit: if draw phase ended without submission, submit now.
+        // This catches edge cases where the timer-based auto-submit didn't fire in time.
+        // Skip if canvas is empty — no entity should spawn for blank drawings.
+        if (prevPhase === 'draw' && !hasSubmittedRef.current) {
+          // Inline submit logic — handleSubmit() may not be stable yet during mount
+          const dc = drawingCanvasRef.current;
+          const br = bridgeRef.current;
+          const ap = appRef.current;
+          if (dc && br && ap) {
+            dc.commitCurrentStroke();
+            // Only submit if something was drawn
+            if (!dc.isEmpty) {
+              const dataUrl = exportPng(ap, dc.strokeContainerRef, dc.region) ?? '';
+              br.submitDrawing(dataUrl);
+              setHasSubmitted(true);
+              hasSubmittedRef.current = true;
+              if (dataUrl) setCapturedImageUrl(dataUrl);
+            }
+          }
+        }
+
         if (currentPhase === 'draw') {
           // Reset submission state for new round
           setHasSubmitted(false);
@@ -547,9 +584,9 @@ export function GameScreen(): React.JSX.Element {
     };
   }, [room]);
 
-  // Auto-submit when timer hits 0 and player hasn't submitted yet
+  // Auto-submit when timer is about to expire (1s buffer beats server phase transition)
   useEffect(() => {
-    if (snapshot.currentPhase === 'draw' && snapshot.phaseTimer <= 0 && !hasSubmitted) {
+    if (snapshot.currentPhase === 'draw' && snapshot.phaseTimer <= 1 && snapshot.phaseTimer >= 0 && !hasSubmitted) {
       handleSubmit();
     }
   }, [snapshot.phaseTimer, snapshot.currentPhase]);
@@ -596,7 +633,13 @@ export function GameScreen(): React.JSX.Element {
 
     if (!app || !drawingCanvas || !bridge) return;
 
-    // Export current drawing (empty canvas returns null — submit anyway with empty)
+    // Commit any in-progress stroke (user may be mid-draw when timer expires)
+    drawingCanvas.commitCurrentStroke();
+
+    // Skip submission if canvas is empty — no entity should spawn for blank drawings
+    if (drawingCanvas.isEmpty) return;
+
+    // Export current drawing
     const imageDataUrl = exportPng(app, drawingCanvas.strokeContainerRef, drawingCanvas.region);
     const dataUrl = imageDataUrl ?? '';
 

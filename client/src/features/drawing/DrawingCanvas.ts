@@ -111,6 +111,36 @@ export class DrawingCanvas {
     this._undoStack.undo();
   }
 
+  /**
+   * Commit any in-progress stroke (e.g., when auto-submitting while user is still drawing).
+   * If no stroke is in progress, this is a no-op.
+   */
+  commitCurrentStroke(): void {
+    if (!this.drawing || !this.liveGraphics) return;
+
+    this.drawing = false;
+
+    // Remove live graphics from container (will be replaced by committed one)
+    this.strokeContainer.removeChild(this.liveGraphics);
+    this.liveGraphics.destroy();
+    this.liveGraphics = null;
+
+    // Need at least 1 point to commit
+    if (this.currentPoints.length === 0) return;
+
+    // If just a click (< 2 points), duplicate the point to render a dot
+    let pts = this.currentPoints;
+    if (pts.length < 2) {
+      pts = [pts[0], pts[0]];
+    }
+
+    const committed = new Graphics();
+    renderStroke(committed, pts, this.activePreset);
+    this._undoStack.push(committed);
+
+    this.currentPoints = [];
+  }
+
   clear(): void {
     this._undoStack.clear();
 
