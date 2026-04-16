@@ -203,7 +203,7 @@ export class DrawingCanvas {
 
   reposition(screenWidth: number, screenHeight: number, leftReserved = 0): void {
     const { width: w, height: h } = this.computeCanvasSize(screenWidth, screenHeight, leftReserved);
-    const x = (screenWidth - w + leftReserved) / 2;
+    const x = (screenWidth - w) / 2;
     const y = (screenHeight - h) / 2 + 28;
     this.updateRegionFrame(w, h);
     this._region.x = x;
