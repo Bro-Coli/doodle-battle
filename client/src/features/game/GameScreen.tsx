@@ -10,6 +10,7 @@ import { TEAM_TINTS } from '../world/EntitySprite';
 import { getActiveRoom, leaveActiveRoom } from '../../network/ColyseusClient';
 import { navigate } from '../../utils/navigate';
 import { DrawToolbar } from './DrawToolbar';
+import { CountdownRing } from '../scenario/parts/CountdownRing';
 import { StrokeShadowText } from '../../ui/text/StrokeShadowText';
 
 // ─── Snapshot types ───────────────────────────────────────────────────────────
@@ -120,16 +121,10 @@ function TimerBanner({ seconds }: { seconds: number }): React.JSX.Element {
   );
 }
 
-function DrawPhaseOverlay({
-  phaseTimer,
-  currentRound,
-  maxRounds,
+function DrawPhaseSubmitButton({
   canvasBounds,
   onSubmit,
 }: {
-  phaseTimer: number;
-  currentRound: number;
-  maxRounds: number;
   canvasBounds: { x: number; y: number; width: number; height: number } | null;
   onSubmit: () => void;
 }): React.JSX.Element {
@@ -139,48 +134,39 @@ function DrawPhaseOverlay({
   };
 
   return (
-    <>
-      <div className="fixed left-1/2 top-4 z-20 -translate-x-1/2 flex items-center gap-3 rounded-xl bg-black/75 px-6 py-2">
-        <span className="font-bold text-white/60 text-lg">
-          Round {currentRound + 1}/{maxRounds}
-        </span>
-        <span className="text-white/30">|</span>
-        <span className="font-bold text-2xl text-white">{Math.max(0, Math.ceil(phaseTimer))}s</span>
-      </div>
-      <div
-        className="fixed z-20"
-        style={
-          canvasBounds
-            ? {
-                left: '50%',
-                top: canvasBounds.y + canvasBounds.height + 42,
-                transform: 'translateX(-50%)',
-              }
-            : {
-                left: '50%',
-                bottom: 24,
-                transform: 'translateX(-50%)',
-              }
-        }
+    <div
+      className="fixed z-20"
+      style={
+        canvasBounds
+          ? {
+              left: '50%',
+              top: canvasBounds.y + canvasBounds.height + 42,
+              transform: 'translateX(-50%)',
+            }
+          : {
+              left: '50%',
+              bottom: 24,
+              transform: 'translateX(-50%)',
+            }
+      }
+    >
+      <button
+        type="button"
+        onClick={onSubmit}
+        className="ui-pill-button ui-pill-button--mint min-w-[212px] px-7 h-[72px]"
       >
-        <button
-          type="button"
-          onClick={onSubmit}
-          className="ui-pill-button ui-pill-button--mint min-w-[212px] px-7 h-[72px]"
-        >
-          <span className="relative z-1 inline-block">
-            <span
-              aria-hidden
-              className="pointer-events-none absolute inset-0 text-center uppercase text-transparent t20-eb"
-              style={confirmStrokeStyle}
-            >
-              Submit Drawing
-            </span>
-            <span className="relative text-center uppercase text-white t20-eb">Submit Drawing</span>
+        <span className="relative z-1 inline-block">
+          <span
+            aria-hidden
+            className="pointer-events-none absolute inset-0 text-center uppercase text-transparent t20-eb"
+            style={confirmStrokeStyle}
+          >
+            Submit Drawing
           </span>
-        </button>
-      </div>
-    </>
+          <span className="relative text-center uppercase text-white t20-eb">Submit Drawing</span>
+        </span>
+      </button>
+    </div>
   );
 }
 
@@ -464,6 +450,8 @@ export function GameScreen(): React.JSX.Element {
   // Track my team (derived from room state once, stable)
   const myTeamRef = useRef<string>('red');
 
+  const drawPhaseTotalRef = useRef(30);
+
   // When true, the unmount cleanup will NOT leave the room.
   // Set by handlers that intentionally keep the player in the room (e.g., Back to Lobby),
   // so browser back / tab close / uncontrolled unmounts still trigger room.leave() and
@@ -625,6 +613,8 @@ export function GameScreen(): React.JSX.Element {
         }
 
         if (currentPhase === 'draw') {
+          drawPhaseTotalRef.current = phaseTimer > 0 ? Math.ceil(phaseTimer) : 30;
+
           // Reset submission state for new round
           setHasSubmitted(false);
           hasSubmittedRef.current = false;
@@ -813,13 +803,15 @@ export function GameScreen(): React.JSX.Element {
       {/* Phase overlays — React on top of canvas */}
       {currentPhase === 'draw' && !hasSubmitted && (
         <>
-          <DrawPhaseOverlay
-            phaseTimer={phaseTimer}
-            currentRound={currentRound}
-            maxRounds={maxRounds}
-            canvasBounds={canvasBounds}
-            onSubmit={handleSubmit}
-          />
+          <div className="fixed right-4 top-4 z-20">
+            <CountdownRing
+              remaining={phaseTimer}
+              total={drawPhaseTotalRef.current}
+              currentRound={currentRound}
+              maxRounds={maxRounds}
+            />
+          </div>
+          <DrawPhaseSubmitButton canvasBounds={canvasBounds} onSubmit={handleSubmit} />
           <ObjectiveBanner canvasBounds={canvasBounds} />
           <DrawToolbar
             activeTool={activeTool}

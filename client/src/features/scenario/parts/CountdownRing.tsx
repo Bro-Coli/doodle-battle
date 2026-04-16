@@ -3,25 +3,43 @@ import { StrokeShadowText } from '@/ui/text/StrokeShadowText';
 const RING_VB = 300;
 const RING_TRACK_W = 24;
 const RING_GOLD_W = 16;
-const RING_R = (RING_VB - RING_TRACK_W) / 2 - 20;
+const RING_R = (RING_VB - RING_TRACK_W) / 2 - 16;
 const RING_C = 2 * Math.PI * RING_R;
 const CX = RING_VB / 2;
 const CY = RING_VB / 2;
 
-export function CountdownRing({ remaining, total }: { remaining: number; total: number }) {
+function formatTime(seconds: number): string {
+  const s = Math.max(0, Math.ceil(seconds));
+  const m = Math.floor(s / 60);
+  const sec = s % 60;
+  return `${String(m).padStart(2, '0')}:${String(sec).padStart(2, '0')}`;
+}
+
+interface CountdownRingProps {
+  remaining: number;
+  total: number;
+  currentRound?: number;
+  maxRounds?: number;
+}
+
+export function CountdownRing({ remaining, total, currentRound, maxRounds }: CountdownRingProps) {
   const progress = total > 0 ? Math.max(0, Math.min(1, remaining / total)) : 0;
   const dashArray = `${progress} 1`;
   const glowOpacity = Math.min(progress * 3, 1) * 0.6;
 
   return (
     <div
-      className="relative flex-center h-[300px] w-[300px] select-none lg:h-[240px] lg:w-[240px]"
+      className="relative flex-center select-none overflow-visible"
+      style={{ width: 220, height: 220 }}
       role="timer"
       aria-live="polite"
       aria-atomic="true"
-      aria-label={`Starts in ${remaining} seconds`}
+      aria-label={`${formatTime(remaining)} remaining`}
     >
-      <svg viewBox={`0 0 ${RING_VB} ${RING_VB}`} className="absolute inset-0 h-full w-full">
+      <svg
+        viewBox={`0 0 ${RING_VB} ${RING_VB}`}
+        className="absolute inset-0 h-full w-full overflow-visible"
+      >
         <defs>
           <linearGradient
             id="cd-ring-grad"
@@ -37,7 +55,6 @@ export function CountdownRing({ remaining, total }: { remaining: number; total: 
             <stop offset="100%" stopColor="#FFB300" />
           </linearGradient>
 
-          {/* Tight glow around the ring */}
           <filter id="cd-glow-tight" x="-30%" y="-30%" width="160%" height="160%">
             <feGaussianBlur in="SourceGraphic" stdDeviation="4" result="b1" />
             <feMerge>
@@ -46,21 +63,19 @@ export function CountdownRing({ remaining, total }: { remaining: number; total: 
             </feMerge>
           </filter>
 
-          {/* Wide ambient neon glow */}
           <filter id="cd-glow-wide" x="-80%" y="-80%" width="260%" height="260%">
             <feGaussianBlur in="SourceGraphic" stdDeviation="18" />
           </filter>
 
-          {/* Highlight shimmer filter */}
           <filter id="cd-highlight" x="-20%" y="-20%" width="140%" height="140%">
             <feGaussianBlur in="SourceGraphic" stdDeviation="3" />
           </filter>
         </defs>
 
         {/* Inner dark fill */}
-        <circle cx={CX} cy={CY} r={RING_R - RING_TRACK_W / 2 - 1} fill="rgba(10, 8, 4, 0.35)" />
+        <circle cx={CX} cy={CY} r={RING_R - RING_TRACK_W / 2 - 1} fill="rgba(10, 8, 4, 0.45)" />
 
-        {/* === Wide ambient neon glow (behind everything) === */}
+        {/* Wide ambient neon glow */}
         {progress > 0 && (
           <circle
             cx={CX}
@@ -80,7 +95,7 @@ export function CountdownRing({ remaining, total }: { remaining: number; total: 
           />
         )}
 
-        {/* === Dark track channel (the groove) === */}
+        {/* Dark track channel */}
         <circle
           cx={CX}
           cy={CY}
@@ -110,7 +125,7 @@ export function CountdownRing({ remaining, total }: { remaining: number; total: 
           opacity={0.6}
         />
 
-        {/* === Gold progress ring with tight glow === */}
+        {/* Gold progress ring with tight glow */}
         <circle
           cx={CX}
           cy={CY}
@@ -127,7 +142,7 @@ export function CountdownRing({ remaining, total }: { remaining: number; total: 
           style={{ transition: 'stroke-dasharray 1s linear' }}
         />
 
-        {/* === Highlight shimmer on upper-right arc === */}
+        {/* Highlight shimmer */}
         {progress > 0.2 && (
           <circle
             cx={CX}
@@ -135,7 +150,7 @@ export function CountdownRing({ remaining, total }: { remaining: number; total: 
             r={RING_R}
             fill="none"
             stroke="rgba(255,255,255,0.45)"
-            strokeWidth={4}
+            strokeWidth={3}
             strokeLinecap="round"
             strokeDasharray={`${RING_C * 0.15} ${RING_C * 0.85}`}
             filter="url(#cd-highlight)"
@@ -148,25 +163,28 @@ export function CountdownRing({ remaining, total }: { remaining: number; total: 
       {/* Text overlay */}
       <div className="relative flex flex-col items-center leading-none">
         <StrokeShadowText
-          className="t28-eb lg:t24-eb"
+          className="t40-eb"
           firstStrokeColor="#3E1E00"
           secondStrokeColor="#6B3A10"
-          firstStrokeWidth={8}
-          secondStrokeWidth={6}
+          firstStrokeWidth={10}
+          secondStrokeWidth={7}
           shadowOffsetY="0.18rem"
         >
-          Starts In
+          {formatTime(remaining)}
         </StrokeShadowText>
-        <StrokeShadowText
-          className="t80-eb lg:t68-eb"
-          firstStrokeColor="#3E1E00"
-          secondStrokeColor="#6B3A10"
-          firstStrokeWidth={12}
-          secondStrokeWidth={9}
-          shadowOffsetY="0.35rem"
-        >
-          {remaining}
-        </StrokeShadowText>
+        {currentRound !== undefined && maxRounds !== undefined && (
+          <StrokeShadowText
+            className="t16-b mt-1"
+            firstStrokeColor="#3E1E00"
+            secondStrokeColor="#6B3A10"
+            firstStrokeWidth={5}
+            secondStrokeWidth={4}
+            shadowOffsetY="0.1rem"
+            fillClassName="text-white/80"
+          >
+            Round {currentRound + 1}/{maxRounds}
+          </StrokeShadowText>
+        )}
       </div>
     </div>
   );
