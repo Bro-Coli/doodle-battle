@@ -15,7 +15,7 @@ export const BEFRIEND_ARRIVE_FRACTION = 0.05;
 /** Chase/fight stop radius — chaser holds this distance so the target isn't overlapped. */
 export const CHASE_STOP_FRACTION = 0.018;
 /** Befriend stop radius — companions settle here instead of orbiting each other. */
-export const BEFRIEND_STOP_FRACTION = 0.012;
+export const BEFRIEND_STOP_FRACTION = 0.04;
 
 // ---------------------------------------------------------------------------
 // Steering result type

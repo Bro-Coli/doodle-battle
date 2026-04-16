@@ -5,7 +5,7 @@ import { buildEntityContainer, buildEntitySprite, updateHealthBar } from './Enti
 import { EntityState, SpreadingState, initEntityState, dispatchBehavior, WORLD_BOUNDS } from '@crayon-world/shared/src/simulation/EntitySimulation';
 import { fetchInteractions } from './fetchInteractions';
 import { RoundOverlay, RoundOutcome } from './RoundOverlay';
-import { resolveInteraction, applyInteractionSteering, DETECTION_RANGE_FRACTION, FIGHT_PROXIMITY_FRACTION, FIGHT_COOLDOWN_MS } from '@crayon-world/shared/src/simulation/interactionBehaviors';
+import { resolveInteraction, applyInteractionSteering, DETECTION_RANGE_FRACTION, FIGHT_PROXIMITY_FRACTION, FIGHT_COOLDOWN_MS, BEFRIEND_STOP_FRACTION, ResolvedInteraction } from '@crayon-world/shared/src/simulation/interactionBehaviors';
 
 /**
  * Round lifecycle phases.
@@ -63,6 +63,9 @@ export class WorldStage {
     Container,
     { elapsed: number; duration: number; dirX: number; dirY: number; amp: number }
   >();
+  // Companion tracking — befriended entities that have reached each other
+  // Maps each entity to its set of companions (supports groups, not just pairs)
+  private readonly _companions = new Map<Container, Set<Container>>();
 
   // Multiplayer — UUID-keyed container maps for Schema-driven rendering
   private readonly _entityContainersById = new Map<string, Container>();
@@ -284,6 +287,9 @@ export class WorldStage {
       else this._bounceCooldowns.set(container, next);
     }
 
+    const companionRadius = worldDiag * BEFRIEND_STOP_FRACTION;
+    const companionCohesion = 0.3; // blend factor for cohesion steering
+
     for (const [container, state] of this._entityStates) {
       // Skip dying entities — they are handled by their own fade-out ticker callback
       if (this._dyingEntities.has(container)) continue;
@@ -307,14 +313,118 @@ export class WorldStage {
 
       let newState: EntityState;
 
-      if (resolved) {
+      // Check if this entity has companions (group support)
+      const companionSet = this._companions.get(container);
+      const hasCompanions = companionSet && companionSet.size > 0;
+
+      // Check if any companion has a hostile interaction we should respond to
+      let companionResolved: ResolvedInteraction<Container> | null = null;
+      if (hasCompanions && this._interactionMatrix && isMovable && !isBouncing) {
+        for (const comp of companionSet) {
+          if (this._dyingEntities.has(comp)) continue;
+          const companionInteraction = resolveInteraction(
+            comp,
+            this._entityStates,
+            this._entityProfiles,
+            this._dyingEntities,
+            this._interactionMatrix,
+            this._nameIdMap,
+            detectionRange,
+          );
+          // Only inherit hostile interactions (chase, flee, fight), not befriend
+          if (companionInteraction && companionInteraction.type !== 'befriend' && companionInteraction.type !== 'ignore') {
+            companionResolved = companionInteraction;
+            break; // Use first hostile interaction found
+          }
+        }
+      }
+
+      // Determine effective interaction: prioritize own hostile > companion hostile > own befriend
+      const ownIsHostile = resolved && resolved.type !== 'befriend' && resolved.type !== 'ignore';
+      const effectiveResolved = ownIsHostile ? resolved : (companionResolved ?? resolved);
+
+      if (resolved && resolved.type === 'befriend') {
         const targetState = this._entityStates.get(resolved.targetContainer);
+        const selfName = this._entityProfiles.get(container)?.name ?? '?';
+        const targetName = this._entityProfiles.get(resolved.targetContainer)?.name ?? '?';
+
         if (targetState) {
-          newState = applyInteractionSteering(state, resolved, targetState, dt, worldDiag);
+          // Track as companions once close enough (bidirectional)
+          if (resolved.distance <= companionRadius) {
+            // Add target to our companions
+            let myCompanions = this._companions.get(container);
+            if (!myCompanions) {
+              myCompanions = new Set();
+              this._companions.set(container, myCompanions);
+            }
+            myCompanions.add(resolved.targetContainer);
+
+            // Add us to target's companions (bidirectional)
+            let theirCompanions = this._companions.get(resolved.targetContainer);
+            if (!theirCompanions) {
+              theirCompanions = new Set();
+              this._companions.set(resolved.targetContainer, theirCompanions);
+            }
+            theirCompanions.add(container);
+          }
+
+          // If close enough (companion mode) and no hostile interaction, use archetype behavior + cohesion
+          // Use distance directly, not set membership, to avoid one-frame delay
+          const inCompanionMode = resolved.distance <= companionRadius;
+
+          if (inCompanionMode && !companionResolved) {
+            // Run archetype behavior for natural movement
+            const archetypeState = dispatchBehavior(state, dt, world);
+
+            // Add cohesion force toward companion (use target position directly)
+            if ('vx' in archetypeState && 'vy' in archetypeState) {
+              const dx = targetState.x - archetypeState.x;
+              const dy = targetState.y - archetypeState.y;
+              const dist = Math.sqrt(dx * dx + dy * dy);
+
+              // Only apply cohesion if drifting apart
+              if (dist > companionRadius * 0.5) {
+                const speed = 'speed' in state ? (state as { speed: number }).speed : 80;
+                const cohesionStrength = Math.min(1, (dist - companionRadius * 0.5) / companionRadius);
+                const cohesionVx = dist > 1 ? (dx / dist) * speed * cohesionStrength * companionCohesion : 0;
+                const cohesionVy = dist > 1 ? (dy / dist) * speed * cohesionStrength * companionCohesion : 0;
+
+                newState = {
+                  ...archetypeState,
+                  x: archetypeState.x + cohesionVx * dt,
+                  y: archetypeState.y + cohesionVy * dt,
+                  vx: (archetypeState as { vx: number }).vx * (1 - companionCohesion) + cohesionVx,
+                  vy: (archetypeState as { vy: number }).vy * (1 - companionCohesion) + cohesionVy,
+                } as EntityState;
+              } else {
+                newState = archetypeState;
+              }
+            } else {
+              newState = archetypeState;
+            }
+          } else if (companionResolved) {
+            // Companion has hostile interaction, respond together
+            const threatState = this._entityStates.get(companionResolved.targetContainer);
+            if (threatState) {
+              newState = applyInteractionSteering(state, companionResolved, threatState, dt, worldDiag);
+            } else {
+              newState = dispatchBehavior(state, dt, world);
+            }
+          } else {
+            // Still approaching companion
+            newState = applyInteractionSteering(state, resolved, targetState, dt, worldDiag);
+          }
+        } else {
+          newState = dispatchBehavior(state, dt, world);
+        }
+      } else if (effectiveResolved) {
+        const targetState = this._entityStates.get(effectiveResolved.targetContainer);
+        if (targetState) {
+          newState = applyInteractionSteering(state, effectiveResolved, targetState, dt, worldDiag);
 
           // Fight contact check — 'chase' means predator caught prey; 'fight' means hostile contact
-          if ((resolved.type === 'fight' || resolved.type === 'chase') && resolved.distance < fightProximity) {
-            this._handleFightContact(container, resolved.targetContainer);
+          if ((effectiveResolved.type === 'fight' || effectiveResolved.type === 'chase') && effectiveResolved.distance < fightProximity) {
+            this._handleFightContact(container, effectiveResolved.targetContainer);
           }
         } else {
           newState = dispatchBehavior(state, dt, world);
@@ -888,6 +998,12 @@ export class WorldStage {
           this._entityContainersById.delete(entityId);
         }
         this._entityIdByContainer.delete(container);
+
+        // Clean companion relationships — remove this entity from all companion sets
+        this._companions.delete(container);
+        for (const [, compSet] of this._companions) {
+          compSet.delete(container);
+        }
 
         label?.destroy({ children: true });
         container.destroy({ children: true });

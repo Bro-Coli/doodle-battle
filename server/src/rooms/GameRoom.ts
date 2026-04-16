@@ -16,6 +16,7 @@ import {
   applyInteractionSteering,
   FIGHT_PROXIMITY_FRACTION,
   FIGHT_COOLDOWN_MS,
+  BEFRIEND_STOP_FRACTION,
 } from '@crayon-world/shared/src/simulation/interactionBehaviors.js';
 import type { EntityProfile, InteractionMatrix, Archetype } from '@crayon-world/shared/src/types.js';
 import { DEFAULT_STYLE_BY_ARCHETYPE } from '@crayon-world/shared/src/types.js';
@@ -76,6 +77,8 @@ export class GameRoom extends Room<{ state: GameState }> {
   _bounceCooldowns: Map<string, number> = new Map(); // ms remaining after wall bounce
   _nameIdMap: Map<string, string> = new Map();
   _dyingEntities: Set<string> = new Set();
+  // Companion tracking — befriended entities that have reached each other (supports groups)
+  _companions: Map<string, Set<string>> = new Map();
   // Pending profiles buffered during draw phase — spawned simultaneously at simulate start
   _pendingProfiles: Map<string, { profile: EntityProfile; teamId: string; imageDataUrl: string }> = new Map();
   // Count of in-flight recognition calls — must reach 0 before phase can advance
@@ -271,6 +274,8 @@ export class GameRoom extends Room<{ state: GameState }> {
 
       // Resolve interaction steering if matrix exists, entity is movable, and not bouncing
       const isBouncing = this._bounceCooldowns.has(entityId);
+      const companionRadius = worldDiag * BEFRIEND_STOP_FRACTION;
+
       if (isMovable && this._interactionMatrix && !isBouncing) {
         const resolved = resolveInteraction(
           entityId,
@@ -286,11 +291,118 @@ export class GameRoom extends Room<{ state: GameState }> {
         if (resolved) {
           const targetState = this._entityStates.get(resolved.targetContainer);
           if (targetState) {
-            newState = applyInteractionSteering(state, resolved, targetState, dt, worldDiag);
+            // Handle befriend specially — companions should continue moving together
+            if (resolved.type === 'befriend') {
+              const selfName = this._entityProfiles.get(entityId)?.name ?? '?';
+              const targetName = this._entityProfiles.get(resolved.targetContainer)?.name ?? '?';
+              const inCompanionMode = resolved.distance <= companionRadius;
 
-            // Fight contact check
-            if ((resolved.type === 'fight' || resolved.type === 'chase') && resolved.distance < fightProximity) {
-              this._handleFightContact(entityId, resolved.targetContainer, toRemove);
+              // Track as companions once close enough (bidirectional)
+              if (inCompanionMode) {
+                let myCompanions = this._companions.get(entityId);
+                if (!myCompanions) {
+                  myCompanions = new Set();
+                  this._companions.set(entityId, myCompanions);
+                }
+                myCompanions.add(resolved.targetContainer);
+
+                let theirCompanions = this._companions.get(resolved.targetContainer);
+                if (!theirCompanions) {
+                  theirCompanions = new Set();
+                  this._companions.set(resolved.targetContainer, theirCompanions);
+                }
+                theirCompanions.add(entityId);
+              }
+
+              if (inCompanionMode) {
+                // Leader-follower pattern: AI determines leader, fallback to lower entityId
+                // Construct the key for befriendLeaders lookup (always "smallerId-largerId")
+                const selfId = this._nameIdMap.get(selfName);
+                const targetId = this._nameIdMap.get(targetName);
+                let isLeader: boolean;
+                let leaderSource: string;
+
+                if (selfId && targetId && this._interactionMatrix?.befriendLeaders) {
+                  const key = selfId < targetId ? `${selfId}-${targetId}` : `${targetId}-${selfId}`;
+                  const leaderId = this._interactionMatrix.befriendLeaders[key];
+                  // If AI specified a leader, use it; otherwise fallback to ID comparison
+                  if (leaderId) {
+                    isLeader = leaderId === selfId;
+                    leaderSource = `AI (key=${key}, leaderId=${leaderId}, selfId=${selfId})`;
+                  } else {
+                    isLeader = entityId < resolved.targetContainer;
+                    leaderSource = `fallback-noLeaderId (key=${key}, entityId comparison)`;
+                  }
+                } else {
+                  // No leader info available, fallback to entity ID comparison
+                  isLeader = entityId < resolved.targetContainer;
+                  leaderSource = `fallback-noMatrix (selfId=${selfId}, targetId=${targetId}, hasMatrix=${!!this._interactionMatrix}, hasLeaders=${!!this._interactionMatrix?.befriendLeaders})`;
+                }
+
+                console.log(`[BEFRIEND] ${selfName} -> ${targetName}: isLeader=${isLeader}, source=${leaderSource}`);
+
+                if (isLeader) {
+                  // Leader: pure archetype behavior
+                  newState = dispatchBehavior(state, dt, world);
+                } else {
+                  // Follower: stay within tether range of leader
+                  // Simple approach: if close enough, do archetype; if too far, move toward leader
+                  const archetypeState = dispatchBehavior(state, dt, world);
+
+                  // Distance to leader
+                  const dx = targetState.x - state.x;
+                  const dy = targetState.y - state.y;
+                  const distToLeader = Math.sqrt(dx * dx + dy * dy);
+
+                  // Tether range - follower should stay within this distance
+                  const tetherRange = companionRadius * 0.8; // ~47px
+                  const catchupRange = companionRadius * 1.2; // ~70px - start catching up here
+
+                  if (distToLeader <= tetherRange) {
+                    // Close enough - just do archetype behavior like the leader
+                    newState = archetypeState;
+                  } else {
+                    // Too far - move toward leader, blending with archetype
+                    const archetypeVx = 'vx' in archetypeState ? (archetypeState as { vx: number }).vx : 0;
+                    const archetypeVy = 'vy' in archetypeState ? (archetypeState as { vy: number }).vy : 0;
+
+                    const speed = 'speed' in state ? (state as { speed: number }).speed : 80;
+
+                    // Catchup strength increases as we get further away
+                    const excess = distToLeader - tetherRange;
+                    const maxExcess = catchupRange - tetherRange;
+                    const catchupStrength = Math.min(1, excess / maxExcess);
+
+                    // Move directly toward leader (not to a "behind" position)
+                    const catchupVx = (dx / distToLeader) * speed * catchupStrength;
+                    const catchupVy = (dy / distToLeader) * speed * catchupStrength;
+
+                    // Blend archetype with catchup - more archetype when closer
+                    const archetypeWeight = 1 - catchupStrength * 0.7;
+                    const finalVx = archetypeVx * archetypeWeight + catchupVx;
+                    const finalVy = archetypeVy * archetypeWeight + catchupVy;
+
+                    newState = {
+                      ...archetypeState,
+                      x: state.x + finalVx * dt,
+                      y: state.y + finalVy * dt,
+                      vx: finalVx,
+                      vy: finalVy,
+                    } as EntityState;
+                  }
+                }
+              } else {
+                // Still approaching companion
+                newState = applyInteractionSteering(state, resolved, targetState, dt, worldDiag);
+              }
+            } else {
+              // Non-befriend interactions (chase, flee, fight)
+              newState = applyInteractionSteering(state, resolved, targetState, dt, worldDiag);
+
+              // Fight contact check
+              if ((resolved.type === 'fight' || resolved.type === 'chase') && resolved.distance < fightProximity) {
+                this._handleFightContact(entityId, resolved.targetContainer, toRemove);
+              }
             }
           } else {
             newState = dispatchBehavior(state, dt, world);
@@ -432,6 +544,11 @@ export class GameRoom extends Room<{ state: GameState }> {
       this._entityProfiles.delete(entityId);
       this.state.entities.delete(entityId);
       this._dyingEntities.delete(entityId);
+      // Clean companion relationships
+      this._companions.delete(entityId);
+      for (const [, compSet] of this._companions) {
+        compSet.delete(entityId);
+      }
     }
   }
 
@@ -698,6 +815,12 @@ export class GameRoom extends Room<{ state: GameState }> {
           .join(', ');
         console.log(`  ${name} → ${rels}`);
       }
+      // Log befriend leaders
+      if (matrix.befriendLeaders && Object.keys(matrix.befriendLeaders).length > 0) {
+        console.log('[interactions] Befriend leaders:', matrix.befriendLeaders);
+      } else {
+        console.log('[interactions] No befriend leaders specified by AI');
+      }
     } catch (err) {
       console.error('[interactions] Failed to fetch interaction matrix:', err);
       this._interactionMatrix = { entries: [] };
@@ -840,6 +963,7 @@ export class GameRoom extends Room<{ state: GameState }> {
         this._nameIdMap.set(profile.name, String(id++));
       }
     }
+    console.log('[interactions] nameIdMap:', Object.fromEntries(this._nameIdMap));
   }
 
   // ---------------------------------------------------------------------------

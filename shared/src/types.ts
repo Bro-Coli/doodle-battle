@@ -70,4 +70,7 @@ export interface EntityRelationship {
 // Full matrix of relationships for a set of entities
 export interface InteractionMatrix {
   entries: EntityRelationship[];
+  // For befriend pairs, which entity leads? Key: "smallerId-largerId", value: leader's ID
+  // If not specified, falls back to lower ID as leader (same-type entities)
+  befriendLeaders?: Record<string, string>;
 }

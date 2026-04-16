@@ -16,6 +16,18 @@ The player submits a freehand sketch. Respond with ONLY a JSON object matching t
   "maxHealth": number         // 1-100 durability (1=fragile insect, 50=medium animal, 100=massive beast/vehicle)
 }
 
+IMPORTANT: Identify WHAT is being depicted, not HOW it's drawn. These are quick freehand sketches, so:
+- A stick figure represents a Human/Person, not "Stick Figure"
+- A simple circle with rays is a Sun, not "Circle" or "Drawing"
+- Basic shapes forming an animal are that animal (e.g. "Cat", "Dog"), not "Simple Cat" or "Cartoon Dog"
+- Crude/childlike drawings should be identified by their subject matter
+- Never include drawing-style words like "stick", "simple", "cartoon", "crude", "sketch", "doodle" in the name
+
+When ambiguous, prefer animate over inanimate. This is a game where entities come to life, so:
+- A pointed shape is more likely a Fighter Jet, Rocket, or Shark than an Arrow
+- A round shape with features is more likely an Animal or Face than a Ball
+- Only identify as inanimate (rocks, arrows, symbols) when clearly that and nothing else
+
 Valid movementStyle values by archetype:
 - flying:     "swooping" (dive-and-rise arcs), "gliding" (long smooth curves), "hovering" (near-stationary), "darting" (sharp direction changes), "flapping" (steady sine bob)
 - walking:    "prowling" (low, deliberate, with pauses), "scampering" (fast + erratic), "lumbering" (slow, steady), "hopping" (discrete arcs)
