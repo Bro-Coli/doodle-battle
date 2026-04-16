@@ -13,7 +13,7 @@ import type {
 } from '@crayon-world/shared/src/simulation/EntitySimulation.js';
 import {
   resolveInteraction,
-  applyInteractionSteering,
+  blendSteeringIntoAnimation,
   FIGHT_PROXIMITY_FRACTION,
   FIGHT_COOLDOWN_MS,
   BEFRIEND_STOP_FRACTION,
@@ -320,26 +320,16 @@ export class GameRoom extends Room<{ state: GameState }> {
                 const selfId = this._nameIdMap.get(selfName);
                 const targetId = this._nameIdMap.get(targetName);
                 let isLeader: boolean;
-                let leaderSource: string;
 
                 if (selfId && targetId && this._interactionMatrix?.befriendLeaders) {
                   const key = selfId < targetId ? `${selfId}-${targetId}` : `${targetId}-${selfId}`;
                   const leaderId = this._interactionMatrix.befriendLeaders[key];
                   // If AI specified a leader, use it; otherwise fallback to ID comparison
-                  if (leaderId) {
-                    isLeader = leaderId === selfId;
-                    leaderSource = `AI (key=${key}, leaderId=${leaderId}, selfId=${selfId})`;
-                  } else {
-                    isLeader = entityId < resolved.targetContainer;
-                    leaderSource = `fallback-noLeaderId (key=${key}, entityId comparison)`;
-                  }
+                  isLeader = leaderId ? leaderId === selfId : entityId < resolved.targetContainer;
                 } else {
                   // No leader info available, fallback to entity ID comparison
                   isLeader = entityId < resolved.targetContainer;
-                  leaderSource = `fallback-noMatrix (selfId=${selfId}, targetId=${targetId}, hasMatrix=${!!this._interactionMatrix}, hasLeaders=${!!this._interactionMatrix?.befriendLeaders})`;
                 }
-
-                console.log(`[BEFRIEND] ${selfName} -> ${targetName}: isLeader=${isLeader}, source=${leaderSource}`);
 
                 if (isLeader) {
                   // Leader: pure archetype behavior
@@ -349,55 +339,67 @@ export class GameRoom extends Room<{ state: GameState }> {
                   // Simple approach: if close enough, do archetype; if too far, move toward leader
                   const archetypeState = dispatchBehavior(state, dt, world);
 
-                  // Distance to leader
-                  const dx = targetState.x - state.x;
-                  const dy = targetState.y - state.y;
-                  const distToLeader = Math.sqrt(dx * dx + dy * dy);
+                  // Check if archetype is pausing (near-zero velocity)
+                  const archetypeVx = 'vx' in archetypeState ? (archetypeState as { vx: number }).vx : 0;
+                  const archetypeVy = 'vy' in archetypeState ? (archetypeState as { vy: number }).vy : 0;
+                  const archetypeSpeed = Math.sqrt(archetypeVx * archetypeVx + archetypeVy * archetypeVy);
+                  const isPausing = archetypeSpeed < 1;
 
-                  // Tether range - follower should stay within this distance
-                  const tetherRange = companionRadius * 0.8; // ~47px
-                  const catchupRange = companionRadius * 1.2; // ~70px - start catching up here
-
-                  if (distToLeader <= tetherRange) {
-                    // Close enough - just do archetype behavior like the leader
+                  // If archetype is pausing, respect that - follower pauses too
+                  if (isPausing) {
                     newState = archetypeState;
                   } else {
-                    // Too far - move toward leader, blending with archetype
-                    const archetypeVx = 'vx' in archetypeState ? (archetypeState as { vx: number }).vx : 0;
-                    const archetypeVy = 'vy' in archetypeState ? (archetypeState as { vy: number }).vy : 0;
+                    // Distance to leader
+                    const dx = targetState.x - state.x;
+                    const dy = targetState.y - state.y;
+                    const distToLeader = Math.sqrt(dx * dx + dy * dy);
 
-                    const speed = 'speed' in state ? (state as { speed: number }).speed : 80;
+                    // Tether range - follower should stay within this distance
+                    const tetherRange = companionRadius * 0.8; // ~47px
+                    const catchupRange = companionRadius * 1.2; // ~70px - start catching up here
 
-                    // Catchup strength increases as we get further away
-                    const excess = distToLeader - tetherRange;
-                    const maxExcess = catchupRange - tetherRange;
-                    const catchupStrength = Math.min(1, excess / maxExcess);
+                    if (distToLeader <= tetherRange) {
+                      // Close enough - just do archetype behavior like the leader
+                      newState = archetypeState;
+                    } else {
+                      // Too far - move toward leader, blending with archetype
+                      const speed = 'speed' in state ? (state as { speed: number }).speed : 80;
 
-                    // Move directly toward leader (not to a "behind" position)
-                    const catchupVx = (dx / distToLeader) * speed * catchupStrength;
-                    const catchupVy = (dy / distToLeader) * speed * catchupStrength;
+                      // Catchup strength increases as we get further away
+                      const excess = distToLeader - tetherRange;
+                      const maxExcess = catchupRange - tetherRange;
+                      const catchupStrength = Math.min(1, excess / maxExcess);
 
-                    // Blend archetype with catchup - more archetype when closer
-                    const archetypeWeight = 1 - catchupStrength * 0.7;
-                    const finalVx = archetypeVx * archetypeWeight + catchupVx;
-                    const finalVy = archetypeVy * archetypeWeight + catchupVy;
+                      // Move directly toward leader (not to a "behind" position)
+                      const catchupVx = (dx / distToLeader) * speed * catchupStrength;
+                      const catchupVy = (dy / distToLeader) * speed * catchupStrength;
 
-                    newState = {
-                      ...archetypeState,
-                      x: state.x + finalVx * dt,
-                      y: state.y + finalVy * dt,
-                      vx: finalVx,
-                      vy: finalVy,
-                    } as EntityState;
+                      // Blend archetype with catchup - more archetype when closer
+                      const archetypeWeight = 1 - catchupStrength * 0.7;
+                      const finalVx = archetypeVx * archetypeWeight + catchupVx;
+                      const finalVy = archetypeVy * archetypeWeight + catchupVy;
+
+                      newState = {
+                        ...archetypeState,
+                        x: state.x + finalVx * dt,
+                        y: state.y + finalVy * dt,
+                        vx: finalVx,
+                        vy: finalVy,
+                      } as EntityState;
+                    }
                   }
                 }
               } else {
-                // Still approaching companion
-                newState = applyInteractionSteering(state, resolved, targetState, dt, worldDiag);
+                // Still approaching companion — run archetype behavior and blend in steering
+                const archetypeState = dispatchBehavior(state, dt, world);
+                newState = blendSteeringIntoAnimation(archetypeState, resolved, targetState, worldDiag, 0.8);
               }
             } else {
               // Non-befriend interactions (chase, flee, fight)
-              newState = applyInteractionSteering(state, resolved, targetState, dt, worldDiag);
+              // Run archetype behavior first to preserve animations (hopping, swooping, etc.)
+              const archetypeState = dispatchBehavior(state, dt, world);
+              // Then blend steering direction into the animated state
+              newState = blendSteeringIntoAnimation(archetypeState, resolved, targetState, worldDiag);
 
               // Fight contact check
               if ((resolved.type === 'fight' || resolved.type === 'chase') && resolved.distance < fightProximity) {

@@ -279,6 +279,148 @@ function getFleeFallback(state: EntityState): { x: number; y: number } {
 }
 
 /**
+ * Compute desired heading angle toward or away from a target.
+ */
+function computeSteeringHeading(
+  selfX: number,
+  selfY: number,
+  targetX: number,
+  targetY: number,
+  flee: boolean,
+): number {
+  let dx = targetX - selfX;
+  let dy = targetY - selfY;
+  if (flee) {
+    dx = -dx;
+    dy = -dy;
+  }
+  return Math.atan2(dy, dx);
+}
+
+/**
+ * Blend steering direction into an archetype-animated state.
+ *
+ * This preserves the animation offsets (bob, hop, swoop phases) computed by
+ * dispatchBehavior while redirecting the entity's velocity/heading toward
+ * or away from the interaction target.
+ *
+ * For walking/flying archetypes: adjusts heading and velocity direction.
+ * For drifting: adjusts horizontal velocity direction.
+ * For stationary/rooted/spreading: no effect (they don't move directionally).
+ */
+export function blendSteeringIntoAnimation<T>(
+  animatedState: EntityState,
+  resolved: ResolvedInteraction<T>,
+  targetState: EntityState,
+  worldDiagonal: number,
+  steeringStrength: number = 1.0,
+): EntityState {
+  // Ignore type doesn't need steering
+  if (resolved.type === 'ignore') return animatedState;
+
+  const chaseStopRadius = worldDiagonal * CHASE_STOP_FRACTION;
+  const befriendStopRadius = worldDiagonal * BEFRIEND_STOP_FRACTION;
+
+  // Determine if we should stop (close enough to target)
+  const shouldStop =
+    (resolved.type === 'chase' || resolved.type === 'fight') && resolved.distance <= chaseStopRadius ||
+    resolved.type === 'befriend' && resolved.distance <= befriendStopRadius;
+
+  // For entities without directional movement, just return the animated state
+  if (!('vx' in animatedState) || !('vy' in animatedState)) {
+    return animatedState;
+  }
+
+  const state = animatedState as EntityState & { vx: number; vy: number };
+  const speed = 'speed' in state ? (state as { speed: number }).speed : 80;
+
+  // If close enough, stop but preserve position/animation state
+  if (shouldStop) {
+    return {
+      ...state,
+      vx: 0,
+      vy: 0,
+    } as EntityState;
+  }
+
+  // Determine if this is an urgent interaction (no pausing allowed)
+  const isUrgent = resolved.type === 'chase' || resolved.type === 'flee' || resolved.type === 'fight';
+
+  // For non-urgent interactions, respect archetype pause behavior
+  // If the archetype state has near-zero velocity, it's pausing — don't override
+  const archetypeSpeed = Math.sqrt(state.vx * state.vx + state.vy * state.vy);
+  const isPausing = archetypeSpeed < 1;
+  if (!isUrgent && isPausing) {
+    return animatedState; // Respect the pause, return unchanged
+  }
+
+  // Determine if fleeing
+  const isFleeing = resolved.type === 'flee';
+
+  // Speed multiplier based on interaction type
+  const speedMult = isFleeing ? 1.1 : resolved.type === 'befriend' ? 0.7 : 1.0;
+
+  // Compute desired heading toward/away from target
+  // Use the animated state's current position (which includes animation offsets)
+  const desiredHeading = computeSteeringHeading(
+    state.x,
+    state.y,
+    targetState.x,
+    targetState.y,
+    isFleeing,
+  );
+
+  // Compute new velocity in the steering direction
+  const steeringVx = Math.cos(desiredHeading) * speed * speedMult;
+  const steeringVy = Math.sin(desiredHeading) * speed * speedMult;
+
+  // Blend steering velocity with current velocity based on strength
+  const blendedVx = state.vx * (1 - steeringStrength) + steeringVx * steeringStrength;
+  const blendedVy = state.vy * (1 - steeringStrength) + steeringVy * steeringStrength;
+
+  // Build base result with blended velocity
+  let result: EntityState & { vx: number; vy: number } = {
+    ...state,
+    vx: blendedVx,
+    vy: blendedVy,
+  };
+
+  // For entities with heading (walking/flying), also update heading
+  if ('heading' in state) {
+    const currentHeading = (state as { heading: number }).heading;
+    // Smooth heading transition - blend toward desired heading
+    let headingDiff = desiredHeading - currentHeading;
+    // Normalize to [-PI, PI]
+    while (headingDiff > Math.PI) headingDiff -= Math.PI * 2;
+    while (headingDiff < -Math.PI) headingDiff += Math.PI * 2;
+    const newHeading = currentHeading + headingDiff * steeringStrength;
+
+    result = {
+      ...result,
+      heading: newHeading,
+    } as EntityState & { vx: number; vy: number };
+  }
+
+  // For urgent interactions, suppress pause behaviors so entities keep moving
+  if (isUrgent) {
+    // Walking entities: reset pauseTimer so they don't stop mid-chase/flee
+    if ('pauseTimer' in result) {
+      result = { ...result, pauseTimer: 0 } as EntityState & { vx: number; vy: number };
+    }
+    // Darting flying entities: if idle, trigger a burst so they move
+    if ('dartIdleTimer' in result && 'dartBurstTimer' in result) {
+      const dartState = result as { dartIdleTimer: number; dartBurstTimer: number };
+      if (dartState.dartBurstTimer <= 0) {
+        // In idle mode - trigger immediate burst
+        result = { ...result, dartIdleTimer: 0, dartBurstTimer: 200 } as EntityState & { vx: number; vy: number };
+      }
+    }
+  }
+
+  return result as EntityState;
+}
+
+/**
  * Apply interaction steering to an entity state, returning an updated state spread.
  * Preserves all archetype-specific fields.
  *

@@ -5,7 +5,7 @@ import { buildEntityContainer, buildEntitySprite, updateHealthBar } from './Enti
 import { EntityState, SpreadingState, initEntityState, dispatchBehavior, WORLD_BOUNDS } from '@crayon-world/shared/src/simulation/EntitySimulation';
 import { fetchInteractions } from './fetchInteractions';
 import { RoundOverlay, RoundOutcome } from './RoundOverlay';
-import { resolveInteraction, applyInteractionSteering, DETECTION_RANGE_FRACTION, FIGHT_PROXIMITY_FRACTION, FIGHT_COOLDOWN_MS, BEFRIEND_STOP_FRACTION, ResolvedInteraction } from '@crayon-world/shared/src/simulation/interactionBehaviors';
+import { resolveInteraction, blendSteeringIntoAnimation, DETECTION_RANGE_FRACTION, FIGHT_PROXIMITY_FRACTION, FIGHT_COOLDOWN_MS, BEFRIEND_STOP_FRACTION, ResolvedInteraction } from '@crayon-world/shared/src/simulation/interactionBehaviors';
 
 /**
  * Round lifecycle phases.
@@ -378,41 +378,54 @@ export class WorldStage {
 
             // Add cohesion force toward companion (use target position directly)
             if ('vx' in archetypeState && 'vy' in archetypeState) {
-              const dx = targetState.x - archetypeState.x;
-              const dy = targetState.y - archetypeState.y;
-              const dist = Math.sqrt(dx * dx + dy * dy);
+              const archetypeVx = (archetypeState as { vx: number }).vx;
+              const archetypeVy = (archetypeState as { vy: number }).vy;
+              const archetypeSpeed = Math.sqrt(archetypeVx * archetypeVx + archetypeVy * archetypeVy);
+              const isPausing = archetypeSpeed < 1;
 
-              // Only apply cohesion if drifting apart
-              if (dist > companionRadius * 0.5) {
-                const speed = 'speed' in state ? (state as { speed: number }).speed : 80;
-                const cohesionStrength = Math.min(1, (dist - companionRadius * 0.5) / companionRadius);
-                const cohesionVx = dist > 1 ? (dx / dist) * speed * cohesionStrength * companionCohesion : 0;
-                const cohesionVy = dist > 1 ? (dy / dist) * speed * cohesionStrength * companionCohesion : 0;
-
-                newState = {
-                  ...archetypeState,
-                  x: archetypeState.x + cohesionVx * dt,
-                  y: archetypeState.y + cohesionVy * dt,
-                  vx: (archetypeState as { vx: number }).vx * (1 - companionCohesion) + cohesionVx,
-                  vy: (archetypeState as { vy: number }).vy * (1 - companionCohesion) + cohesionVy,
-                } as EntityState;
-              } else {
+              // If archetype is pausing, respect that - don't apply cohesion
+              if (isPausing) {
                 newState = archetypeState;
+              } else {
+                const dx = targetState.x - archetypeState.x;
+                const dy = targetState.y - archetypeState.y;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+
+                // Only apply cohesion if drifting apart
+                if (dist > companionRadius * 0.5) {
+                  const speed = 'speed' in state ? (state as { speed: number }).speed : 80;
+                  const cohesionStrength = Math.min(1, (dist - companionRadius * 0.5) / companionRadius);
+                  const cohesionVx = dist > 1 ? (dx / dist) * speed * cohesionStrength * companionCohesion : 0;
+                  const cohesionVy = dist > 1 ? (dy / dist) * speed * cohesionStrength * companionCohesion : 0;
+
+                  newState = {
+                    ...archetypeState,
+                    x: archetypeState.x + cohesionVx * dt,
+                    y: archetypeState.y + cohesionVy * dt,
+                    vx: archetypeVx * (1 - companionCohesion) + cohesionVx,
+                    vy: archetypeVy * (1 - companionCohesion) + cohesionVy,
+                  } as EntityState;
+                } else {
+                  newState = archetypeState;
+                }
               }
             } else {
               newState = archetypeState;
             }
           } else if (companionResolved) {
             // Companion has hostile interaction, respond together
+            // Run archetype behavior first to preserve animations
+            const archetypeState = dispatchBehavior(state, dt, world);
             const threatState = this._entityStates.get(companionResolved.targetContainer);
             if (threatState) {
-              newState = applyInteractionSteering(state, companionResolved, threatState, dt, worldDiag);
+              newState = blendSteeringIntoAnimation(archetypeState, companionResolved, threatState, worldDiag);
             } else {
-              newState = dispatchBehavior(state, dt, world);
+              newState = archetypeState;
             }
           } else {
-            // Still approaching companion
-            newState = applyInteractionSteering(state, resolved, targetState, dt, worldDiag);
+            // Still approaching companion — run archetype behavior and blend in steering
+            const archetypeState = dispatchBehavior(state, dt, world);
+            newState = blendSteeringIntoAnimation(archetypeState, resolved, targetState, worldDiag, 0.8);
           }
         } else {
           newState = dispatchBehavior(state, dt, world);
@@ -420,7 +433,10 @@ export class WorldStage {
       } else if (effectiveResolved) {
         const targetState = this._entityStates.get(effectiveResolved.targetContainer);
         if (targetState) {
-          newState = applyInteractionSteering(state, effectiveResolved, targetState, dt, worldDiag);
+          // Run archetype behavior first to preserve animations (hopping, swooping, etc.)
+          const archetypeState = dispatchBehavior(state, dt, world);
+          // Then blend steering direction into the animated state
+          newState = blendSteeringIntoAnimation(archetypeState, effectiveResolved, targetState, worldDiag);
 
           // Fight contact check — 'chase' means predator caught prey; 'fight' means hostile contact
           if ((effectiveResolved.type === 'fight' || effectiveResolved.type === 'chase') && effectiveResolved.distance < fightProximity) {
