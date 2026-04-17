@@ -16,6 +16,7 @@ import './style/team.css';
 import './style/panel.css';
 import './style/invite.css';
 import './style/modal.css';
+import './style/hud.css';
 
 // Eagerly initialize Colyseus client singleton
 import './network/ColyseusClient';

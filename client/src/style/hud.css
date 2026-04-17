@@ -1,0 +1,621 @@
+@layer components {
+  /* ═══════════════════════════════════════════════════════════════
+   * HUD CARD — premium glass surface used by in-game overlays
+   * Three tonal variants: default (purple), red, blue.
+   * All share the same structural depth: chunky white border,
+   * inner gloss highlight, layered shadow pedestal, ambient glow.
+   * ═══════════════════════════════════════════════════════════════ */
+
+  .ui-hud-card {
+    position: relative;
+    border-radius: 32px;
+    border: 5px solid rgba(255, 255, 255, 0.82);
+    background: var(--gradient-hud-panel);
+    box-shadow:
+      inset 0 0 0 2px rgba(255, 255, 255, 0.18),
+      inset 0 3px 0 rgba(255, 255, 255, 0.32),
+      inset 0 20px 40px -20px rgba(255, 255, 255, 0.22),
+      inset 0 -10px 24px -8px rgba(36, 20, 80, 0.45),
+      0 6px 0 rgba(36, 20, 80, 0.35),
+      0 18px 38px rgba(24, 12, 60, 0.45),
+      0 0 28px rgba(140, 110, 255, 0.28),
+      0 0 60px rgba(120, 90, 240, 0.18);
+    backdrop-filter: blur(14px);
+    overflow: hidden;
+    isolation: isolate;
+  }
+
+  .ui-hud-card::before {
+    content: '';
+    position: absolute;
+    inset: 10px 10px auto 10px;
+    height: 44%;
+    border-radius: 22px 22px 60px 60px / 18px 18px 50px 50px;
+    background: linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.32) 0%,
+      rgba(255, 255, 255, 0.12) 45%,
+      rgba(255, 255, 255, 0.02) 100%
+    );
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .ui-hud-card::after {
+    content: '';
+    position: absolute;
+    left: 22px;
+    top: 18px;
+    width: 30px;
+    height: 16px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.42);
+    transform: rotate(-32deg);
+    filter: blur(2px);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .ui-hud-card > * {
+    position: relative;
+    z-index: 1;
+  }
+
+  .ui-hud-card--red {
+    background: var(--gradient-hud-panel-red);
+    border-color: rgba(255, 220, 225, 0.82);
+    box-shadow:
+      inset 0 0 0 2px rgba(255, 255, 255, 0.18),
+      inset 0 3px 0 rgba(255, 255, 255, 0.32),
+      inset 0 20px 40px -20px rgba(255, 255, 255, 0.22),
+      inset 0 -10px 24px -8px rgba(78, 18, 38, 0.5),
+      0 6px 0 rgba(78, 18, 38, 0.4),
+      0 18px 38px rgba(60, 12, 24, 0.45),
+      0 0 28px var(--color-team-red-glow),
+      0 0 60px var(--color-team-red-glow-soft);
+  }
+
+  .ui-hud-card--blue {
+    background: var(--gradient-hud-panel-blue);
+    border-color: rgba(220, 240, 255, 0.82);
+    box-shadow:
+      inset 0 0 0 2px rgba(255, 255, 255, 0.18),
+      inset 0 3px 0 rgba(255, 255, 255, 0.32),
+      inset 0 20px 40px -20px rgba(255, 255, 255, 0.22),
+      inset 0 -10px 24px -8px rgba(10, 42, 100, 0.5),
+      0 6px 0 rgba(10, 42, 100, 0.4),
+      0 18px 38px rgba(8, 28, 72, 0.45),
+      0 0 28px var(--color-team-blue-glow),
+      0 0 60px var(--color-team-blue-glow-soft);
+  }
+
+  .ui-hud-card--sm {
+    border-radius: 22px;
+    border-width: 4px;
+  }
+
+  .ui-hud-card--sm::before {
+    inset: 6px 6px auto 6px;
+    border-radius: 16px 16px 40px 40px / 12px 12px 34px 34px;
+  }
+
+  /* ═══════════════════════════════════════════════════════════════
+   * HUD BADGE — glossy pill (sub-variant of ui-objective-banner)
+   * Used for status messages like "Waiting for players…"
+   * ═══════════════════════════════════════════════════════════════ */
+
+  .ui-hud-badge {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.6rem 1.8rem;
+    border: 2.5px solid rgba(255, 255, 255, 0.7);
+    border-radius: 999px;
+    overflow: hidden;
+    background: linear-gradient(
+      180deg,
+      rgba(160, 140, 230, 0.6) 0%,
+      rgba(120, 100, 210, 0.55) 50%,
+      rgba(90, 70, 190, 0.6) 100%
+    );
+    box-shadow:
+      inset 0 0 0 2px rgba(255, 255, 255, 0.18),
+      inset 0 3px 0 rgba(255, 255, 255, 0.3),
+      inset 0 14px 28px -12px rgba(255, 255, 255, 0.22),
+      inset 0 -5px 0 rgba(55, 32, 120, 0.25),
+      0 4px 0 rgba(64, 40, 150, 0.3),
+      0 10px 22px rgba(40, 20, 100, 0.35),
+      0 0 20px rgba(150, 120, 255, 0.28);
+    backdrop-filter: blur(8px);
+    user-select: none;
+    color: white;
+  }
+
+  .ui-hud-badge::before {
+    content: '';
+    position: absolute;
+    left: 10px;
+    right: 10px;
+    top: 5px;
+    height: 44%;
+    border-radius: 999px;
+    background: linear-gradient(to bottom, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.05));
+    pointer-events: none;
+  }
+
+  .ui-hud-badge::after {
+    content: '';
+    position: absolute;
+    left: 14px;
+    top: 8px;
+    width: 12px;
+    height: 7px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.5);
+    transform: rotate(142deg);
+    pointer-events: none;
+    filter: blur(1px);
+  }
+
+  .ui-hud-badge > * {
+    position: relative;
+    z-index: 1;
+  }
+
+  .ui-hud-badge--red {
+    background: linear-gradient(
+      180deg,
+      rgba(255, 120, 142, 0.62) 0%,
+      rgba(232, 58, 92, 0.58) 50%,
+      rgba(170, 30, 60, 0.62) 100%
+    );
+    border-color: rgba(255, 220, 225, 0.7);
+    box-shadow:
+      inset 0 0 0 2px rgba(255, 255, 255, 0.18),
+      inset 0 3px 0 rgba(255, 255, 255, 0.3),
+      inset 0 14px 28px -12px rgba(255, 255, 255, 0.22),
+      inset 0 -5px 0 rgba(120, 18, 38, 0.3),
+      0 4px 0 rgba(155, 24, 52, 0.3),
+      0 10px 22px rgba(140, 20, 50, 0.35),
+      0 0 20px var(--color-team-red-glow);
+  }
+
+  .ui-hud-badge--blue {
+    background: linear-gradient(
+      180deg,
+      rgba(115, 185, 255, 0.62) 0%,
+      rgba(32, 128, 220, 0.58) 50%,
+      rgba(16, 76, 175, 0.62) 100%
+    );
+    border-color: rgba(220, 240, 255, 0.7);
+    box-shadow:
+      inset 0 0 0 2px rgba(255, 255, 255, 0.18),
+      inset 0 3px 0 rgba(255, 255, 255, 0.3),
+      inset 0 14px 28px -12px rgba(255, 255, 255, 0.22),
+      inset 0 -5px 0 rgba(12, 50, 120, 0.3),
+      0 4px 0 rgba(12, 68, 155, 0.3),
+      0 10px 22px rgba(10, 50, 130, 0.35),
+      0 0 20px var(--color-team-blue-glow);
+  }
+
+  /* ═══════════════════════════════════════════════════════════════
+   * HUD TIMER — heroic countdown chip shown during simulation
+   * Uses a gold-gradient inner chip + dark bezel.
+   * ═══════════════════════════════════════════════════════════════ */
+
+  .ui-hud-timer {
+    position: relative;
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.35rem;
+    padding: 0.9rem 1.8rem 0.8rem;
+    border: 4px solid rgba(60, 32, 8, 0.95);
+    border-radius: 26px;
+    background: linear-gradient(180deg, #2a1a06 0%, #15090a 100%);
+    box-shadow:
+      inset 0 0 0 2px rgba(255, 220, 120, 0.22),
+      inset 0 4px 0 rgba(255, 220, 120, 0.18),
+      inset 0 -6px 18px rgba(0, 0, 0, 0.55),
+      0 6px 0 rgba(18, 10, 4, 0.6),
+      0 14px 30px rgba(10, 6, 2, 0.55),
+      0 0 24px rgba(255, 190, 60, 0.35);
+    user-select: none;
+  }
+
+  .ui-hud-timer::before {
+    content: '';
+    position: absolute;
+    inset: 6px 10px auto 10px;
+    height: 42%;
+    border-radius: 18px;
+    background: linear-gradient(
+      180deg,
+      rgba(255, 220, 120, 0.22) 0%,
+      rgba(255, 200, 80, 0.06) 60%,
+      transparent 100%
+    );
+    pointer-events: none;
+  }
+
+  .ui-hud-timer__value {
+    position: relative;
+    z-index: 1;
+    font-weight: 900;
+    font-size: 4.4rem;
+    line-height: 1;
+    letter-spacing: 0.02em;
+    font-variant-numeric: tabular-nums;
+    background: linear-gradient(180deg, #fff4b8 0%, #ffd24f 40%, #f5a623 75%, #d07a00 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    filter: drop-shadow(0 2px 0 rgba(0, 0, 0, 0.45));
+  }
+
+  .ui-hud-timer__unit {
+    position: relative;
+    z-index: 1;
+    font-weight: 800;
+    font-size: 1.6rem;
+    letter-spacing: 0.12em;
+    color: rgba(255, 220, 120, 0.72);
+    text-transform: uppercase;
+  }
+
+  /* ═══════════════════════════════════════════════════════════════
+   * HUD COUNTER — big team entity count (used in score reveal)
+   * ═══════════════════════════════════════════════════════════════ */
+
+  .ui-hud-counter {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 900;
+    font-size: 8rem;
+    line-height: 1;
+    letter-spacing: 0.02em;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .ui-hud-counter--red {
+    background: linear-gradient(180deg, #ffe2e8 0%, #ff8298 30%, #f04060 60%, #b21e3c 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    filter: drop-shadow(0 4px 0 rgba(92, 18, 40, 0.65))
+      drop-shadow(0 0 18px var(--color-team-red-glow))
+      drop-shadow(0 0 36px var(--color-team-red-glow-soft));
+  }
+
+  .ui-hud-counter--blue {
+    background: linear-gradient(180deg, #dff0ff 0%, #7dc2ff 30%, #2089e0 60%, #0e4b9e 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    filter: drop-shadow(0 4px 0 rgba(12, 50, 120, 0.65))
+      drop-shadow(0 0 18px var(--color-team-blue-glow))
+      drop-shadow(0 0 36px var(--color-team-blue-glow-soft));
+  }
+
+  /* ═══════════════════════════════════════════════════════════════
+   * HUD VS DIVIDER — between two team counters
+   * ═══════════════════════════════════════════════════════════════ */
+
+  .ui-hud-vs {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 96px;
+    height: 96px;
+    border-radius: 999px;
+    background: radial-gradient(circle at 35% 30%, #ffe58a 0%, #f5a623 45%, #a55a00 100%);
+    border: 5px solid rgba(90, 50, 0, 0.85);
+    box-shadow:
+      inset 0 0 0 2px rgba(255, 240, 170, 0.55),
+      inset 0 3px 0 rgba(255, 255, 255, 0.5),
+      inset 0 -10px 18px rgba(120, 60, 0, 0.55),
+      0 4px 0 rgba(60, 32, 0, 0.7),
+      0 10px 24px rgba(30, 16, 0, 0.45),
+      0 0 24px rgba(255, 190, 60, 0.45);
+    color: white;
+    font-weight: 900;
+    font-size: 2.4rem;
+    letter-spacing: 0.04em;
+    text-shadow:
+      0 2px 0 rgba(90, 50, 0, 0.85),
+      0 0 12px rgba(255, 220, 120, 0.6);
+    user-select: none;
+  }
+
+  .ui-hud-vs::before {
+    content: '';
+    position: absolute;
+    left: 12%;
+    right: 12%;
+    top: 8%;
+    height: 38%;
+    border-radius: 999px;
+    background: linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.55) 0%,
+      rgba(255, 255, 255, 0.05) 100%
+    );
+    pointer-events: none;
+  }
+
+  /* ═══════════════════════════════════════════════════════════════
+   * HUD SCOREBAR — horizontal team strength indicator
+   * Shows proportional fill between two teams.
+   * ═══════════════════════════════════════════════════════════════ */
+
+  .ui-hud-scorebar {
+    position: relative;
+    width: 100%;
+    height: 18px;
+    border-radius: 999px;
+    border: 3px solid rgba(20, 12, 48, 0.85);
+    background: rgba(16, 8, 36, 0.85);
+    box-shadow:
+      inset 0 2px 4px rgba(0, 0, 0, 0.5),
+      inset 0 0 0 2px rgba(255, 255, 255, 0.06);
+    overflow: hidden;
+  }
+
+  .ui-hud-scorebar__fill {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    transition: width 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+  }
+
+  .ui-hud-scorebar__fill--red {
+    left: 0;
+    background: linear-gradient(90deg, #ff506e 0%, #f0304f 55%, #c81f3e 100%);
+    box-shadow:
+      inset 0 2px 0 rgba(255, 200, 210, 0.5),
+      inset 0 -2px 0 rgba(110, 10, 30, 0.5),
+      0 0 10px var(--color-team-red-glow);
+  }
+
+  .ui-hud-scorebar__fill--blue {
+    right: 0;
+    background: linear-gradient(90deg, #0e4fae 0%, #1078d8 45%, #3fa6ff 100%);
+    box-shadow:
+      inset 0 2px 0 rgba(200, 230, 255, 0.5),
+      inset 0 -2px 0 rgba(8, 38, 90, 0.5),
+      0 0 10px var(--color-team-blue-glow);
+  }
+
+  /* ═══════════════════════════════════════════════════════════════
+   * HUD POLAROID — framed drawing preview (waiting phase)
+   * ═══════════════════════════════════════════════════════════════ */
+
+  .ui-hud-polaroid {
+    position: relative;
+    padding: 14px 14px 28px;
+    background: linear-gradient(180deg, #fdfbf3 0%, #f4efe0 100%);
+    border: 3px solid rgba(255, 255, 255, 0.92);
+    border-radius: 14px;
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.9),
+      0 6px 0 rgba(40, 20, 80, 0.28),
+      0 22px 46px rgba(20, 8, 50, 0.45),
+      0 0 0 6px rgba(255, 255, 255, 0.18),
+      0 0 32px rgba(180, 150, 255, 0.3);
+    transform: rotate(-1.2deg);
+  }
+
+  .ui-hud-polaroid::before {
+    content: '';
+    position: absolute;
+    inset: 6px 6px auto 6px;
+    height: 50%;
+    border-radius: 8px;
+    background: linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.6) 0%,
+      rgba(255, 255, 255, 0.05) 100%
+    );
+    pointer-events: none;
+  }
+
+  .ui-hud-polaroid__tape {
+    position: absolute;
+    top: -12px;
+    left: 50%;
+    width: 72px;
+    height: 22px;
+    background: linear-gradient(
+      180deg,
+      rgba(255, 235, 150, 0.85) 0%,
+      rgba(255, 210, 100, 0.8) 100%
+    );
+    transform: translateX(-50%) rotate(-3deg);
+    box-shadow:
+      inset 0 -3px 0 rgba(180, 130, 30, 0.25),
+      0 2px 6px rgba(0, 0, 0, 0.2);
+  }
+  .ui-hud-polaroid__tape::before {
+    left: -4px;
+  }
+
+  .ui-hud-polaroid__tape::after {
+    right: -4px;
+  }
+
+  .ui-hud-polaroid__caption {
+    position: relative;
+    z-index: 1;
+    margin-top: 10px;
+    text-align: center;
+    color: #5b3a8a;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    font-size: 1.2rem;
+  }
+
+  /* ═══════════════════════════════════════════════════════════════
+   * HUD LEADERBOARD — premium winner-screen player row
+   * ═══════════════════════════════════════════════════════════════ */
+
+  .ui-hud-row {
+    position: relative;
+    display: grid;
+    grid-template-columns: 1fr auto auto auto auto;
+    column-gap: 1.6rem;
+    align-items: center;
+    padding: 0.9rem 1.4rem;
+    border-radius: 16px;
+    background: linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.1) 0%,
+      rgba(255, 255, 255, 0.04) 100%
+    );
+    border: 1.5px solid rgba(255, 255, 255, 0.12);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    transition:
+      transform 0.15s ease,
+      filter 0.15s ease;
+  }
+
+  .ui-hud-row--red {
+    background: linear-gradient(180deg, rgba(255, 90, 120, 0.22) 0%, rgba(155, 30, 58, 0.18) 100%);
+    border-color: rgba(255, 160, 180, 0.35);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 200, 210, 0.3),
+      0 0 12px rgba(255, 90, 120, 0.12);
+  }
+
+  .ui-hud-row--blue {
+    background: linear-gradient(180deg, rgba(90, 170, 255, 0.22) 0%, rgba(20, 80, 170, 0.18) 100%);
+    border-color: rgba(170, 210, 255, 0.35);
+    box-shadow:
+      inset 0 1px 0 rgba(200, 225, 255, 0.3),
+      0 0 12px rgba(90, 170, 255, 0.12);
+  }
+
+  .ui-hud-row--me {
+    border-width: 2.5px;
+    border-color: rgba(255, 210, 100, 0.8);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 230, 160, 0.4),
+      inset 0 0 0 1px rgba(255, 255, 255, 0.15),
+      0 0 18px rgba(255, 200, 60, 0.35),
+      0 0 36px rgba(255, 200, 60, 0.15);
+  }
+
+  .ui-hud-row__stat {
+    font-variant-numeric: tabular-nums;
+    font-weight: 800;
+    color: rgba(255, 255, 255, 0.92);
+    text-align: right;
+    min-width: 3.2rem;
+  }
+
+  .ui-hud-row__stat--muted {
+    color: rgba(255, 255, 255, 0.6);
+    font-weight: 700;
+  }
+
+  .ui-hud-row__stat--highlight {
+    color: #fff5c8;
+    text-shadow:
+      0 0 8px rgba(255, 210, 80, 0.6),
+      0 0 16px rgba(255, 180, 40, 0.35);
+  }
+
+  /* ═══════════════════════════════════════════════════════════════
+   * HUD CROWN — winner team decoration
+   * ═══════════════════════════════════════════════════════════════ */
+
+  .ui-hud-crown {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    filter: drop-shadow(0 0 14px rgba(255, 210, 80, 0.75))
+      drop-shadow(0 0 28px rgba(255, 180, 40, 0.45)) drop-shadow(0 4px 0 rgba(120, 65, 0, 0.55));
+  }
+
+  /* ═══════════════════════════════════════════════════════════════
+   * HUD DEV DOCK — muted dev-only pill for temp/markup links
+   * Prevents prototype noise from showing in main composition.
+   * ═══════════════════════════════════════════════════════════════ */
+
+  .ui-dev-dock {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.35rem 0.6rem;
+    border-radius: 999px;
+    background: rgba(8, 4, 28, 0.45);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    backdrop-filter: blur(8px);
+    opacity: 0.55;
+    transition: opacity 0.2s ease;
+  }
+
+  .ui-dev-dock:hover {
+    opacity: 1;
+  }
+
+  .ui-dev-dock__label {
+    font-size: 0.75rem;
+    font-weight: 800;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.5);
+    padding: 0 0.25rem;
+  }
+
+  .ui-dev-dock__btn {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.25rem 0.7rem;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: rgba(255, 255, 255, 0.85);
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    cursor: pointer;
+    transition:
+      background 0.15s ease,
+      color 0.15s ease;
+  }
+
+  .ui-dev-dock__btn:hover {
+    background: rgba(255, 255, 255, 0.18);
+    color: white;
+  }
+
+  /* ═══════════════════════════════════════════════════════════════
+   * HUD SUBMIT BUTTON DISABLED STATE — used by draw phase
+   * (extends existing .ui-pill-button--mint with a ghost state)
+   * ═══════════════════════════════════════════════════════════════ */
+
+  .ui-pill-button--ghost-disabled {
+    border-color: rgba(120, 115, 160, 0.55) !important;
+    background: linear-gradient(
+      180deg,
+      rgba(170, 165, 210, 0.38) 0%,
+      rgba(130, 125, 175, 0.32) 100%
+    ) !important;
+    box-shadow:
+      inset 0 0 0 3px rgba(255, 255, 255, 0.08),
+      inset 0 2px 0 rgba(255, 255, 255, 0.12),
+      inset 0 -3px 0 rgba(40, 30, 80, 0.18),
+      0 2px 0 rgba(40, 30, 80, 0.24),
+      0 6px 14px rgba(0, 0, 0, 0.18) !important;
+    cursor: not-allowed !important;
+  }
+
+  .ui-pill-button--ghost-disabled:hover {
+    transform: none !important;
+    filter: none !important;
+  }
+}
