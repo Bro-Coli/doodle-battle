@@ -46,118 +46,133 @@ export function SimulationOverlay({
     }
   }, [entityCounts.blue]);
 
+  const timerValueStyle: React.CSSProperties = {
+    // Lock a two-digit width so the HUD doesn't jitter as the timer
+    // ticks through 10 ↔ 9 ↔ 1. tabular-nums keeps digit advance
+    // uniform; min-width + centered text handles the digit-count change.
+    minWidth: '2ch',
+    display: 'inline-block',
+    textAlign: 'center',
+    ...(isCritical
+      ? {
+          background: 'linear-gradient(180deg, #FFE0DB 0%, #FF6B7F 40%, #E8263F 75%, #9B0B24 100%)',
+          WebkitBackgroundClip: 'text',
+          backgroundClip: 'text',
+          WebkitTextFillColor: 'transparent',
+        }
+      : null),
+  };
+
   return (
     <>
-      <div className="fixed left-1/2 top-6 z-20 -translate-x-1/2 animate-[fadeSlideDown_0.35s_ease-out_both] pointer-events-none">
-        <div
-          className={cn(
-            'ui-hud-timer',
-            isCritical ? 'hud-timer-critical-glow' : 'hud-timer-glow',
-          )}
-          aria-live="polite"
-        >
-          <span
-            className={cn('ui-hud-timer__value', isCritical && 'animate-pulse')}
-            style={
-              isCritical
-                ? {
-                    background:
-                      'linear-gradient(180deg, #FFE0DB 0%, #FF6B7F 40%, #E8263F 75%, #9B0B24 100%)',
-                    WebkitBackgroundClip: 'text',
-                    backgroundClip: 'text',
-                    WebkitTextFillColor: 'transparent',
-                  }
-                : undefined
-            }
+      {/*
+        Two-layer structure: the outer `fixed` div owns horizontal centering
+        (left-1/2 + -translate-x-1/2, static transform) while the inner div
+        runs the entry animation. Keeping the animation off the centering
+        element prevents keyframe `transform` from clobbering the
+        -translate-x-1/2 Tailwind utility mid-animation.
+      */}
+      <div className="fixed left-1/2 -top-6 z-above -translate-x-1/2 pointer-events-none">
+        <div className="animate-[slideDownFade_0.35s_ease-out_both]">
+          <div
+            className={cn(
+              'ui-hud-timer',
+              isCritical ? 'hud-timer-critical-glow' : 'hud-timer-glow',
+            )}
+            aria-live="polite"
           >
-            {display}
-          </span>
-          <span className="ui-hud-timer__unit">S</span>
+            <span
+              className={cn('ui-hud-timer__value', isCritical && 'animate-pulse')}
+              style={timerValueStyle}
+            >
+              {display}
+            </span>
+          </div>
         </div>
       </div>
 
-      <div
-        className="fixed left-1/2 top-40 z-20 -translate-x-1/2 w-[min(92vw,420px)] animate-[fadeSlideDown_0.45s_ease-out_both] pointer-events-none"
-        style={{ animationDelay: '0.08s' }}
-      >
+      <div className="fixed left-1/2 top-32 z-20 -translate-x-1/2 w-[min(92vw,420px)] pointer-events-none">
         <div
-          className={cn(
-            'flex items-center justify-between gap-4 px-5 py-3',
-            'rounded-[22px] border-2 border-white/30',
-            'bg-[linear-gradient(180deg,rgba(30,18,70,0.82)_0%,rgba(18,10,48,0.92)_100%)]',
-            'shadow-[inset_0_1px_0_rgba(255,255,255,0.22),inset_0_-3px_0_rgba(8,4,30,0.5),0_10px_26px_rgba(12,6,40,0.5)]',
-            'backdrop-blur-md',
-          )}
+          className="animate-[slideDownFade_0.45s_ease-out_both]"
+          style={{ animationDelay: '0.08s' }}
         >
           <div
-            ref={redRef}
-            className="flex items-center gap-2.5 min-w-[70px] justify-start"
-            style={{ willChange: 'transform' }}
+            className={cn(
+              'flex items-center justify-between gap-4 px-5 py-3',
+              'rounded-[22px] border-2 border-white/30',
+              'bg-[linear-gradient(180deg,rgba(30,18,70,0.82)_0%,rgba(18,10,48,0.92)_100%)]',
+              'shadow-[inset_0_1px_0_rgba(255,255,255,0.22),inset_0_-3px_0_rgba(8,4,30,0.5),0_10px_26px_rgba(12,6,40,0.5)]',
+              'backdrop-blur-md',
+            )}
           >
-            <span
-              className="inline-block h-3 w-3 rounded-full"
-              style={{
-                background:
-                  'radial-gradient(circle at 30% 30%, #FFE3E8 0%, #FF506E 45%, #C62142 100%)',
-                boxShadow:
-                  '0 0 10px rgba(253,84,110,0.7), inset 0 0 0 1px rgba(255,255,255,0.25)',
-              }}
-            />
-            <span
-              className="font-nunito tabular-nums font-black text-3xl"
-              style={{
-                background:
-                  'linear-gradient(180deg, #FFE7EB 0%, #FF8FA2 45%, #F04560 100%)',
-                WebkitBackgroundClip: 'text',
-                backgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                filter: 'drop-shadow(0 2px 0 rgba(60,8,20,0.55))',
-              }}
+            <div
+              ref={redRef}
+              className="flex items-center gap-2.5 min-w-[70px] justify-start"
+              style={{ willChange: 'transform' }}
             >
-              {entityCounts.red}
-            </span>
-          </div>
-
-          <div className="flex-1 px-1">
-            <div className="ui-hud-scorebar">
-              <div
-                className="ui-hud-scorebar__fill ui-hud-scorebar__fill--red"
-                style={{ width: `${redPct}%` }}
+              <span
+                className="inline-block h-3 w-3 rounded-full"
+                style={{
+                  background:
+                    'radial-gradient(circle at 30% 30%, #FFE3E8 0%, #FF506E 45%, #C62142 100%)',
+                  boxShadow:
+                    '0 0 10px rgba(253,84,110,0.7), inset 0 0 0 1px rgba(255,255,255,0.25)',
+                }}
               />
-              <div
-                className="ui-hud-scorebar__fill ui-hud-scorebar__fill--blue"
-                style={{ width: `${bluePct}%` }}
+              <span
+                className="font-nunito tabular-nums font-black text-3xl"
+                style={{
+                  background: 'linear-gradient(180deg, #FFE7EB 0%, #FF8FA2 45%, #F04560 100%)',
+                  WebkitBackgroundClip: 'text',
+                  backgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  filter: 'drop-shadow(0 2px 0 rgba(60,8,20,0.55))',
+                }}
+              >
+                {entityCounts.red}
+              </span>
+            </div>
+
+            <div className="flex-1 px-1">
+              <div className="ui-hud-scorebar">
+                <div
+                  className="ui-hud-scorebar__fill ui-hud-scorebar__fill--red"
+                  style={{ width: `${redPct}%` }}
+                />
+                <div
+                  className="ui-hud-scorebar__fill ui-hud-scorebar__fill--blue"
+                  style={{ width: `${bluePct}%` }}
+                />
+              </div>
+            </div>
+
+            <div
+              ref={blueRef}
+              className="flex items-center gap-2.5 min-w-[70px] justify-end"
+              style={{ willChange: 'transform' }}
+            >
+              <span
+                className="font-nunito tabular-nums font-black text-3xl"
+                style={{
+                  background: 'linear-gradient(180deg, #E8F4FF 0%, #7ABEFF 45%, #1F7BDC 100%)',
+                  WebkitBackgroundClip: 'text',
+                  backgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  filter: 'drop-shadow(0 2px 0 rgba(8,28,72,0.55))',
+                }}
+              >
+                {entityCounts.blue}
+              </span>
+              <span
+                className="inline-block h-3 w-3 rounded-full"
+                style={{
+                  background:
+                    'radial-gradient(circle at 30% 30%, #DFF0FF 0%, #5AB2FF 45%, #1776D0 100%)',
+                  boxShadow:
+                    '0 0 10px rgba(56,189,248,0.7), inset 0 0 0 1px rgba(255,255,255,0.25)',
+                }}
               />
             </div>
-          </div>
-
-          <div
-            ref={blueRef}
-            className="flex items-center gap-2.5 min-w-[70px] justify-end"
-            style={{ willChange: 'transform' }}
-          >
-            <span
-              className="font-nunito tabular-nums font-black text-3xl"
-              style={{
-                background:
-                  'linear-gradient(180deg, #E8F4FF 0%, #7ABEFF 45%, #1F7BDC 100%)',
-                WebkitBackgroundClip: 'text',
-                backgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                filter: 'drop-shadow(0 2px 0 rgba(8,28,72,0.55))',
-              }}
-            >
-              {entityCounts.blue}
-            </span>
-            <span
-              className="inline-block h-3 w-3 rounded-full"
-              style={{
-                background:
-                  'radial-gradient(circle at 30% 30%, #DFF0FF 0%, #5AB2FF 45%, #1776D0 100%)',
-                boxShadow:
-                  '0 0 10px rgba(56,189,248,0.7), inset 0 0 0 1px rgba(255,255,255,0.25)',
-              }}
-            />
           </div>
         </div>
       </div>
