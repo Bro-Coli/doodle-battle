@@ -1,17 +1,20 @@
 import type { CSSProperties } from 'react';
+import { cn } from '@/shared/lib/cn';
 
 type DrawPhaseSubmitButtonProps = {
   canvasBounds: { x: number; y: number; width: number; height: number } | null;
   onSubmit: () => void;
+  disabled?: boolean;
 };
 
 export function DrawPhaseSubmitButton({
   canvasBounds,
   onSubmit,
+  disabled = false,
 }: DrawPhaseSubmitButtonProps): React.JSX.Element {
   const confirmStrokeStyle: CSSProperties & { '--stroke': string } = {
     '--stroke': '5px',
-    WebkitTextStroke: 'var(--stroke) #0f6b7f',
+    WebkitTextStroke: `var(--stroke) ${disabled ? '#3d3a5e' : '#0f6b7f'}`,
   };
 
   return (
@@ -34,17 +37,31 @@ export function DrawPhaseSubmitButton({
       <button
         type="button"
         onClick={onSubmit}
-        className="ui-pill-button ui-pill-button--mint h-[72px] min-w-[212px] px-7"
+        disabled={disabled}
+        aria-disabled={disabled}
+        className={cn(
+          'ui-pill-button ui-pill-button--mint h-[72px] min-w-[240px] px-8',
+          disabled && 'ui-pill-button--ghost-disabled',
+        )}
       >
-        <span className="relative z-1 inline-block">
-          <span
-            aria-hidden
-            className="t20-eb pointer-events-none absolute inset-0 text-center uppercase text-transparent"
-            style={confirmStrokeStyle}
-          >
-            Submit Drawing
+        <span className="relative z-1 inline-flex items-center gap-3">
+          <span className="inline-block">
+            <span
+              aria-hidden
+              className="t20-eb pointer-events-none absolute inset-0 text-center uppercase text-transparent"
+              style={confirmStrokeStyle}
+            >
+              {disabled ? 'Draw Something' : 'Submit Drawing'}
+            </span>
+            <span
+              className={cn(
+                't20-eb relative text-center uppercase',
+                disabled ? 'text-white/60' : 'text-white',
+              )}
+            >
+              {disabled ? 'Draw Something' : 'Submit Drawing'}
+            </span>
           </span>
-          <span className="t20-eb relative text-center uppercase text-white">Submit Drawing</span>
         </span>
       </button>
     </div>

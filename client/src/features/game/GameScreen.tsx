@@ -399,7 +399,11 @@ export function GameScreen(): React.JSX.Element {
               maxRounds={maxRounds}
             />
           </div>
-          <DrawPhaseSubmitButton canvasBounds={canvasBounds} onSubmit={handleSubmit} />
+          <DrawPhaseSubmitButton
+            canvasBounds={canvasBounds}
+            onSubmit={handleSubmit}
+            disabled={canvasEmpty}
+          />
           <ObjectiveBanner canvasBounds={canvasBounds} />
           <DrawToolbar
             activeTool={activeTool}
