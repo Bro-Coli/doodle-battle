@@ -1,10 +1,33 @@
+import type { ReactNode } from 'react';
 import { useEffect } from 'react';
 
 import resultVictoryTitle from './assets/result-victory-title.webp';
 import resultVsText from './assets/scenario-vs-text.webp';
 import { ResultScoreCard } from './ResultScoreCard';
 
-export function VictoryResultPage() {
+type TeamSlot = {
+  label: string;
+  variant: 'pink' | 'blue';
+  score: number;
+};
+
+type VictoryResultPageProps = {
+  /** Your (winning) team. Rendered on the LEFT with the "YOU" badge. */
+  myTeam?: TeamSlot;
+  /** Opposing team. Rendered on the RIGHT. */
+  oppTeam?: TeamSlot;
+  /** Extra content rendered below the score cards (e.g. stats table). */
+  children?: ReactNode;
+};
+
+const DEFAULT_MY_TEAM: TeamSlot = { label: 'Blue Team', variant: 'blue', score: 5 };
+const DEFAULT_OPP_TEAM: TeamSlot = { label: 'Red Team', variant: 'pink', score: 3 };
+
+export function VictoryResultPage({
+  myTeam = DEFAULT_MY_TEAM,
+  oppTeam = DEFAULT_OPP_TEAM,
+  children,
+}: VictoryResultPageProps = {}) {
   useEffect(() => {
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
@@ -68,7 +91,13 @@ export function VictoryResultPage() {
           fetchPriority="high"
         />
         <div className="mt-12 flex w-full items-center justify-center gap-10 px-4">
-          <ResultScoreCard team="Blue Team" score={5} variant="blue" winner isMyTeam />
+          <ResultScoreCard
+            team={myTeam.label}
+            score={myTeam.score}
+            variant={myTeam.variant}
+            winner
+            isMyTeam
+          />
 
           <img
             src={resultVsText}
@@ -78,8 +107,9 @@ export function VictoryResultPage() {
             decoding="async"
           />
 
-          <ResultScoreCard team="Red Team" score={3} variant="pink" />
+          <ResultScoreCard team={oppTeam.label} score={oppTeam.score} variant={oppTeam.variant} />
         </div>
+        {children}
       </div>
     </>
   );

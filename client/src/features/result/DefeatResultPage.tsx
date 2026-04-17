@@ -1,9 +1,33 @@
+import type { ReactNode } from 'react';
+
 import resultDefeatTitle from './assets/result-defeat-title.webp';
 import resultVsText from './assets/scenario-vs-text.webp';
 import { ResultScoreCard } from './ResultScoreCard';
 import { StrokeShadowText } from '@/ui/text/StrokeShadowText';
 
-export function DefeatResultPage(): React.JSX.Element {
+type TeamSlot = {
+  label: string;
+  variant: 'pink' | 'blue';
+  score: number;
+};
+
+type DefeatResultPageProps = {
+  /** Your (losing) team. Rendered on the LEFT with the "YOU" badge. */
+  myTeam?: TeamSlot;
+  /** Opposing (winning) team. Rendered on the RIGHT with the trophy. */
+  oppTeam?: TeamSlot;
+  /** Extra content rendered below the score cards (e.g. stats table). */
+  children?: ReactNode;
+};
+
+const DEFAULT_MY_TEAM: TeamSlot = { label: 'Blue Team', variant: 'blue', score: 3 };
+const DEFAULT_OPP_TEAM: TeamSlot = { label: 'Red Team', variant: 'pink', score: 5 };
+
+export function DefeatResultPage({
+  myTeam = DEFAULT_MY_TEAM,
+  oppTeam = DEFAULT_OPP_TEAM,
+  children,
+}: DefeatResultPageProps = {}): React.JSX.Element {
   return (
     <>
       <div
@@ -41,7 +65,7 @@ export function DefeatResultPage(): React.JSX.Element {
           </StrokeShadowText>
         </div>
         <div className="mt-16 flex w-full items-center justify-center gap-10 px-4">
-          <ResultScoreCard team="Blue Team" score={3} variant="blue" isMyTeam />
+          <ResultScoreCard team={myTeam.label} score={myTeam.score} variant={myTeam.variant} isMyTeam />
 
           <img
             src={resultVsText}
@@ -51,8 +75,9 @@ export function DefeatResultPage(): React.JSX.Element {
             decoding="async"
           />
 
-          <ResultScoreCard team="Red Team" score={5} variant="pink" winner />
+          <ResultScoreCard team={oppTeam.label} score={oppTeam.score} variant={oppTeam.variant} winner />
         </div>
+        {children}
       </div>
     </>
   );
