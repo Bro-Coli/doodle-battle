@@ -74,24 +74,27 @@ export function LobbyScreen(): React.JSX.Element {
       <div className="absolute bottom-8 left-8 sm:bottom-4 sm:left-4">
         <LobbyTutorialButton />
       </div>
-      <div className="absolute top-6 left-6 z-10 sm:top-4 sm:left-4">
-        <div className="flex flex-col items-start gap-3">
-          <button
-            type="button"
-            onClick={() => navigate('/scenario')}
-            className="rounded-full border border-white/25 bg-black/25 px-5 py-2 font-nunito t14-b text-white/90 backdrop-blur-sm hover:bg-black/35"
-          >
-            Scenario Markup (Temp)
-          </button>
-          <button
-            type="button"
-            onClick={() => navigate('/result')}
-            className="rounded-full border border-white/25 bg-black/25 px-5 py-2 font-nunito t14-b text-white/90 backdrop-blur-sm hover:bg-black/35"
-          >
-            Result Markup (Temp)
-          </button>
+      {import.meta.env.DEV && (
+        <div className="absolute bottom-8 right-8 z-10 sm:bottom-4 sm:right-4">
+          <div className="ui-dev-dock">
+            <span className="ui-dev-dock__label">Dev</span>
+            <button
+              type="button"
+              onClick={() => navigate('/scenario')}
+              className="ui-dev-dock__btn"
+            >
+              Scenario
+            </button>
+            <button
+              type="button"
+              onClick={() => navigate('/result')}
+              className="ui-dev-dock__btn"
+            >
+              Result
+            </button>
+          </div>
         </div>
-      </div>
+      )}
       <div className="absolute top-6 right-6 z-10 sm:top-4 sm:right-4">
         <LobbyNameModal trigger={<LobbyUserIconButton />} />
       </div>
