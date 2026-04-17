@@ -151,7 +151,7 @@ export function CreateRoomScreen() {
       </div>
 
       {/* Content */}
-      <div className="flex w-full max-w-[1200px] flex-1 items-start gap-12">
+      <div className="flex w-full max-w-[1320px] flex-1 items-start gap-12">
         {/* Left: Settings panel */}
         <div className="ui-glass-panel w-[400px] shrink-0">
           {/* Max Players */}
@@ -613,12 +613,23 @@ function TeamSlot({
   }
 
   return (
-    <div
-      className={
-        'ui-team-slot ui-team-slot--filled font-nunito' + (isMe ? ' ui-team-slot--me' : '')
-      }
-    >
-      <span className="truncate t16-b">{playerName}</span>
+    <div className="ui-team-slot ui-team-slot--filled font-nunito">
+      <div className="flex min-w-0 items-center gap-2">
+        <span className="truncate t16-b">{playerName}</span>
+        {isMe && (
+          <span
+            className="shrink-0 rounded-md px-1.5 py-0.5 font-black text-[0.72rem] tracking-[0.14em] uppercase"
+            style={{
+              background: 'linear-gradient(180deg, #FFE788 0%, #FFC93C 55%, #E08A00 100%)',
+              color: '#4A2A00',
+              boxShadow:
+                'inset 0 1px 0 rgba(255,255,255,0.65), 0 1px 0 rgba(80,44,0,0.5), 0 0 10px rgba(255,200,60,0.45)',
+            }}
+          >
+            You
+          </span>
+        )}
+      </div>
       {isReady && (
         <Icon
           name="check"
