@@ -74,51 +74,75 @@ export class DrawingCanvas {
       this.currentPoints.push([pos.x, pos.y]);
     });
 
-    // Global pointer move updates live stroke
+    // Global pointer move updates live stroke.
+    //
+    // Keep strokes strictly inside the canvas: when the pointer leaves the
+    // region we finalize the current segment instead of clamping points to
+    // the border (which used to pile ink up along the edge). If the user
+    // returns to the canvas while still holding the button, a fresh segment
+    // is started so strokes don't jump across outside areas.
     app.stage.on('globalpointermove', (e) => {
-      if (!this.drawing || !this.liveGraphics) return;
+      if (!this.drawing) return;
 
       const pos = e.getLocalPosition(this._region);
+      const isInside =
+        pos.x >= 0 && pos.x <= this._region.width && pos.y >= 0 && pos.y <= this._region.height;
 
-      // Clamp to region bounds
-      const clampedX = Math.max(0, Math.min(this._region.width, pos.x));
-      const clampedY = Math.max(0, Math.min(this._region.height, pos.y));
+      if (!isInside) {
+        this.finalizeLiveSegment();
+        return;
+      }
 
-      this.currentPoints.push([clampedX, clampedY]);
+      if (!this.liveGraphics) {
+        this.liveGraphics = new Graphics();
+        this.strokeContainer.addChild(this.liveGraphics);
+        this.currentPoints = [];
+      }
+
+      this.currentPoints.push([pos.x, pos.y]);
       renderStroke(this.liveGraphics, this.currentPoints, this.activePreset);
     });
 
-    // Pointer up commits the stroke
+    // Pointer up commits any open segment and ends the drawing session.
     const commitStroke = () => {
       if (!this.drawing) return;
       this.drawing = false;
-
-      // Remove live graphics from container (will be replaced by committed one)
-      if (this.liveGraphics) {
-        this.strokeContainer.removeChild(this.liveGraphics);
-        this.liveGraphics.destroy();
-        this.liveGraphics = null;
-      }
-
-      // Need at least 1 point to commit
-      if (this.currentPoints.length === 0) return;
-
-      // If just a click (< 2 points), duplicate the point to render a dot
-      let pts = this.currentPoints;
-      if (pts.length < 2) {
-        pts = [pts[0], pts[0]];
-      }
-
-      const committed = new Graphics();
-      renderStroke(committed, pts, this.activePreset);
-      this._undoStack.push(committed);
-
-      this.currentPoints = [];
+      this.finalizeLiveSegment();
     };
 
     app.stage.on('pointerup', commitStroke);
     app.stage.on('pointerupoutside', commitStroke);
     app.stage.eventMode = 'static';
+  }
+
+  /**
+   * Commit the in-progress live stroke segment to the undo stack and clear
+   * the live graphics. Does NOT change the `drawing` flag so callers can
+   * decide whether the user is still actively drawing (e.g. pointer exited
+   * the canvas but button is still held).
+   */
+  private finalizeLiveSegment(): void {
+    if (!this.liveGraphics) {
+      this.currentPoints = [];
+      return;
+    }
+
+    this.strokeContainer.removeChild(this.liveGraphics);
+    this.liveGraphics.destroy();
+    this.liveGraphics = null;
+
+    if (this.currentPoints.length === 0) return;
+
+    let pts = this.currentPoints;
+    if (pts.length < 2) {
+      pts = [pts[0], pts[0]];
+    }
+
+    const committed = new Graphics();
+    renderStroke(committed, pts, this.activePreset);
+    this._undoStack.push(committed);
+
+    this.currentPoints = [];
   }
 
   undo(): void {
@@ -130,29 +154,9 @@ export class DrawingCanvas {
    * If no stroke is in progress, this is a no-op.
    */
   commitCurrentStroke(): void {
-    if (!this.drawing || !this.liveGraphics) return;
-
+    if (!this.drawing) return;
     this.drawing = false;
-
-    // Remove live graphics from container (will be replaced by committed one)
-    this.strokeContainer.removeChild(this.liveGraphics);
-    this.liveGraphics.destroy();
-    this.liveGraphics = null;
-
-    // Need at least 1 point to commit
-    if (this.currentPoints.length === 0) return;
-
-    // If just a click (< 2 points), duplicate the point to render a dot
-    let pts = this.currentPoints;
-    if (pts.length < 2) {
-      pts = [pts[0], pts[0]];
-    }
-
-    const committed = new Graphics();
-    renderStroke(committed, pts, this.activePreset);
-    this._undoStack.push(committed);
-
-    this.currentPoints = [];
+    this.finalizeLiveSegment();
   }
 
   clear(): void {
