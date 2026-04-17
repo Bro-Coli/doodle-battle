@@ -18,8 +18,8 @@ import {
   ResultsOverlay,
   SimulationOverlay,
   WaitingOverlay,
-  WinnerOverlay,
 } from './overlays';
+import { saveMatchResult } from '../result/matchResultStorage';
 
 type PlayerSnapshot = {
   name: string;
@@ -62,7 +62,6 @@ export function GameScreen(): React.JSX.Element {
   });
   const [hasSubmitted, setHasSubmitted] = useState(false);
   const [capturedImageUrl, setCapturedImageUrl] = useState<string | null>(null);
-  const [winnerData, setWinnerData] = useState<WinnerData | null>(null);
   const [activeTool, setActiveTool] = useState<DrawTool>('brush');
   const [canvasEmpty, setCanvasEmpty] = useState(true);
   const [canvasBounds, setCanvasBounds] = useState<{
@@ -97,7 +96,16 @@ export function GameScreen(): React.JSX.Element {
     }
 
     const removeGameFinished = room.onMessage('game_finished', (msg: WinnerData) => {
-      setWinnerData(msg);
+      // Persist the result for the standalone /result page and hand off routing.
+      // Setting intentionalStayRef keeps the Colyseus room alive so the result
+      // page can dispatch Play Again / Main Menu without reconnecting.
+      saveMatchResult({
+        winner: msg.winner,
+        stats: msg.stats,
+        mySessionId: room.sessionId,
+      });
+      intentionalStayRef.current = true;
+      navigate('/result');
     });
 
     const host = document.getElementById('game-pixi-host');
@@ -230,10 +238,6 @@ export function GameScreen(): React.JSX.Element {
           hasSubmittedRef.current = false;
           setCapturedImageUrl(null);
 
-          if (prevPhase === 'idle') {
-            setWinnerData(null);
-          }
-
           const teamTint = TEAM_TINTS[myTeamRef.current];
           if (teamTint !== undefined) {
             drawingCanvasRef.current?.setBrushColor(teamTint);
@@ -355,18 +359,6 @@ export function GameScreen(): React.JSX.Element {
     hasSubmittedRef.current = true;
   }
 
-  function handleBackToLobby(): void {
-    intentionalStayRef.current = true;
-    room?.send('return_to_lobby');
-    navigate('/waiting');
-  }
-
-  function handleMainMenu(): void {
-    intentionalStayRef.current = true;
-    leaveActiveRoom();
-    navigate('/');
-  }
-
   if (!room) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-[#1a1035] text-white">
@@ -430,17 +422,7 @@ export function GameScreen(): React.JSX.Element {
         <ResultsOverlay entityCounts={entityCounts} isFinalRound={currentRound + 1 >= maxRounds} />
       )}
 
-      {winnerData && (
-        <WinnerOverlay
-          winner={winnerData.winner}
-          stats={winnerData.stats}
-          mySessionId={room.sessionId}
-          onBackToLobby={handleBackToLobby}
-          onMainMenu={handleMainMenu}
-        />
-      )}
-
-      {currentPhase === 'idle' && !winnerData && <IdleOverlay />}
+      {currentPhase === 'idle' && <IdleOverlay />}
     </div>
   );
 }

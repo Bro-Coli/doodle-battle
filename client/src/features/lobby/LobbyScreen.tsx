@@ -80,14 +80,14 @@ export function LobbyScreen(): React.JSX.Element {
             <span className="ui-dev-dock__label">Dev</span>
             <button
               type="button"
-              onClick={() => navigate('/scenario')}
+              onClick={() => navigate('/dev/scenario')}
               className="ui-dev-dock__btn"
             >
               Scenario
             </button>
             <button
               type="button"
-              onClick={() => navigate('/result')}
+              onClick={() => navigate('/dev/result')}
               className="ui-dev-dock__btn"
             >
               Result

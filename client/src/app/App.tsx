@@ -7,6 +7,7 @@ import { QuickPlayScreen } from '../features/lobby/QuickPlayScreen';
 import { WaitingRoomScreen } from '../features/lobby/WaitingRoomScreen';
 import { GameScreen } from '../features/game/GameScreen';
 import { ScenarioRevealScreen } from '../features/scenario/ScenarioRevealScreen';
+import { MatchResultScreen } from '../features/result/MatchResultScreen';
 import { ResultScreen } from '../features/result/ResultScreen';
 
 export function App(): React.JSX.Element {
@@ -29,7 +30,15 @@ export function App(): React.JSX.Element {
   if (pathname === '/join') return <JoinRoomScreen />;
   if (pathname === '/quick') return <QuickPlayScreen />;
   if (pathname === '/waiting') return <WaitingRoomScreen />;
-  if (pathname === '/scenario') return <ScenarioRevealScreen />;
-  if (pathname === '/result') return <ResultScreen />;
+  if (pathname === '/result') return <MatchResultScreen />;
+
+  // Dev-only markup previews: these are accessible only during development
+  // (the lobby dev-dock is already gated behind `import.meta.env.DEV`) and
+  // fall back to the lobby in production so a stray URL can't leak them.
+  if (import.meta.env.DEV) {
+    if (pathname === '/dev/scenario') return <ScenarioRevealScreen />;
+    if (pathname === '/dev/result') return <ResultScreen />;
+  }
+
   return <LobbyScreen />;
 }
