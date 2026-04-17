@@ -16,7 +16,11 @@ type DefeatResultPageProps = {
   myTeam?: TeamSlot;
   /** Opposing (winning) team. Rendered on the RIGHT with the trophy. */
   oppTeam?: TeamSlot;
-  /** Extra content rendered below the score cards (e.g. stats table). */
+  /** Stats slot rendered directly below MY team's score card. */
+  myTeamStats?: ReactNode;
+  /** Stats slot rendered directly below the opposing team's score card. */
+  oppTeamStats?: ReactNode;
+  /** Extra content rendered at the bottom (after the stats columns). */
   children?: ReactNode;
 };
 
@@ -26,8 +30,11 @@ const DEFAULT_OPP_TEAM: TeamSlot = { label: 'Red Team', variant: 'pink', score: 
 export function DefeatResultPage({
   myTeam = DEFAULT_MY_TEAM,
   oppTeam = DEFAULT_OPP_TEAM,
+  myTeamStats,
+  oppTeamStats,
   children,
 }: DefeatResultPageProps = {}): React.JSX.Element {
+  const hasStats = myTeamStats !== undefined || oppTeamStats !== undefined;
   return (
     <>
       <div
@@ -38,11 +45,11 @@ export function DefeatResultPage({
             'radial-gradient(circle at center, #6ECFEF 0%, #6cc5ea 24%, #6ca8df 48%, #6d88d3 68%, #706bc7 86%, #7458BC 100%)',
         }}
       />
-      <div className="relative flex w-full flex-1 flex-col items-center justify-start pt-16">
+      <div className="relative flex w-full flex-1 flex-col items-center justify-start pt-12">
         <img
           src={resultDefeatTitle}
           alt="Defeat"
-          className="w-full max-w-[600px] scale-x-108 object-contain"
+          className="w-full max-w-[520px] scale-x-108 object-contain"
           style={{ aspectRatio: '2156 / 711' }}
           decoding="async"
           fetchPriority="high"
@@ -65,7 +72,12 @@ export function DefeatResultPage({
           </StrokeShadowText>
         </div>
         <div className="mt-16 flex w-full items-center justify-center gap-10 px-4">
-          <ResultScoreCard team={myTeam.label} score={myTeam.score} variant={myTeam.variant} isMyTeam />
+          <ResultScoreCard
+            team={myTeam.label}
+            score={myTeam.score}
+            variant={myTeam.variant}
+            isMyTeam
+          />
 
           <img
             src={resultVsText}
@@ -75,8 +87,24 @@ export function DefeatResultPage({
             decoding="async"
           />
 
-          <ResultScoreCard team={oppTeam.label} score={oppTeam.score} variant={oppTeam.variant} winner />
+          <ResultScoreCard
+            team={oppTeam.label}
+            score={oppTeam.score}
+            variant={oppTeam.variant}
+            winner
+          />
         </div>
+        {hasStats && (
+          <div className="mt-6 flex w-full items-start justify-center gap-10 px-4">
+            <div className="w-[400px] shrink-0">{myTeamStats}</div>
+            <div
+              aria-hidden
+              className="invisible h-20 w-auto shrink-0 lg:h-16 md:h-14"
+              style={{ aspectRatio: '1808 / 1335' }}
+            />
+            <div className="w-[400px] shrink-0">{oppTeamStats}</div>
+          </div>
+        )}
         {children}
       </div>
     </>

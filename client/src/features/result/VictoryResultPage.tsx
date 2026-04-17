@@ -16,7 +16,11 @@ type VictoryResultPageProps = {
   myTeam?: TeamSlot;
   /** Opposing team. Rendered on the RIGHT. */
   oppTeam?: TeamSlot;
-  /** Extra content rendered below the score cards (e.g. stats table). */
+  /** Stats slot rendered directly below MY team's score card. */
+  myTeamStats?: ReactNode;
+  /** Stats slot rendered directly below the opposing team's score card. */
+  oppTeamStats?: ReactNode;
+  /** Extra content rendered at the bottom (after the stats columns). */
   children?: ReactNode;
 };
 
@@ -26,8 +30,11 @@ const DEFAULT_OPP_TEAM: TeamSlot = { label: 'Red Team', variant: 'pink', score: 
 export function VictoryResultPage({
   myTeam = DEFAULT_MY_TEAM,
   oppTeam = DEFAULT_OPP_TEAM,
+  myTeamStats,
+  oppTeamStats,
   children,
 }: VictoryResultPageProps = {}) {
+  const hasStats = myTeamStats !== undefined || oppTeamStats !== undefined;
   useEffect(() => {
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
@@ -81,11 +88,11 @@ export function VictoryResultPage({
             'radial-gradient(circle at center, #00C8E4 0%, #08BEE4 22%, #109FDE 44%, #0F7FD4 62%, #0D5FC7 78%, #0B4BB9 90%, #0B3BB2 100%)',
         }}
       />
-      <div className="relative flex w-full flex-1 flex-col items-center justify-start pt-16">
+      <div className="relative flex w-full flex-1 flex-col items-center justify-start pt-12">
         <img
           src={resultVictoryTitle}
           alt="Victory"
-          className="w-full max-w-[760px] scale-x-106 object-contain"
+          className="w-full max-w-[600px] scale-x-106 object-contain"
           style={{ aspectRatio: '5306 / 2054' }}
           decoding="async"
           fetchPriority="high"
@@ -109,6 +116,17 @@ export function VictoryResultPage({
 
           <ResultScoreCard team={oppTeam.label} score={oppTeam.score} variant={oppTeam.variant} />
         </div>
+        {hasStats && (
+          <div className="mt-6 flex w-full items-start justify-center gap-10 px-4">
+            <div className="w-[400px] shrink-0">{myTeamStats}</div>
+            <div
+              aria-hidden
+              className="invisible h-20 w-auto shrink-0 lg:h-16"
+              style={{ aspectRatio: '1808 / 1335' }}
+            />
+            <div className="w-[400px] shrink-0">{oppTeamStats}</div>
+          </div>
+        )}
         {children}
       </div>
     </>

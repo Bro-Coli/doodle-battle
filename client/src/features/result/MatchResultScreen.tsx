@@ -34,64 +34,70 @@ const TEAM_VARIANT: Record<'red' | 'blue', 'pink' | 'blue'> = {
   blue: 'blue',
 };
 
-function StatsPanel({
-  rows,
+function TeamStatsPanel({
+  players,
+  team,
   mySessionId,
+  startDelayMs,
 }: {
-  rows: [string, MatchResultPlayerStat][];
+  players: [string, MatchResultPlayerStat][];
+  team: 'red' | 'blue';
   mySessionId: string;
+  /** Extra animation delay so the winning/losing team can lead the reveal. */
+  startDelayMs: number;
 }): React.JSX.Element {
+  const teamRowCls = team === 'red' ? 'ui-hud-row--red' : 'ui-hud-row--blue';
+
   return (
     <div
       className={cn(
-        'relative mt-14 w-full max-w-3xl rounded-2xl px-6 pb-5 pt-4',
-        'bg-black/28 ring-1 ring-white/18 backdrop-blur-[3px]',
-        'animate-[fadeSlideUp_0.5s_ease-out_both]',
+        'w-full rounded-2xl px-3 pb-3 pt-3',
+        'bg-black/30 ring-1 ring-white/20 backdrop-blur-[3px]',
+        'animate-[fadeSlideUp_0.45s_ease-out_both]',
       )}
-      style={{ animationDelay: '0.35s' }}
+      style={{ animationDelay: `${startDelayMs}ms` }}
     >
-      <div className="grid grid-cols-[1fr_auto_auto_auto] gap-x-6 px-[1.2rem] pb-2 font-nunito text-[0.68rem] font-black tracking-[0.18em] uppercase text-white/55">
+      <div
+        className="grid px-3 pb-2 font-nunito text-[0.6rem] font-black tracking-[0.16em] uppercase text-white/55"
+        style={{
+          gridTemplateColumns: '1fr auto auto auto',
+          columnGap: '1rem',
+        }}
+      >
         <span>Player</span>
-        <span className="text-right min-w-[3.2rem]">Drawn</span>
-        <span className="text-right min-w-[3.2rem]">Alive</span>
-        <span className="text-right min-w-[3.2rem]">Kills</span>
+        <span className="text-right min-w-[2.4rem]">Drawn</span>
+        <span className="text-right min-w-[2.4rem]">Alive</span>
+        <span className="text-right min-w-[2.4rem]">Kills</span>
       </div>
 
-      <div className="space-y-2">
-        {rows.map(([sessionId, stat], index) => {
+      <div className="flex flex-col gap-1.5">
+        {players.length === 0 && (
+          <div className="py-3 text-center font-nunito text-xs font-bold text-white/40">
+            No players
+          </div>
+        )}
+        {players.map(([sessionId, stat], index) => {
           const isMe = sessionId === mySessionId;
-          const teamCls = stat.team === 'red' ? 'ui-hud-row--red' : 'ui-hud-row--blue';
           return (
             <div
               key={sessionId}
               className={cn(
                 'ui-hud-row',
-                teamCls,
+                teamRowCls,
                 isMe && 'ui-hud-row--me',
-                'animate-[fadeSlideUp_0.4s_ease-out_both]',
+                'animate-[fadeSlideUp_0.35s_ease-out_both]',
               )}
               style={{
                 gridTemplateColumns: '1fr auto auto auto',
-                animationDelay: `${0.45 + index * 0.06}s`,
+                columnGap: '1rem',
+                padding: '0.7rem 1rem',
+                animationDelay: `${startDelayMs + 120 + index * 60}ms`,
               }}
             >
-              <div className="flex items-center gap-2.5 min-w-0">
-                <span
-                  className="inline-block h-2.5 w-2.5 rounded-full shrink-0"
-                  style={{
-                    background:
-                      stat.team === 'red'
-                        ? 'radial-gradient(circle at 30% 30%, #FFE3E8 0%, #FF506E 45%, #C62142 100%)'
-                        : 'radial-gradient(circle at 30% 30%, #DFF0FF 0%, #5AB2FF 45%, #1776D0 100%)',
-                    boxShadow:
-                      stat.team === 'red'
-                        ? '0 0 8px var(--color-team-red-glow)'
-                        : '0 0 8px var(--color-team-blue-glow)',
-                  }}
-                />
+              <div className="flex items-center gap-2 min-w-0">
                 <span
                   className={cn(
-                    'truncate text-base',
+                    'truncate text-sm',
                     isMe ? 'text-white font-black' : 'text-white/92 font-bold',
                   )}
                 >
@@ -99,7 +105,7 @@ function StatsPanel({
                 </span>
                 {isMe && (
                   <span
-                    className="ml-1 shrink-0 rounded-md px-2 py-0.5 font-black text-[0.65rem] tracking-[0.14em] uppercase"
+                    className="ml-1 shrink-0 rounded-md px-1.5 py-0.5 font-black text-[0.58rem] tracking-[0.14em] uppercase"
                     style={{
                       background:
                         'linear-gradient(180deg, #FFE788 0%, #FFC93C 55%, #E08A00 100%)',
@@ -112,11 +118,18 @@ function StatsPanel({
                   </span>
                 )}
               </div>
-              <span className="ui-hud-row__stat ui-hud-row__stat--muted">
+              <span className="ui-hud-row__stat ui-hud-row__stat--muted" style={{ minWidth: '2.4rem' }}>
                 {stat.entitiesDrawn}
               </span>
-              <span className="ui-hud-row__stat">{stat.entitiesSurviving}</span>
-              <span className="ui-hud-row__stat ui-hud-row__stat--highlight">{stat.kills}</span>
+              <span className="ui-hud-row__stat" style={{ minWidth: '2.4rem' }}>
+                {stat.entitiesSurviving}
+              </span>
+              <span
+                className="ui-hud-row__stat ui-hud-row__stat--highlight"
+                style={{ minWidth: '2.4rem' }}
+              >
+                {stat.kills}
+              </span>
             </div>
           );
         })}
@@ -221,12 +234,33 @@ export function MatchResultScreen(): React.JSX.Element | null {
 
   const isVictory = winner === myTeamKey;
 
-  const rows = Object.entries(stats).sort(([, a], [, b]) => {
-    if (a.team !== b.team) return a.team === myTeamKey ? -1 : 1;
-    return b.kills - a.kills;
-  });
+  const myTeamPlayers = Object.entries(stats)
+    .filter(([, stat]) => stat.team === myTeamKey)
+    .sort(([, a], [, b]) => b.kills - a.kills);
+  const oppTeamPlayers = Object.entries(stats)
+    .filter(([, stat]) => stat.team === oppTeamKey)
+    .sort(([, a], [, b]) => b.kills - a.kills);
 
-  const statsPanel = <StatsPanel rows={rows} mySessionId={mySessionId} />;
+  // Winner's stats panel reveals first for a tiny bit of drama.
+  const myDelay = isVictory ? 350 : 450;
+  const oppDelay = isVictory ? 450 : 350;
+
+  const myTeamStats = (
+    <TeamStatsPanel
+      players={myTeamPlayers}
+      team={myTeamKey}
+      mySessionId={mySessionId}
+      startDelayMs={myDelay}
+    />
+  );
+  const oppTeamStats = (
+    <TeamStatsPanel
+      players={oppTeamPlayers}
+      team={oppTeamKey}
+      mySessionId={mySessionId}
+      startDelayMs={oppDelay}
+    />
+  );
 
   function handlePlayAgain(): void {
     intentionalStayRef.current = true;
@@ -246,13 +280,19 @@ export function MatchResultScreen(): React.JSX.Element | null {
   return (
     <main className="relative flex min-h-screen w-screen flex-col overflow-hidden bg-[#120c2d] px-6 py-8">
       {isVictory ? (
-        <VictoryResultPage myTeam={myTeamSlot} oppTeam={oppTeamSlot}>
-          {statsPanel}
-        </VictoryResultPage>
+        <VictoryResultPage
+          myTeam={myTeamSlot}
+          oppTeam={oppTeamSlot}
+          myTeamStats={myTeamStats}
+          oppTeamStats={oppTeamStats}
+        />
       ) : (
-        <DefeatResultPage myTeam={myTeamSlot} oppTeam={oppTeamSlot}>
-          {statsPanel}
-        </DefeatResultPage>
+        <DefeatResultPage
+          myTeam={myTeamSlot}
+          oppTeam={oppTeamSlot}
+          myTeamStats={myTeamStats}
+          oppTeamStats={oppTeamStats}
+        />
       )}
 
       <div className="relative mt-12 flex-center gap-8 pb-12">

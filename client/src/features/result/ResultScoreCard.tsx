@@ -47,15 +47,15 @@ export function ResultScoreCard({
   const scoreDeepShadowColor = isBlue ? '#041a44' : '#3a0622';
 
   return (
-    <div className="relative shrink-0 w-[420px]">
+    <div className="relative shrink-0 w-[400px]">
       {isMyTeam && (
         <div className="pointer-events-none absolute -left-8 -top-8 z-10 -rotate-24">
-          <YouBadge className="scale-85 origin-top-left" />
+          <YouBadge className="scale-80 origin-top-left" />
         </div>
       )}
       <article
         className={[
-          'relative overflow-hidden rounded-3xl border-12 border-white px-20 py-8 text-center',
+          'relative overflow-hidden rounded-3xl border-[11px] border-white px-16 py-7 text-center',
           'translate-y-0 transition-transform',
           cardGradient,
           cardDepthShadow,
@@ -65,13 +65,12 @@ export function ResultScoreCard({
         <div className="pointer-events-none absolute inset-0 rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.22)_0%,transparent_45%,transparent_55%,rgba(0,0,0,0.08)_100%)]" />
         <div className="absolute inset-x-0 top-0 flex h-[34%] items-center justify-center">
           <StrokeShadowText
-            className="t32-eb lg:t28-eb"
-            // fillStyle={teamFillStyle}
+            className="t28-eb lg:t24-eb"
             firstStrokeColor={teamFirstStrokeColor}
             secondStrokeColor={teamSecondStrokeColor}
-            firstStrokeWidth={8}
-            secondStrokeWidth={6}
-            shadowOffsetY="0.22rem"
+            firstStrokeWidth={7}
+            secondStrokeWidth={5}
+            shadowOffsetY="0.18rem"
           >
             {team}
           </StrokeShadowText>
@@ -79,16 +78,16 @@ export function ResultScoreCard({
         <div className="relative mt-[34%]">
           <div className="relative inline-flex items-center justify-center">
             <StrokeShadowText
-              className="t88-eb lg:t72-eb"
+              className="t72-eb lg:t60-eb"
               fillStyle={scoreFillStyle}
               firstStrokeColor={scoreFirstStrokeColor}
               secondStrokeColor={scoreSecondStrokeColor}
-              firstStrokeWidth={8}
-              secondStrokeWidth={6}
-              shadowOffsetY="0.4rem"
+              firstStrokeWidth={7}
+              secondStrokeWidth={5}
+              shadowOffsetY="0.32rem"
               deepShadowColor={scoreDeepShadowColor}
-              deepShadowOffsetY="0.36rem"
-              deepShadowStrokeWidth={14}
+              deepShadowOffsetY="0.3rem"
+              deepShadowStrokeWidth={12}
               deepShadowBlur="3px"
             >
               {score}
@@ -96,9 +95,9 @@ export function ResultScoreCard({
             {winner && (
               <Icon
                 name="trophy"
-                size={64}
+                size={52}
                 color={isBlue ? '#0a2a7a' : '#8b0a4a'}
-                className="absolute -right-24 top-1/2 -translate-y-1/2 rotate-12 drop-shadow-md"
+                className="absolute -right-20 top-1/2 -translate-y-1/2 rotate-12 drop-shadow-md"
               />
             )}
           </div>
