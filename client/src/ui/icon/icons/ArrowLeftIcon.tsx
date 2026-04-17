@@ -9,17 +9,17 @@ export const arrowLeftIcon = defineIcon({
   element: (
     <>
       <path
-        d="M28 8 L6 32 L28 56 L28 44 L50 44 Q56 44 56 38 L56 26 Q56 20 50 20 L28 20Z"
-        fill="#dff5ff"
-        stroke="#2f5f95"
-        strokeWidth="3.1"
+        d="M31.5 20.4 L50.5 20.4 Q55 20.4 55 24.9 L55 39.1 Q55 43.6 50.5 43.6 L31.5 43.6 L31.5 49.5 Q31.5 54.5 27 52 L10 35 Q6 32 10 29 L27 12 Q31.5 9.5 31.5 14.5 Z"
+        fill="#fbfdff"
+        stroke="#1c4796"
+        strokeWidth="3.8"
         strokeLinejoin="round"
         strokeLinecap="round"
       />
       <path
-        d="M30 22 L52 22 Q54 22 54 26 L54 38 Q54 42 50 42 L30 42 L30 22Z"
-        fill="#eaf9ff"
-        opacity="0.4"
+        d="M11.5 30.5 L27.2 14.8 Q28.4 14.2 28.4 15.8 L28.4 22.6 L52 22.6 Q53 22.6 53 23.8 L53 28 Q40 26.6 27 28.2 Q18.5 29.3 12.5 31 Q10.8 31.4 11.5 30.5 Z"
+        fill="#ffffff"
+        opacity="0.7"
       />
     </>
   ),
