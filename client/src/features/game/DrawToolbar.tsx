@@ -38,6 +38,7 @@ function ToolButton({
       aria-pressed={active}
       onClick={onClick}
       className={[
+        'cursor-pointer',
         usesSystemIconButton || usesToolCard
           ? ''
           : [
@@ -96,13 +97,14 @@ export function DrawToolbar({
         active={activeTool === 'brush'}
         label="Brush"
         className={[
-          'draw-tool-card relative flex h-[88px] w-[136px] items-center justify-center overflow-hidden rounded-[22px] border transition',
+          'draw-tool-card relative flex h-[88px] w-[136px] items-center justify-center overflow-hidden rounded-[22px] transition-[transform,box-shadow,background-color,filter,border-color] duration-150',
           'before:pointer-events-none before:absolute before:left-[8px] before:right-[8px] before:top-[8px] before:h-[40%] before:rounded-[16px]',
           'before:bg-[linear-gradient(180deg,rgba(255,255,255,0.46)_0%,rgba(255,255,255,0.18)_48%,rgba(255,255,255,0.04)_100%)]',
           'after:pointer-events-none after:absolute after:left-[14px] after:top-[12px] after:h-[12px] after:w-[26px] after:rotate-[-26deg] after:rounded-full after:bg-white/45 after:blur-[1px]',
+          'active:translate-y-[2px] active:scale-[0.98] active:brightness-95 active:shadow-[inset_0_2px_6px_rgba(41,24,95,0.35),inset_0_-1px_0_rgba(255,255,255,0.18),0_2px_6px_rgba(79,48,144,0.18)]',
           activeTool === 'brush'
-            ? 'border-white/40 bg-[linear-gradient(180deg,rgba(255,255,255,0.34)_0%,rgba(255,255,255,0.2)_100%)] shadow-[inset_0_1px_0_rgba(255,255,255,0.42),inset_0_-10px_20px_rgba(255,255,255,0.06),0_0_0_2px_rgba(255,255,255,0.08),0_8px_18px_rgba(79,48,144,0.22)]'
-            : 'border-white/22 bg-[linear-gradient(180deg,rgba(255,255,255,0.22)_0%,rgba(255,255,255,0.12)_100%)] shadow-[inset_0_1px_0_rgba(255,255,255,0.24),inset_0_-10px_20px_rgba(255,255,255,0.04),0_8px_18px_rgba(79,48,144,0.14)] hover:bg-white/20 active:translate-y-[2px]',
+            ? 'border-[3px] border-[#FFD966] bg-[linear-gradient(180deg,rgba(255,255,255,0.38)_0%,rgba(255,255,255,0.22)_100%)] shadow-[inset_0_1px_0_rgba(255,255,255,0.48),inset_0_-10px_20px_rgba(255,255,255,0.08),0_0_0_2px_rgba(255,210,80,0.35),0_0_18px_rgba(255,200,60,0.42),0_8px_18px_rgba(79,48,144,0.22)]'
+            : 'border-[1.5px] border-white/22 bg-[linear-gradient(180deg,rgba(255,255,255,0.22)_0%,rgba(255,255,255,0.12)_100%)] shadow-[inset_0_1px_0_rgba(255,255,255,0.24),inset_0_-10px_20px_rgba(255,255,255,0.04),0_8px_18px_rgba(79,48,144,0.14)] hover:bg-white/20',
         ].join(' ')}
         icon={
           <img
@@ -117,13 +119,14 @@ export function DrawToolbar({
         active={activeTool === 'eraser'}
         label="Eraser"
         className={[
-          'draw-tool-card relative flex h-[88px] w-[136px] items-center justify-center overflow-hidden rounded-[22px] border transition',
+          'draw-tool-card relative flex h-[88px] w-[136px] items-center justify-center overflow-hidden rounded-[22px] transition-[transform,box-shadow,background-color,filter,border-color] duration-150',
           'before:pointer-events-none before:absolute before:left-[8px] before:right-[8px] before:top-[8px] before:h-[40%] before:rounded-[16px]',
           'before:bg-[linear-gradient(180deg,rgba(255,255,255,0.46)_0%,rgba(255,255,255,0.18)_48%,rgba(255,255,255,0.04)_100%)]',
           'after:pointer-events-none after:absolute after:left-[14px] after:top-[12px] after:h-[12px] after:w-[26px] after:rotate-[-26deg] after:rounded-full after:bg-white/45 after:blur-[1px]',
+          'active:translate-y-[2px] active:scale-[0.98] active:brightness-95 active:shadow-[inset_0_2px_6px_rgba(41,24,95,0.35),inset_0_-1px_0_rgba(255,255,255,0.18),0_2px_6px_rgba(79,48,144,0.18)]',
           activeTool === 'eraser'
-            ? 'border-white/40 bg-[linear-gradient(180deg,rgba(255,255,255,0.34)_0%,rgba(255,255,255,0.2)_100%)] shadow-[inset_0_1px_0_rgba(255,255,255,0.42),inset_0_-10px_20px_rgba(255,255,255,0.06),0_0_0_2px_rgba(255,255,255,0.08),0_8px_18px_rgba(79,48,144,0.22)]'
-            : 'border-white/22 bg-[linear-gradient(180deg,rgba(255,255,255,0.22)_0%,rgba(255,255,255,0.12)_100%)] shadow-[inset_0_1px_0_rgba(255,255,255,0.24),inset_0_-10px_20px_rgba(255,255,255,0.04),0_8px_18px_rgba(79,48,144,0.14)] hover:bg-white/20 active:translate-y-[2px]',
+            ? 'border-[3px] border-[#FFD966] bg-[linear-gradient(180deg,rgba(255,255,255,0.38)_0%,rgba(255,255,255,0.22)_100%)] shadow-[inset_0_1px_0_rgba(255,255,255,0.48),inset_0_-10px_20px_rgba(255,255,255,0.08),0_0_0_2px_rgba(255,210,80,0.35),0_0_18px_rgba(255,200,60,0.42),0_8px_18px_rgba(79,48,144,0.22)]'
+            : 'border-[1.5px] border-white/22 bg-[linear-gradient(180deg,rgba(255,255,255,0.22)_0%,rgba(255,255,255,0.12)_100%)] shadow-[inset_0_1px_0_rgba(255,255,255,0.24),inset_0_-10px_20px_rgba(255,255,255,0.04),0_8px_18px_rgba(79,48,144,0.14)] hover:bg-white/20',
         ].join(' ')}
         icon={
           <img

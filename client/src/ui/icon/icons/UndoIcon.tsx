@@ -6,18 +6,18 @@ export const undoIcon = defineIcon({
   element: (
     <>
       <path
-        d="M14 28l-6-8 8-6"
+        d="M20 12 L8 22 L20 32"
         fill="none"
         stroke="currentColor"
-        strokeWidth="4.5"
+        strokeWidth="7"
         strokeLinecap="round"
         strokeLinejoin="round"
       />
       <path
-        d="M10 20h26a16 16 0 110 32H24"
+        d="M8 22 H36 A18 18 0 0 1 36 58"
         fill="none"
         stroke="currentColor"
-        strokeWidth="4.5"
+        strokeWidth="7"
         strokeLinecap="round"
         strokeLinejoin="round"
       />
