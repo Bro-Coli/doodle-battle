@@ -1,5 +1,5 @@
 import { cn } from '@/shared/lib/cn';
-import { GameOverlay, GameOverlayBadge } from '@/ui/overlay/GameOverlay';
+import { GameOverlay, GameOverlayBadge, GameOverlayCard } from '@/ui/overlay/GameOverlay';
 
 type PlayerSnapshot = {
   name: string;
@@ -13,48 +13,76 @@ type WaitingOverlayProps = {
   myTeam: string;
 };
 
-function PlayerStatusList({
+function PlayerRoster({
   players,
   teamLabel,
-  teamColor,
-  bgColor,
+  team,
+  isMyTeam,
 }: {
   players: PlayerSnapshot[];
   teamLabel: string;
-  teamColor: string;
-  bgColor: string;
+  team: 'red' | 'blue';
+  isMyTeam: boolean;
 }): React.JSX.Element {
+  const dot =
+    team === 'red'
+      ? 'radial-gradient(circle at 30% 30%, #FFE3E8 0%, #FF506E 45%, #C62142 100%)'
+      : 'radial-gradient(circle at 30% 30%, #DFF0FF 0%, #5AB2FF 45%, #1776D0 100%)';
+  const dotGlow =
+    team === 'red' ? '0 0 8px var(--color-team-red-glow)' : '0 0 8px var(--color-team-blue-glow)';
+
   return (
-    <div
-      className={cn(
-        'rounded-2xl px-5 py-4',
-        'border border-white/10',
-        'shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]',
-        bgColor,
-      )}
-    >
-      <p className={cn('mb-3 text-xs font-black uppercase tracking-widest', teamColor)}>
-        {teamLabel}
-      </p>
-      <ul className="flex flex-col gap-2">
+    <GameOverlayCard variant={team} size="sm" className="w-full px-5 py-4">
+      <div className="mb-3 flex items-center justify-between gap-3">
+        <div className="flex items-center gap-2">
+          <span
+            className="inline-block h-3 w-3 rounded-full"
+            style={{ background: dot, boxShadow: dotGlow }}
+          />
+          <span className="font-nunito text-[0.72rem] font-black tracking-[0.18em] uppercase text-white/90">
+            {teamLabel}
+          </span>
+        </div>
+        {isMyTeam && (
+          <span className="rounded-full bg-white/20 px-2 py-0.5 font-nunito text-[0.62rem] font-black tracking-[0.16em] uppercase text-white">
+            You
+          </span>
+        )}
+      </div>
+      <ul className="flex flex-col gap-1.5">
         {players.map((p) => (
-          <li key={p.name} className="flex items-center gap-3 text-sm text-white">
+          <li
+            key={p.name}
+            className={cn(
+              'flex items-center gap-2.5 rounded-lg px-2 py-1.5 transition',
+              p.hasSubmittedDrawing ? 'bg-white/10' : 'bg-black/20 ring-1 ring-white/8',
+            )}
+          >
             <span
               className={cn(
-                'flex h-5 w-5 items-center justify-center rounded-full text-xs',
+                'flex h-5 w-5 items-center justify-center rounded-full text-xs font-black transition',
                 p.hasSubmittedDrawing
-                  ? 'bg-emerald-500 text-white'
-                  : 'border border-white/30 text-white/50',
+                  ? 'bg-[linear-gradient(180deg,#A5F3B3_0%,#2FCC71_100%)] text-[#0A3820] shadow-[inset_0_1px_0_rgba(255,255,255,0.5),0_0_10px_rgba(80,220,140,0.5)]'
+                  : 'bg-black/30 ring-1 ring-white/20 text-white/35',
               )}
             >
-              {p.hasSubmittedDrawing ? '✓' : ''}
+              {p.hasSubmittedDrawing ? '✓' : '•'}
             </span>
-            <span className={p.hasSubmittedDrawing ? 'text-white' : 'text-white/60'}>{p.name}</span>
+            <span
+              className={cn(
+                'font-nunito text-sm font-bold truncate',
+                p.hasSubmittedDrawing ? 'text-white' : 'text-white/55',
+              )}
+            >
+              {p.name}
+            </span>
           </li>
         ))}
-        {players.length === 0 && <li className="text-xs text-white/40">No players</li>}
+        {players.length === 0 && (
+          <li className="font-nunito text-xs font-bold text-white/40">No players</li>
+        )}
       </ul>
-    </div>
+    </GameOverlayCard>
   );
 }
 
@@ -68,61 +96,67 @@ export function WaitingOverlay({
   let allSubmitted = true;
 
   players.forEach((p) => {
-    if (p.team === myTeam) {
-      teammates.push(p);
-    } else {
-      opponents.push(p);
-    }
+    if (p.team === myTeam) teammates.push(p);
+    else opponents.push(p);
     if (!p.hasSubmittedDrawing) allSubmitted = false;
   });
 
-  return (
-    <GameOverlay className="flex flex-col items-center">
-      <div className="mt-6 animate-[fadeSlideDown_0.3s_ease-out_both]">
-        <GameOverlayBadge>
-          <span
-            className={cn(
-              'inline-block h-2 w-2 rounded-full',
-              allSubmitted ? 'bg-emerald-400' : 'animate-pulse bg-amber-400',
-            )}
-          />
-          {allSubmitted ? 'Bringing drawings to life...' : 'Waiting for players...'}
-        </GameOverlayBadge>
-      </div>
+  const myTeamKey = myTeam === 'red' ? 'red' : 'blue';
+  const oppTeamKey = myTeam === 'red' ? 'blue' : 'red';
+  const myLabel = myTeam === 'red' ? 'Red Team' : 'Blue Team';
+  const oppLabel = myTeam === 'red' ? 'Blue Team' : 'Red Team';
 
-      <div className="mt-4 flex flex-1 items-center justify-center">
-        {capturedImageUrl ? (
+  return (
+    <GameOverlay
+      centered
+      className="bg-[radial-gradient(ellipse_at_center,rgba(20,10,55,0.55)_0%,rgba(8,4,30,0.78)_100%)] backdrop-blur-sm"
+    >
+      <div className="flex items-end justify-center gap-14 lg:gap-10 px-6">
+        {/* LEFT — player's creation polaroid */}
+        <div
+          className="animate-[scaleIn_0.5s_cubic-bezier(0.34,1.56,0.64,1)_both]"
+          style={{ animationDelay: '0.12s' }}
+        >
+          {capturedImageUrl ? (
+            <div className="ui-hud-polaroid">
+              <span className="ui-hud-polaroid__tape" aria-hidden />
+              <img
+                src={capturedImageUrl}
+                alt="Your drawing"
+                className="relative z-1 block h-[320px] w-[320px] rounded-md object-contain bg-white"
+              />
+              <p className="ui-hud-polaroid__caption">Your Creation</p>
+            </div>
+          ) : (
+            <div className="ui-hud-card flex h-[380px] w-[360px] items-center justify-center px-8 py-6 text-white/70 font-nunito font-bold">
+              Drawing submitted
+            </div>
+          )}
+        </div>
+
+        {/* RIGHT — status badge + team rosters (anchored to bottom) */}
+        <div className="flex flex-col justify-end items-stretch w-[360px] self-stretch">
+          <div className="flex justify-center mb-8 animate-[slideDownFade_0.35s_ease-out_both]">
+            <GameOverlayBadge>
+              <span className="font-nunito text-[1.05rem] font-black tracking-[0.08em] text-white uppercase">
+                {allSubmitted ? 'Bringing drawings to game' : 'Waiting for players'}
+              </span>
+            </GameOverlayBadge>
+          </div>
+
           <div
-            className="animate-[scaleIn_0.4s_ease-out_both] rounded-2xl border-4 border-white/20 bg-white p-3 shadow-[0_20px_40px_rgba(0,0,0,0.3)]"
-            style={{ animationDelay: '0.1s' }}
+            className="flex flex-col gap-6 animate-[fadeSlideUp_0.4s_ease-out_both]"
+            style={{ animationDelay: '0.2s' }}
           >
-            <img
-              src={capturedImageUrl}
-              alt="Your drawing"
-              className="max-h-64 max-w-xs rounded-lg object-contain"
+            <PlayerRoster players={teammates} teamLabel={myLabel} team={myTeamKey} isMyTeam />
+            <PlayerRoster
+              players={opponents}
+              teamLabel={oppLabel}
+              team={oppTeamKey}
+              isMyTeam={false}
             />
           </div>
-        ) : (
-          <div className="rounded-2xl bg-white/10 px-8 py-6 text-white/60">Drawing submitted</div>
-        )}
-      </div>
-
-      <div
-        className="mb-8 flex gap-4 animate-[fadeSlideUp_0.35s_ease-out_both]"
-        style={{ animationDelay: '0.15s' }}
-      >
-        <PlayerStatusList
-          players={teammates}
-          teamLabel={`Your Team (${myTeam === 'red' ? 'Red' : 'Blue'})`}
-          teamColor={myTeam === 'red' ? 'text-red-300' : 'text-blue-300'}
-          bgColor={myTeam === 'red' ? 'bg-red-900/50' : 'bg-blue-900/50'}
-        />
-        <PlayerStatusList
-          players={opponents}
-          teamLabel="Opponents"
-          teamColor={myTeam === 'red' ? 'text-blue-300' : 'text-red-300'}
-          bgColor={myTeam === 'red' ? 'bg-blue-900/50' : 'bg-red-900/50'}
-        />
+        </div>
       </div>
     </GameOverlay>
   );
