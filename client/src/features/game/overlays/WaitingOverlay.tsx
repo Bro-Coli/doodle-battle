@@ -1,5 +1,9 @@
+import type { CSSProperties } from 'react';
+
 import { cn } from '@/shared/lib/cn';
 import { GameOverlay, GameOverlayBadge, GameOverlayCard } from '@/ui/overlay/GameOverlay';
+import { Icon } from '@/ui/icon/Icon';
+import { StrokeShadowText } from '@/ui/text/StrokeShadowText';
 
 type PlayerSnapshot = {
   name: string;
@@ -13,36 +17,69 @@ type WaitingOverlayProps = {
   myTeam: string;
 };
 
+// Mirrors the team text treatment used on the scenario reveal screen:
+// the team color only fills the "Blue"/"Red" word, while "Team" keeps
+// stroke-only so the color word carries the identity.
+const TEAM_TEXT_CFG = {
+  blue: {
+    label: 'Blue',
+    fillStyle: {
+      background: 'linear-gradient(to bottom, #FFFFFF 0%, #75ccf4 30%, #0692dd 100%)',
+      WebkitBackgroundClip: 'text',
+      WebkitTextFillColor: 'transparent',
+    } as CSSProperties,
+    firstStrokeColor: '#2469b7',
+    secondStrokeColor: '#0D2E6E',
+  },
+  red: {
+    label: 'Red',
+    fillStyle: {
+      background: 'linear-gradient(to bottom, #f9c0dc 0%, #ec83a6 40%, #C2185B 100%)',
+      WebkitBackgroundClip: 'text',
+      WebkitTextFillColor: 'transparent',
+    } as CSSProperties,
+    firstStrokeColor: '#880E4F',
+    secondStrokeColor: '#4A0A2A',
+  },
+} as const;
+
 function PlayerRoster({
   players,
-  teamLabel,
   team,
   isMyTeam,
 }: {
   players: PlayerSnapshot[];
-  teamLabel: string;
   team: 'red' | 'blue';
   isMyTeam: boolean;
 }): React.JSX.Element {
-  const dot =
-    team === 'red'
-      ? 'radial-gradient(circle at 30% 30%, #FFE3E8 0%, #FF506E 45%, #C62142 100%)'
-      : 'radial-gradient(circle at 30% 30%, #DFF0FF 0%, #5AB2FF 45%, #1776D0 100%)';
-  const dotGlow =
-    team === 'red' ? '0 0 8px var(--color-team-red-glow)' : '0 0 8px var(--color-team-blue-glow)';
+  const cfg = TEAM_TEXT_CFG[team];
 
   return (
     <GameOverlayCard variant={team} size="sm" className="w-full px-5 py-4">
-      <div className="mb-3 flex items-center justify-between gap-3">
-        <div className="flex items-center gap-2">
-          <span
-            className="inline-block h-3 w-3 rounded-full"
-            style={{ background: dot, boxShadow: dotGlow }}
-          />
-          <span className="font-nunito text-[0.72rem] font-black tracking-[0.18em] uppercase text-white/90">
-            {teamLabel}
-          </span>
-        </div>
+      <div className="mb-3 flex items-end justify-between gap-3">
+        <p className="flex items-end gap-2">
+          <StrokeShadowText
+            className="t20-eb"
+            fillStyle={cfg.fillStyle}
+            firstStrokeColor={cfg.firstStrokeColor}
+            secondStrokeColor={cfg.secondStrokeColor}
+            firstStrokeWidth={5}
+            secondStrokeWidth={4}
+            shadowOffsetY="0.15rem"
+          >
+            {cfg.label}
+          </StrokeShadowText>
+          <StrokeShadowText
+            className="t16-b"
+            firstStrokeColor={cfg.firstStrokeColor}
+            secondStrokeColor={cfg.secondStrokeColor}
+            firstStrokeWidth={4}
+            secondStrokeWidth={3}
+            shadowOffsetY="0.1rem"
+          >
+            Team
+          </StrokeShadowText>
+        </p>
         {isMyTeam && (
           <span className="rounded-full bg-white/20 px-2 py-0.5 font-nunito text-[0.62rem] font-black tracking-[0.16em] uppercase text-white">
             You
@@ -60,13 +97,22 @@ function PlayerRoster({
           >
             <span
               className={cn(
-                'flex h-5 w-5 items-center justify-center rounded-full text-xs font-black transition',
-                p.hasSubmittedDrawing
-                  ? 'bg-[linear-gradient(180deg,#A5F3B3_0%,#2FCC71_100%)] text-[#0A3820] shadow-[inset_0_1px_0_rgba(255,255,255,0.5),0_0_10px_rgba(80,220,140,0.5)]'
-                  : 'bg-black/30 ring-1 ring-white/20 text-white/35',
+                'flex h-6 w-6 items-center justify-center shrink-0 transition',
+                !p.hasSubmittedDrawing &&
+                  'rounded-full bg-black/30 ring-1 ring-white/20 text-white/35 text-xs font-black',
               )}
             >
-              {p.hasSubmittedDrawing ? '✓' : '•'}
+              {p.hasSubmittedDrawing ? (
+                <Icon
+                  name="check"
+                  size={22}
+                  color="emerald-300"
+                  className="shrink-0 text-emerald-300 drop-shadow-[0_0_6px_rgba(52,211,153,0.6)]"
+                  decorative
+                />
+              ) : (
+                '•'
+              )}
             </span>
             <span
               className={cn(
@@ -103,8 +149,6 @@ export function WaitingOverlay({
 
   const myTeamKey = myTeam === 'red' ? 'red' : 'blue';
   const oppTeamKey = myTeam === 'red' ? 'blue' : 'red';
-  const myLabel = myTeam === 'red' ? 'Red Team' : 'Blue Team';
-  const oppLabel = myTeam === 'red' ? 'Blue Team' : 'Red Team';
 
   return (
     <GameOverlay
@@ -148,13 +192,8 @@ export function WaitingOverlay({
             className="flex flex-col gap-6 animate-[fadeSlideUp_0.4s_ease-out_both]"
             style={{ animationDelay: '0.2s' }}
           >
-            <PlayerRoster players={teammates} teamLabel={myLabel} team={myTeamKey} isMyTeam />
-            <PlayerRoster
-              players={opponents}
-              teamLabel={oppLabel}
-              team={oppTeamKey}
-              isMyTeam={false}
-            />
+            <PlayerRoster players={teammates} team={myTeamKey} isMyTeam />
+            <PlayerRoster players={opponents} team={oppTeamKey} isMyTeam={false} />
           </div>
         </div>
       </div>
