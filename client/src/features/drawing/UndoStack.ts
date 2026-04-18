@@ -1,7 +1,8 @@
 import { Graphics, Container } from 'pixi.js';
+import type { DrawTool } from './DrawingCanvas';
 
 export class UndoStack {
-  private strokes: Graphics[] = [];
+  private strokes: Array<{ gfx: Graphics; tool: DrawTool }> = [];
   private container: Container;
 
   onChange: (() => void) | null = null;
@@ -10,23 +11,23 @@ export class UndoStack {
     this.container = container;
   }
 
-  push(gfx: Graphics): void {
-    this.strokes.push(gfx);
+  push(gfx: Graphics, tool: DrawTool): void {
+    this.strokes.push({ gfx, tool });
     this.container.addChild(gfx);
     this.onChange?.();
   }
 
   undo(): boolean {
-    const gfx = this.strokes.pop();
-    if (!gfx) return false;
-    this.container.removeChild(gfx);
-    gfx.destroy();
+    const stroke = this.strokes.pop();
+    if (!stroke) return false;
+    this.container.removeChild(stroke.gfx);
+    stroke.gfx.destroy();
     this.onChange?.();
     return true;
   }
 
   clear(): void {
-    for (const gfx of this.strokes) {
+    for (const { gfx } of this.strokes) {
       gfx.destroy();
     }
     this.strokes = [];
@@ -36,5 +37,9 @@ export class UndoStack {
 
   get isEmpty(): boolean {
     return this.strokes.length === 0;
+  }
+
+  get hasBrushStroke(): boolean {
+    return this.strokes.some((stroke) => stroke.tool === 'brush');
   }
 }

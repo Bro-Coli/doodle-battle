@@ -133,7 +133,7 @@ export function GameScreen(): React.JSX.Element {
       worldStage.drawingRoot.addChild(drawingCanvas.region);
 
       drawingCanvas.undoStack.onChange = () => {
-        setCanvasEmpty(drawingCanvas.isEmpty);
+        setCanvasEmpty(!drawingCanvas.hasBrushStroke);
       };
 
       const bridge = new MultiplayerWorldBridge(worldStage);
@@ -221,7 +221,7 @@ export function GameScreen(): React.JSX.Element {
           const ap = appRef.current;
           if (dc && br && ap) {
             dc.commitCurrentStroke();
-            if (!dc.isEmpty) {
+            if (dc.hasBrushStroke) {
               const dataUrl = exportPng(ap, dc.strokeContainerRef, dc.region) ?? '';
               br.submitDrawing(dataUrl);
               setHasSubmitted(true);
@@ -336,7 +336,7 @@ export function GameScreen(): React.JSX.Element {
 
     drawingCanvas.commitCurrentStroke();
 
-    if (drawingCanvas.isEmpty) return;
+    if (!drawingCanvas.hasBrushStroke) return;
 
     const imageDataUrl = exportPng(app, drawingCanvas.strokeContainerRef, drawingCanvas.region);
     const dataUrl = imageDataUrl ?? '';

@@ -140,7 +140,7 @@ export class DrawingCanvas {
 
     const committed = new Graphics();
     renderStroke(committed, pts, this.activePreset);
-    this._undoStack.push(committed);
+    this._undoStack.push(committed, this._activeTool);
 
     this.currentPoints = [];
   }
@@ -178,6 +178,10 @@ export class DrawingCanvas {
 
   get isEmpty(): boolean {
     return this._undoStack.isEmpty;
+  }
+
+  get hasBrushStroke(): boolean {
+    return this._undoStack.hasBrushStroke;
   }
 
   setThickness(preset: ThicknessPreset): void {
