@@ -19,13 +19,13 @@ export function DrawPhaseSubmitButton({
 
   return (
     <div
-      className="fixed z-20 animate-[fadeSlideUp_0.35s_ease-out_both]"
+      className="fixed z-20 flex justify-center animate-[fadeSlideUp_0.35s_ease-out_both]"
       style={
         canvasBounds
           ? {
-              left: '50%',
+              left: canvasBounds.x,
+              width: canvasBounds.width,
               top: canvasBounds.y + canvasBounds.height + 42,
-              transform: 'translateX(-50%)',
             }
           : {
               left: '50%',
