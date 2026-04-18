@@ -10,7 +10,7 @@ export function ObjectiveBanner({ canvasBounds }: ObjectiveBannerProps): React.J
       className="fixed z-20 animate-[fadeSlideDown_0.4s_ease-out_both]"
       style={{
         left: '50%',
-        top: canvasBounds ? (56 + canvasBounds.y) / 2 : 76,
+        top: canvasBounds ? (80 + canvasBounds.y) / 2 : 76,
         transform: 'translate(-50%, -50%)',
       }}
     >
@@ -46,7 +46,7 @@ export function ObjectiveBanner({ canvasBounds }: ObjectiveBannerProps): React.J
           </defs>
         </svg>
 
-        <span className="relative z-1">
+        <span className="relative">
           <StrokeShadowText
             className="t20-eb tracking-wide normal-case!"
             firstStrokeColor="#595B9D"
