@@ -138,16 +138,35 @@ export function CreateRoomScreen() {
       </button>
 
       {/* Title */}
-      <div className="mb-12">
-        <StrokeShadowText
-          className="t60-eb uppercase"
-          firstStrokeColor="#1a2555"
-          secondStrokeColor="#2c5890"
-          firstStrokeWidth={10}
-          secondStrokeWidth={10}
-        >
-          Create Room
-        </StrokeShadowText>
+      <div className="ui-create-room-title mb-12">
+        <div className="ui-create-room-title__main">
+          <span className="ui-create-room-title__orb" aria-hidden />
+          <StrokeShadowText
+            className="t60-eb sm:t48-eb"
+            fillClassName="ui-create-room-title__text"
+            fillStyle={{
+              backgroundImage: 'linear-gradient(180deg, #ffffff 0%, #eef7ff 35%, #bfe4ff 72%, #8fd2ff 100%)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+            }}
+            firstStrokeColor="#1a2555"
+            secondStrokeColor="#2c5890"
+            firstStrokeWidth={12}
+            secondStrokeWidth={8}
+            shadowOffsetY="0.32rem"
+            deepShadowColor="rgba(20, 38, 92, 0.92)"
+            deepShadowOffsetY="0.7rem"
+            deepShadowStrokeWidth={12}
+            deepShadowBlur="1px"
+          >
+            Create Room
+          </StrokeShadowText>
+        </div>
+        <div className="ui-create-room-title__underline" aria-hidden>
+          <span className="ui-create-room-title__underline-line" />
+          <span className="ui-create-room-title__underline-gem" />
+          <span className="ui-create-room-title__underline-line" />
+        </div>
       </div>
 
       {/* Content */}
