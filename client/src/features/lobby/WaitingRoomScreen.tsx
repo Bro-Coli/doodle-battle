@@ -425,7 +425,6 @@ function TeamColumn({
                 key={entry ? entry[0] : `${team}-empty-${i}`}
                 team={team}
                 playerName={entry?.[1].name}
-                isHost={entry ? entry[0] === hostSessionId : false}
                 isMe={entry ? entry[0] === mySessionId : false}
                 isReady={entry?.[1].ready}
               />
@@ -489,13 +488,11 @@ function ReadyButton({ room, isReady }: { room: Room; isReady: boolean }) {
 function TeamSlot({
   team,
   playerName,
-  isHost,
   isMe,
   isReady,
 }: {
   team: 'blue' | 'red';
   playerName?: string;
-  isHost: boolean;
   isMe: boolean;
   isReady?: boolean;
 }) {
@@ -518,24 +515,22 @@ function TeamSlot({
 
   return (
     <li className={slotClass}>
-      <div className="flex min-w-0 flex-1 items-center">
-        <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+      <div className="flex min-w-0 flex-1 items-center gap-2">
+        {isMe && (
+          <span
+            className="shrink-0 rounded-md px-1.5 py-0.5 font-black text-[0.72rem] tracking-[0.14em] uppercase"
+            style={{
+              background: 'linear-gradient(180deg, #FFE788 0%, #FFC93C 55%, #E08A00 100%)',
+              color: '#4A2A00',
+              boxShadow:
+                'inset 0 1px 0 rgba(255,255,255,0.65), 0 1px 0 rgba(80,44,0,0.5), 0 0 10px rgba(255,200,60,0.45)',
+            }}
+          >
+            You
+          </span>
+        )}
+        <div className="flex min-w-0 flex-1 flex-col">
           <span className="truncate t16-b text-white">{playerName}</span>
-          <div className="flex items-center gap-1.5">
-            {isHost && <span className="ui-host-badge">Host</span>}
-            {isMe && (
-              <span
-                className="rounded-md px-1.5 py-0.5 font-black text-[0.66rem] tracking-[0.14em] uppercase"
-                style={{
-                  background: 'rgba(255, 255, 255, 0.22)',
-                  color: 'white',
-                  boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.3)',
-                }}
-              >
-                You
-              </span>
-            )}
-          </div>
         </div>
       </div>
       {isReady && (
