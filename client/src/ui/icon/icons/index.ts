@@ -8,6 +8,7 @@ import { eraserIcon } from './EraserIcon';
 import { lightningIcon } from './LightningIcon';
 import { plusIcon } from './PlusIcon';
 import { searchIcon } from './SearchIcon';
+import { timerIcon } from './TimerIcon';
 import { trashIcon } from './TrashIcon';
 import { trophyIcon } from './TrophyIcon';
 import { undoIcon } from './UndoIcon';
@@ -23,6 +24,7 @@ export const iconDefinitions: Record<IconName, IconDefinition> = {
   lightning: lightningIcon,
   plus: plusIcon,
   search: searchIcon,
+  timer: timerIcon,
   trash: trashIcon,
   trophy: trophyIcon,
   undo: undoIcon,

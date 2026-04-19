@@ -280,11 +280,11 @@ export function WaitingRoomScreen(): React.JSX.Element {
                   <div className="ui-command-card__row">
                     <div className="flex items-center gap-2.5">
                       <Icon
-                        name="lightning"
-                        size={20}
-                        color="#b4ffea"
+                        name="timer"
+                        size={24}
+                        color="#9fe8ff"
                         decorative
-                        style={{ filter: 'drop-shadow(0 0 6px rgba(180,255,234,0.5))' }}
+                        style={{ filter: 'drop-shadow(0 0 6px rgba(159,232,255,0.55))' }}
                       />
                       <span className="t14-b font-nunito uppercase tracking-wider text-white/70">
                         Draw Time

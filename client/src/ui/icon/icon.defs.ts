@@ -10,6 +10,7 @@ export type IconName =
   | 'lightning'
   | 'plus'
   | 'search'
+  | 'timer'
   | 'trash'
   | 'trophy'
   | 'undo'
