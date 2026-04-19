@@ -290,7 +290,7 @@
 
   .ui-waiting-room-layout {
     min-width: 1380px;
-    grid-template-columns: 300px minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-columns: 340px minmax(0, 1fr) minmax(0, 1fr);
   }
 
   .ui-waiting-room-sidebar {
@@ -307,9 +307,10 @@
 
   .ui-waiting-room-arena__teams {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    grid-template-columns: minmax(0, 456px) auto minmax(0, 456px);
     align-items: center;
-    gap: 1rem;
+    justify-content: center;
+    gap: 1.25rem;
   }
 
   .ui-waiting-room-arena__vs {
