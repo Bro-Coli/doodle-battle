@@ -72,4 +72,407 @@
       0 1px 0 #3a72a8,
       0 2px 6px rgba(40, 80, 140, 0.25);
   }
+
+  /* ── Room info bar (matches invite code bar styling) ── */
+
+  .ui-room-info-bar {
+    display: inline-flex;
+    align-items: center;
+    height: 64px;
+    padding: 0 1.5rem;
+    border-radius: 16px;
+    background: linear-gradient(
+      180deg,
+      rgba(55, 40, 105, 0.6) 0%,
+      rgba(65, 48, 120, 0.6) 50%,
+      rgba(75, 55, 130, 0.6) 100%
+    );
+    border: none;
+    box-shadow:
+      inset 0 4px 8px rgba(10, 5, 40, 0.55),
+      inset 0 2px 3px rgba(10, 5, 40, 0.4),
+      inset 0 -1px 0 rgba(255, 255, 255, 0.06),
+      inset 2px 0 6px rgba(10, 5, 40, 0.2),
+      inset -2px 0 6px rgba(10, 5, 40, 0.2);
+  }
+
+  .ui-room-info-divider {
+    display: inline-block;
+    width: 2px;
+    height: 36px;
+    border-radius: 1px;
+    background: linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0) 0%,
+      rgba(255, 255, 255, 0.18) 50%,
+      rgba(255, 255, 255, 0) 100%
+    );
+  }
+
+  /* ── Lobby hero card (premium glass panel for invite + room info) ── */
+
+  .ui-lobby-hero-card {
+    position: relative;
+    width: 100%;
+    border-radius: 28px;
+    padding: 1.5rem 1.75rem;
+    border: 3px solid rgba(255, 255, 255, 0.32);
+    background: linear-gradient(
+      180deg,
+      rgba(40, 28, 95, 0.62) 0%,
+      rgba(50, 35, 110, 0.58) 50%,
+      rgba(58, 42, 125, 0.55) 100%
+    );
+    backdrop-filter: blur(18px);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.22),
+      inset 0 -2px 6px rgba(15, 10, 50, 0.35),
+      0 12px 30px rgba(20, 12, 60, 0.4),
+      0 0 32px rgba(120, 80, 220, 0.18);
+    overflow: hidden;
+  }
+
+  .ui-lobby-hero-card::before {
+    content: '';
+    position: absolute;
+    inset: 6px 6px auto 6px;
+    height: 38%;
+    border-radius: 22px 22px 60px 60px / 18px 18px 50px 50px;
+    background: linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.18) 0%,
+      rgba(255, 255, 255, 0.05) 60%,
+      rgba(255, 255, 255, 0) 100%
+    );
+    pointer-events: none;
+  }
+
+  .ui-lobby-hero-card__divider {
+    align-self: stretch;
+    width: 2px;
+    border-radius: 1px;
+    background: linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0) 0%,
+      rgba(255, 255, 255, 0.22) 50%,
+      rgba(255, 255, 255, 0) 100%
+    );
+  }
+
+  .ui-lobby-hero-card__section-label {
+    display: block;
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    font-weight: 700;
+    font-size: 1.05rem;
+    color: rgba(255, 255, 255, 0.5);
+  }
+
+  /* ── Live indicator (pulsing dot) ── */
+
+  .ui-live-dot {
+    position: relative;
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 999px;
+    background: #2dd66f;
+    box-shadow:
+      0 0 0 2px rgba(45, 214, 111, 0.25),
+      0 0 12px rgba(45, 214, 111, 0.65);
+  }
+
+  .ui-live-dot::after {
+    content: '';
+    position: absolute;
+    inset: -4px;
+    border-radius: 999px;
+    border: 2px solid rgba(45, 214, 111, 0.5);
+    animation: ui-live-pulse 1.6s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  }
+
+  @keyframes ui-live-pulse {
+    0% {
+      transform: scale(0.6);
+      opacity: 0.85;
+    }
+    100% {
+      transform: scale(2.2);
+      opacity: 0;
+    }
+  }
+
+  /* ── Status chip (context-aware message pill) ── */
+
+  .ui-status-chip {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.7rem;
+    padding: 0.65rem 1.4rem;
+    border-radius: 999px;
+    border: 2px solid rgba(255, 255, 255, 0.22);
+    background: linear-gradient(180deg, rgba(40, 30, 95, 0.55) 0%, rgba(55, 40, 115, 0.55) 100%);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.18),
+      inset 0 -2px 0 rgba(15, 10, 50, 0.25),
+      0 4px 14px rgba(20, 10, 60, 0.28);
+    backdrop-filter: blur(8px);
+    color: rgba(255, 255, 255, 0.92);
+    font-weight: 700;
+    letter-spacing: 0.04em;
+  }
+
+  .ui-status-chip--success {
+    border-color: rgba(72, 245, 198, 0.55);
+    background: linear-gradient(180deg, rgba(20, 130, 110, 0.55) 0%, rgba(15, 100, 95, 0.55) 100%);
+    box-shadow:
+      inset 0 1px 0 rgba(180, 255, 230, 0.32),
+      inset 0 -2px 0 rgba(8, 60, 70, 0.32),
+      0 4px 14px rgba(15, 130, 120, 0.32),
+      0 0 18px rgba(72, 245, 198, 0.32);
+  }
+
+  .ui-status-chip--warning {
+    border-color: rgba(255, 200, 90, 0.55);
+    background: linear-gradient(180deg, rgba(150, 100, 30, 0.5) 0%, rgba(120, 75, 20, 0.5) 100%);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 230, 160, 0.32),
+      inset 0 -2px 0 rgba(60, 35, 5, 0.3),
+      0 4px 14px rgba(140, 90, 25, 0.3);
+  }
+
+  .ui-status-chip--lg {
+    gap: 0.85rem;
+    padding: 0.85rem 1.7rem;
+    border-radius: 999px;
+  }
+
+  /* ── Battle page (page wrapper with team-colored ambient glows) ── */
+
+  .ui-battle-page {
+    position: relative;
+    isolation: isolate;
+  }
+
+  .ui-battle-page::before,
+  .ui-battle-page::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .ui-battle-page::before {
+    background: radial-gradient(
+      ellipse 60% 70% at 0% 50%,
+      rgba(40, 130, 240, 0.32) 0%,
+      rgba(40, 130, 240, 0) 60%
+    );
+  }
+
+  .ui-battle-page::after {
+    background: radial-gradient(
+      ellipse 60% 70% at 100% 50%,
+      rgba(255, 70, 110, 0.32) 0%,
+      rgba(255, 70, 110, 0) 60%
+    );
+  }
+
+  .ui-battle-page > * {
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ── Top bar invite chip (compact, for top-right corner) ── */
+
+  .ui-waiting-room-layout {
+    grid-template-columns: 300px minmax(0, 1fr) minmax(0, 1fr);
+  }
+
+  .ui-waiting-room-sidebar {
+    align-self: stretch;
+  }
+
+  .ui-waiting-room-arena {
+    grid-column: 2 / span 2;
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    gap: 1.1rem;
+  }
+
+  .ui-waiting-room-arena__teams {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .ui-waiting-room-arena__vs {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    align-self: center;
+  }
+
+  .ui-waiting-room-arena__action {
+    display: flex;
+    justify-content: center;
+    padding-top: 1.35rem;
+  }
+
+  .ui-invite-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    height: 52px;
+    padding: 0 0.45rem 0 1.15rem;
+    border-radius: 14px;
+    border: 2px solid rgba(255, 255, 255, 0.18);
+    background: linear-gradient(180deg, rgba(40, 28, 95, 0.6) 0%, rgba(55, 40, 115, 0.55) 100%);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.18),
+      inset 0 -2px 0 rgba(15, 10, 50, 0.32),
+      0 4px 14px rgba(20, 10, 60, 0.28);
+    backdrop-filter: blur(8px);
+  }
+
+  .ui-invite-chip__copy {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 38px;
+    padding: 0 0.95rem;
+    border-radius: 10px;
+    overflow: hidden;
+    border: 2px solid rgba(100, 160, 220, 0.55);
+    background: linear-gradient(180deg, #a8d8f0 0%, #6fb1e0 50%, #4888c0 100%);
+    box-shadow:
+      inset 0 0 0 1px rgba(200, 230, 255, 0.4),
+      inset 0 1px 0 rgba(255, 255, 255, 0.45),
+      inset 0 -2px 0 rgba(40, 80, 140, 0.28),
+      0 2px 0 #3a72a8;
+    cursor: pointer;
+    transition:
+      transform 0.1s ease,
+      filter 0.1s ease;
+  }
+
+  .ui-invite-chip__copy:hover {
+    transform: translateY(-1px);
+    filter: brightness(1.05);
+  }
+
+  .ui-invite-chip__copy:active {
+    transform: translateY(1px);
+  }
+
+  /* ── Compact center command card (replaces big hero card in 3-col layout) ── */
+
+  .ui-command-card {
+    position: relative;
+    border-radius: 24px;
+    padding: 1.25rem 1.25rem 1.5rem;
+    border: 3px solid rgba(255, 255, 255, 0.28);
+    background: linear-gradient(180deg, rgba(40, 28, 95, 0.62) 0%, rgba(55, 40, 115, 0.58) 100%);
+    backdrop-filter: blur(18px);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.22),
+      inset 0 -2px 6px rgba(15, 10, 50, 0.35),
+      0 12px 30px rgba(20, 12, 60, 0.4);
+    overflow: hidden;
+  }
+
+  .ui-command-card::before {
+    content: '';
+    position: absolute;
+    inset: 6px 6px auto 6px;
+    height: 38%;
+    border-radius: 18px 18px 60px 60px / 14px 14px 50px 50px;
+    background: linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.18) 0%,
+      rgba(255, 255, 255, 0.05) 60%,
+      rgba(255, 255, 255, 0) 100%
+    );
+    pointer-events: none;
+  }
+
+  .ui-command-card__row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    padding: 0.55rem 0;
+  }
+
+  .ui-command-card__row + .ui-command-card__row {
+    border-top: 1px dashed rgba(255, 255, 255, 0.12);
+  }
+
+  .ui-command-card__divider {
+    height: 1px;
+    width: 100%;
+    background: linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0) 0%,
+      rgba(255, 255, 255, 0.18) 18%,
+      rgba(255, 255, 255, 0.18) 82%,
+      rgba(255, 255, 255, 0) 100%
+    );
+  }
+
+  /* ── Host badge (small crown-like pill) ── */
+
+  .ui-host-badge {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.18rem 0.5rem;
+    border-radius: 999px;
+    background: linear-gradient(180deg, #ffe788 0%, #ffc93c 55%, #e08a00 100%);
+    color: #4a2a00;
+    font-weight: 900;
+    font-size: 0.7rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.65),
+      0 1px 0 rgba(80, 44, 0, 0.5),
+      0 0 8px rgba(255, 200, 60, 0.45);
+  }
+
+  @media (max-width: 1100px) {
+    .ui-waiting-room-layout {
+      grid-template-columns: 1fr;
+    }
+
+    .ui-waiting-room-arena {
+      grid-column: auto;
+    }
+  }
+
+  @media (max-width: 900px) {
+    .ui-waiting-room-arena__teams {
+      grid-template-columns: 1fr;
+    }
+
+    .ui-waiting-room-arena__vs {
+      order: -1;
+      margin-bottom: 0.25rem;
+    }
+
+    .ui-waiting-room-arena__action > * {
+      width: 100%;
+    }
+
+    .ui-waiting-room-arena__action {
+      padding-top: 1rem;
+    }
+  }
 }

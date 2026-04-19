@@ -145,7 +145,8 @@ export function CreateRoomScreen() {
             className="t60-eb sm:t48-eb"
             fillClassName="ui-create-room-title__text"
             fillStyle={{
-              backgroundImage: 'linear-gradient(180deg, #ffffff 0%, #eef7ff 35%, #bfe4ff 72%, #8fd2ff 100%)',
+              backgroundImage:
+                'linear-gradient(180deg, #ffffff 0%, #eef7ff 35%, #bfe4ff 72%, #8fd2ff 100%)',
               WebkitBackgroundClip: 'text',
               WebkitTextFillColor: 'transparent',
             }}
@@ -503,27 +504,27 @@ function ReadyButton({ room, isReady }: { room: Room; isReady: boolean }) {
     room.send('toggle_ready');
   }
 
+  const label = isReady ? 'Cancel Ready' : 'Ready Up';
+
   return (
     <button
       type="button"
       onClick={toggle}
       className={
         isReady
-          ? 'ui-pill-button ui-pill-button--mint h-[88px] w-[400px]'
-          : 'ui-pill-button ui-pill-button--gray h-[88px] w-[400px]'
+          ? 'ui-pill-button ui-pill-button--gray h-[88px] w-[400px]'
+          : 'ui-pill-button ui-pill-button--mint h-[88px] w-[400px]'
       }
     >
       <span className="relative z-1 inline-block">
         <span
           aria-hidden
           className="pointer-events-none absolute inset-0 text-center uppercase text-transparent t28-eb"
-          style={isReady ? START_STROKE : ({ WebkitTextStroke: '6px #6e6a95' } as CSSProperties)}
+          style={isReady ? ({ WebkitTextStroke: '6px #6e6a95' } as CSSProperties) : START_STROKE}
         >
-          {isReady ? 'Ready!' : 'Ready Up'}
+          {label}
         </span>
-        <span className="relative text-center uppercase text-white t28-eb">
-          {isReady ? 'Ready!' : 'Ready Up'}
-        </span>
+        <span className="relative text-center uppercase text-white t28-eb">{label}</span>
       </span>
     </button>
   );
