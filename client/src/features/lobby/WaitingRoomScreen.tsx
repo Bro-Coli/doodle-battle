@@ -541,9 +541,9 @@ function TeamSlot({
       {isReady && (
         <Icon
           name="check"
-          size={28}
-          color="white"
-          className="shrink-0 drop-shadow-[0_0_6px_rgba(255,255,255,0.55)]"
+          size={32}
+          color="#34d399"
+          className="shrink-0 drop-shadow-[0_0_6px_rgba(52,211,153,0.6)]"
           decorative
         />
       )}

@@ -654,8 +654,8 @@ function TeamSlot({
         <Icon
           name="check"
           size={32}
-          color="emerald-300"
-          className="shrink-0 text-emerald-300 drop-shadow-[0_0_6px_rgba(52,211,153,0.6)]"
+          color="#34d399"
+          className="shrink-0 drop-shadow-[0_0_6px_rgba(52,211,153,0.6)]"
           decorative
         />
       )}

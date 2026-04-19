@@ -4,7 +4,7 @@ export const checkIcon = defineIcon({
   name: 'check',
   viewBox: '0 -8 72 72',
   defaultProps: {
-    strokeWidth: 3,
+    strokeWidth: 2,
   },
   element: (
     <path
