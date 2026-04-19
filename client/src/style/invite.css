@@ -289,6 +289,7 @@
   /* ── Top bar invite chip (compact, for top-right corner) ── */
 
   .ui-waiting-room-layout {
+    min-width: 1380px;
     grid-template-columns: 300px minmax(0, 1fr) minmax(0, 1fr);
   }
 
@@ -445,34 +446,5 @@
       inset 0 1px 0 rgba(255, 255, 255, 0.65),
       0 1px 0 rgba(80, 44, 0, 0.5),
       0 0 8px rgba(255, 200, 60, 0.45);
-  }
-
-  @media (max-width: 1100px) {
-    .ui-waiting-room-layout {
-      grid-template-columns: 1fr;
-    }
-
-    .ui-waiting-room-arena {
-      grid-column: auto;
-    }
-  }
-
-  @media (max-width: 900px) {
-    .ui-waiting-room-arena__teams {
-      grid-template-columns: 1fr;
-    }
-
-    .ui-waiting-room-arena__vs {
-      order: -1;
-      margin-bottom: 0.25rem;
-    }
-
-    .ui-waiting-room-arena__action > * {
-      width: 100%;
-    }
-
-    .ui-waiting-room-arena__action {
-      padding-top: 1rem;
-    }
   }
 }
