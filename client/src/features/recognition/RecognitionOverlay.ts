@@ -86,7 +86,12 @@ export class RecognitionOverlay {
 
     const statsEl = document.createElement('div');
     statsEl.className = 'mb-4 text-[0.85em] text-neutral-700';
-    statsEl.textContent = `HP ${profile.maxHealth} \u00B7 Speed ${profile.speed} \u00B7 Agility ${profile.agility} \u00B7 Energy ${profile.energy}`;
+    const speeds = [
+      profile.landSpeed !== undefined ? `Land ${profile.landSpeed}` : null,
+      profile.waterSpeed !== undefined ? `Water ${profile.waterSpeed}` : null,
+      profile.airSpeed !== undefined ? `Air ${profile.airSpeed}` : null,
+    ].filter(Boolean).join(' \u00B7 ');
+    statsEl.textContent = `HP ${profile.maxHealth} \u00B7 Habitat ${profile.habitat} \u00B7 ${speeds} \u00B7 Agility ${profile.agility} \u00B7 Energy ${profile.energy}`;
 
     const hintEl = document.createElement('div');
     hintEl.className = 'text-xs text-neutral-400';

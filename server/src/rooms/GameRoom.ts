@@ -3,23 +3,49 @@ import { Schema, type, MapSchema } from '@colyseus/schema';
 import {
   dispatchBehavior,
   initEntityState,
+  initProfileForMap,
   WORLD_BOUNDS,
 } from '@crayon-world/shared/src/simulation/EntitySimulation.js';
 import { recognizeDrawingInternal } from '../recognition/recognizeDrawingInternal.js';
-import { fetchInteractionsInternal } from '../interaction/fetchInteractionsInternal.js';
 import type {
   EntityState,
-  SpreadingState,
 } from '@crayon-world/shared/src/simulation/EntitySimulation.js';
 import {
-  resolveInteraction,
   blendSteeringIntoAnimation,
   FIGHT_PROXIMITY_FRACTION,
-  FIGHT_COOLDOWN_MS,
-  BEFRIEND_STOP_FRACTION,
 } from '@crayon-world/shared/src/simulation/interactionBehaviors.js';
-import type { EntityProfile, InteractionMatrix, Archetype } from '@crayon-world/shared/src/types.js';
-import { DEFAULT_STYLE_BY_ARCHETYPE } from '@crayon-world/shared/src/types.js';
+
+/** Per-pair re-hit cooldown after a collision — long enough for the bounce
+ *  impulse to carry the entities apart and their steering to arc them back. */
+const COLLISION_REHIT_MS = 450;
+import type { EntityProfile, Archetype, MapType } from '@crayon-world/shared/src/types.js';
+import { DEFAULT_STYLE_BY_ARCHETYPE, canSurvive } from '@crayon-world/shared/src/types.js';
+
+const MAP_TYPES: MapType[] = ['land', 'water', 'air'];
+
+/** Draw the next map from a shuffled bag — reshuffles once empty, so each set of
+ * three rounds is guaranteed to contain one of each map. */
+function makeMapBag(): () => MapType {
+  let bag: MapType[] = [];
+  return (): MapType => {
+    if (bag.length === 0) {
+      bag = [...MAP_TYPES];
+      // Fisher–Yates in place
+      for (let i = bag.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [bag[i], bag[j]] = [bag[j], bag[i]];
+      }
+    }
+    return bag.pop()!;
+  };
+}
+
+/** HP lost per second when an entity cannot survive the current map. */
+const ENV_DAMAGE_DPS: Record<MapType, number> = {
+  land: 8,    // water-only creatures suffocating
+  water: 15,  // drowning
+  air: 25,    // falling — fast death
+};
 
 // ---------------------------------------------------------------------------
 // Schemas
@@ -58,6 +84,7 @@ export class GameState extends Schema {
   @type('number') maxRounds: number = 5;
   @type('number') drawingTime: number = 60;
   @type('string') gameStatus: string = 'active';
+  @type('string') currentMapType: string = 'land';
 }
 
 // ---------------------------------------------------------------------------
@@ -72,13 +99,9 @@ export class GameRoom extends Room<{ state: GameState }> {
   // Server-only simulation state — NOT in Schema
   _entityStates: Map<string, EntityState> = new Map();
   _entityProfiles: Map<string, EntityProfile> = new Map();
-  _interactionMatrix: InteractionMatrix | null = null;
   _fightCooldowns: Map<string, number> = new Map();
   _bounceCooldowns: Map<string, number> = new Map(); // ms remaining after wall bounce
-  _nameIdMap: Map<string, string> = new Map();
   _dyingEntities: Set<string> = new Set();
-  // Companion tracking — befriended entities that have reached each other (supports groups)
-  _companions: Map<string, Set<string>> = new Map();
   // Pending profiles buffered during draw phase — spawned simultaneously at simulate start
   _pendingProfiles: Map<string, { profile: EntityProfile; teamId: string; imageDataUrl: string }> = new Map();
   // Count of in-flight recognition calls — must reach 0 before phase can advance
@@ -87,6 +110,10 @@ export class GameRoom extends Room<{ state: GameState }> {
   _killCounts: Map<string, number> = new Map();
   // Entities drawn tracking: ownerSessionId -> count drawn this game
   _entitiesDrawn: Map<string, number> = new Map();
+  // Entities that can't survive the current map — drained each tick until dead.
+  _envDyingEntities: Set<string> = new Set();
+  // Per-game shuffled map bag — guarantees a balanced distribution of maps.
+  _nextMap: () => MapType = makeMapBag();
 
 
   onCreate(options: Record<string, unknown> = {}): void {
@@ -106,9 +133,7 @@ export class GameRoom extends Room<{ state: GameState }> {
     // Initialize server-side simulation state
     this._entityStates = new Map();
     this._entityProfiles = new Map();
-    this._interactionMatrix = null;
     this._fightCooldowns = new Map();
-    this._nameIdMap = new Map();
     this._dyingEntities = new Set();
     this._pendingProfiles = new Map();
     this._pendingRecognitions = 0;
@@ -128,10 +153,6 @@ export class GameRoom extends Room<{ state: GameState }> {
 
     this.onMessage('spawn_entity', (client: Client, msg: unknown) => {
       this._handleSpawnEntity(client, msg);
-    });
-
-    this.onMessage('interaction_matrix', (client: Client, msg: unknown) => {
-      this._handleInteractionMatrix(client, msg);
     });
 
     this.onMessage('remove_all_entities', () => {
@@ -224,12 +245,26 @@ export class GameRoom extends Room<{ state: GameState }> {
     // Only run entity simulation during the simulate phase
     if (this.state.currentPhase !== 'simulate') return;
 
+    // Early round end — if any team has been wiped out, stop the round.
+    {
+      let red = 0;
+      let blue = 0;
+      this.state.entities.forEach((e) => {
+        if (e.teamId === 'red') red++;
+        else if (e.teamId === 'blue') blue++;
+      });
+      if (red === 0 || blue === 0) {
+        this.state.phaseTimer = 0;
+        return;
+      }
+    }
+
     const dt = deltaMS / 1000;
     const world = WORLD_BOUNDS;
     const worldDiag = Math.sqrt(world.width * world.width + world.height * world.height);
     const fightProximity = worldDiag * FIGHT_PROXIMITY_FRACTION;
-    const consumeRadius = worldDiag * 0.05;
-    const spawnOrigins = new Map<string, { x: number; y: number }>();
+    const mapType = this.state.currentMapType as MapType;
+    const envDps = ENV_DAMAGE_DPS[mapType];
 
     // Decrement fight cooldowns
     for (const [key, remaining] of this._fightCooldowns) {
@@ -258,162 +293,86 @@ export class GameRoom extends Room<{ state: GameState }> {
       toRemove.push(entityId);
     }
 
-    // Build per-tick team lookup so interaction resolution can force hostility
-    // between opposing teams and peace within a team, regardless of matrix.
-    const teamLookup = new Map<string, string>();
-    for (const [id, schema] of this.state.entities) {
-      if (schema.teamId) teamLookup.set(id, schema.teamId);
+    // PHASE 1: Collision resolution — runs BEFORE per-entity movement so the
+    // reflection mutates velocity/heading in-place and dispatchBehavior this
+    // tick moves the entity in the reflected (backward) direction. Running it
+    // after the main loop caused a visible forward "shoot-through" frame
+    // because committed forward positions were sent to clients before the
+    // reflection took effect next tick.
+    {
+      const ids = Array.from(this._entityStates.keys());
+      const collisionRadiusSq = fightProximity * fightProximity;
+      for (let i = 0; i < ids.length; i++) {
+        const idA = ids[i];
+        if (this._dyingEntities.has(idA)) continue;
+        const schemaA = this.state.entities.get(idA);
+        if (!schemaA?.teamId) continue;
+        const stateA = this._entityStates.get(idA);
+        if (!stateA) continue;
+        for (let j = i + 1; j < ids.length; j++) {
+          const idB = ids[j];
+          if (this._dyingEntities.has(idB)) continue;
+          const schemaB = this.state.entities.get(idB);
+          if (!schemaB?.teamId || schemaB.teamId === schemaA.teamId) continue;
+          const stateB = this._entityStates.get(idB);
+          if (!stateB) continue;
+          const dx = stateB.x - stateA.x;
+          const dy = stateB.y - stateA.y;
+          if (dx * dx + dy * dy < collisionRadiusSq) {
+            this._resolveCollision(idA, idB, toRemove);
+          }
+        }
+      }
     }
 
+    // PHASE 2: per-entity dispatch + chase + wall bounce + commit.
     for (const [entityId, state] of this._entityStates) {
       // Skip dying entities — handled in toRemove above
       if (this._dyingEntities.has(entityId)) continue;
 
       let newState: EntityState;
       const isMovable = state.archetype === 'walking' || state.archetype === 'flying';
-
-      // Resolve interaction steering if matrix exists, entity is movable, and not bouncing
       const isBouncing = this._bounceCooldowns.has(entityId);
-      const companionRadius = worldDiag * BEFRIEND_STOP_FRACTION;
+      const selfSchema = this.state.entities.get(entityId);
+      const myTeam = selfSchema?.teamId;
 
-      if (isMovable && this._interactionMatrix && !isBouncing) {
-        const resolved = resolveInteraction(
-          entityId,
-          this._entityStates,
-          this._entityProfiles,
-          this._dyingEntities,
-          this._interactionMatrix,
-          this._nameIdMap,
-          Infinity,
-          teamLookup,
-        );
+      // Default: pure archetype behavior.
+      newState = dispatchBehavior(state, dt, world);
 
-        if (resolved) {
-          const targetState = this._entityStates.get(resolved.targetContainer);
-          if (targetState) {
-            // Handle befriend specially — companions should continue moving together
-            if (resolved.type === 'befriend') {
-              const selfName = this._entityProfiles.get(entityId)?.name ?? '?';
-              const targetName = this._entityProfiles.get(resolved.targetContainer)?.name ?? '?';
-              const inCompanionMode = resolved.distance <= companionRadius;
-
-              // Track as companions once close enough (bidirectional)
-              if (inCompanionMode) {
-                let myCompanions = this._companions.get(entityId);
-                if (!myCompanions) {
-                  myCompanions = new Set();
-                  this._companions.set(entityId, myCompanions);
-                }
-                myCompanions.add(resolved.targetContainer);
-
-                let theirCompanions = this._companions.get(resolved.targetContainer);
-                if (!theirCompanions) {
-                  theirCompanions = new Set();
-                  this._companions.set(resolved.targetContainer, theirCompanions);
-                }
-                theirCompanions.add(entityId);
-              }
-
-              if (inCompanionMode) {
-                // Leader-follower pattern: AI determines leader, fallback to lower entityId
-                // Construct the key for befriendLeaders lookup (always "smallerId-largerId")
-                const selfId = this._nameIdMap.get(selfName);
-                const targetId = this._nameIdMap.get(targetName);
-                let isLeader: boolean;
-
-                if (selfId && targetId && this._interactionMatrix?.befriendLeaders) {
-                  const key = selfId < targetId ? `${selfId}-${targetId}` : `${targetId}-${selfId}`;
-                  const leaderId = this._interactionMatrix.befriendLeaders[key];
-                  // If AI specified a leader, use it; otherwise fallback to ID comparison
-                  isLeader = leaderId ? leaderId === selfId : entityId < resolved.targetContainer;
-                } else {
-                  // No leader info available, fallback to entity ID comparison
-                  isLeader = entityId < resolved.targetContainer;
-                }
-
-                if (isLeader) {
-                  // Leader: pure archetype behavior
-                  newState = dispatchBehavior(state, dt, world);
-                } else {
-                  // Follower: stay within tether range of leader
-                  // Simple approach: if close enough, do archetype; if too far, move toward leader
-                  const archetypeState = dispatchBehavior(state, dt, world);
-
-                  // Check if archetype is pausing (near-zero velocity)
-                  const archetypeVx = 'vx' in archetypeState ? (archetypeState as { vx: number }).vx : 0;
-                  const archetypeVy = 'vy' in archetypeState ? (archetypeState as { vy: number }).vy : 0;
-                  const archetypeSpeed = Math.sqrt(archetypeVx * archetypeVx + archetypeVy * archetypeVy);
-                  const isPausing = archetypeSpeed < 1;
-
-                  // If archetype is pausing, respect that - follower pauses too
-                  if (isPausing) {
-                    newState = archetypeState;
-                  } else {
-                    // Distance to leader
-                    const dx = targetState.x - state.x;
-                    const dy = targetState.y - state.y;
-                    const distToLeader = Math.sqrt(dx * dx + dy * dy);
-
-                    // Tether range - follower should stay within this distance
-                    const tetherRange = companionRadius * 0.8; // ~47px
-                    const catchupRange = companionRadius * 1.2; // ~70px - start catching up here
-
-                    if (distToLeader <= tetherRange) {
-                      // Close enough - just do archetype behavior like the leader
-                      newState = archetypeState;
-                    } else {
-                      // Too far - move toward leader, blending with archetype
-                      const speed = 'speed' in state ? (state as { speed: number }).speed : 80;
-
-                      // Catchup strength increases as we get further away
-                      const excess = distToLeader - tetherRange;
-                      const maxExcess = catchupRange - tetherRange;
-                      const catchupStrength = Math.min(1, excess / maxExcess);
-
-                      // Move directly toward leader (not to a "behind" position)
-                      const catchupVx = (dx / distToLeader) * speed * catchupStrength;
-                      const catchupVy = (dy / distToLeader) * speed * catchupStrength;
-
-                      // Blend archetype with catchup - more archetype when closer
-                      const archetypeWeight = 1 - catchupStrength * 0.7;
-                      const finalVx = archetypeVx * archetypeWeight + catchupVx;
-                      const finalVy = archetypeVy * archetypeWeight + catchupVy;
-
-                      newState = {
-                        ...archetypeState,
-                        x: state.x + finalVx * dt,
-                        y: state.y + finalVy * dt,
-                        vx: finalVx,
-                        vy: finalVy,
-                      } as EntityState;
-                    }
-                  }
-                }
-              } else {
-                // Still approaching companion — run archetype behavior and blend in steering
-                const archetypeState = dispatchBehavior(state, dt, world);
-                newState = blendSteeringIntoAnimation(archetypeState, resolved, targetState, worldDiag, 0.8);
-              }
-            } else {
-              // Non-befriend interactions (chase, flee, fight)
-              // Run archetype behavior first to preserve animations (hopping, swooping, etc.)
-              const archetypeState = dispatchBehavior(state, dt, world);
-              // Then blend steering direction into the animated state
-              newState = blendSteeringIntoAnimation(archetypeState, resolved, targetState, worldDiag);
-
-              // Fight contact check
-              if ((resolved.type === 'fight' || resolved.type === 'chase') && resolved.distance < fightProximity) {
-                this._handleFightContact(entityId, resolved.targetContainer, toRemove);
-              }
-            }
-          } else {
-            newState = dispatchBehavior(state, dt, world);
+      // Cross-team chase/fight — walking and flying entities seek the nearest
+      // opposing-team entity and blend steering toward it. Teammates ignore
+      // each other. Non-movable archetypes (rooted, drifting, stationary) just
+      // play out their own animation and can be attacked but do not chase.
+      if (isMovable && myTeam && !isBouncing) {
+        let nearestId: string | null = null;
+        let nearestDistSq = Infinity;
+        let nearestState: EntityState | undefined;
+        for (const [otherId, otherState] of this._entityStates) {
+          if (otherId === entityId) continue;
+          if (this._dyingEntities.has(otherId)) continue;
+          const otherSchema = this.state.entities.get(otherId);
+          if (!otherSchema || otherSchema.teamId === myTeam) continue;
+          const dx = otherState.x - state.x;
+          const dy = otherState.y - state.y;
+          const d2 = dx * dx + dy * dy;
+          if (d2 < nearestDistSq) {
+            nearestDistSq = d2;
+            nearestId = otherId;
+            nearestState = otherState;
           }
-        } else {
-          newState = dispatchBehavior(state, dt, world);
         }
-      } else {
-        newState = dispatchBehavior(state, dt, world);
+
+        if (nearestId && nearestState) {
+          const distance = Math.sqrt(nearestDistSq);
+          newState = blendSteeringIntoAnimation(
+            newState,
+            { type: 'chase', targetContainer: nearestId, distance },
+            nearestState,
+            worldDiag,
+          );
+          // Collision resolution runs in a separate post-pass so it can mutate
+          // committed state without being overwritten by this tick's commit.
+        }
       }
 
       // Bounce off world borders — reverse velocity AND reflect heading so
@@ -445,84 +404,14 @@ export class GameRoom extends Room<{ state: GameState }> {
         this._bounceCooldowns.set(entityId, 500); // 500ms cooldown
       }
 
-      // Spreading consume pass — deal contact damage to nearby non-spreading
-      // entities; a kill this tick triggers a single copy spawn at the victim's
-      // position. Spreading entities never move and ignore the matrix, so this
-      // is the only way they propagate.
-      if (newState.archetype === 'spreading') {
-        for (const [victimId, victimState] of this._entityStates) {
-          if (victimId === entityId) continue;
-          if (victimState.archetype === 'spreading') continue;
-          if (this._dyingEntities.has(victimId)) continue;
-          const dx = victimState.x - newState.x;
-          const dy = victimState.y - newState.y;
-          if (dx * dx + dy * dy > consumeRadius * consumeRadius) continue;
-
-          const alreadyDying = this._dyingEntities.has(victimId);
-          this._handleFightContact(entityId, victimId, toRemove);
-          if (!alreadyDying && this._dyingEntities.has(victimId)) {
-            spawnOrigins.set(entityId, { x: victimState.x, y: victimState.y });
-            newState = { ...(newState as SpreadingState), pendingSpawn: true };
-            break;
-          }
-        }
-      }
-
-      // Handle spreading pendingSpawn
-      if (newState.archetype === 'spreading') {
-        const spreadState = newState as SpreadingState;
-        if (spreadState.pendingSpawn) {
-          // Clear the flag
-          newState = { ...spreadState, pendingSpawn: false };
-
-          const newEntityId = crypto.randomUUID();
-
-          // Spawn at the consumed victim's position when available; otherwise
-          // fall back to a random offset around the spreader.
-          const origin = spawnOrigins.get(entityId);
-          const offsetX = origin ? 0 : (Math.random() - 0.5) * 2 * spreadState.spawnRadius;
-          const offsetY = origin ? 0 : (Math.random() - 0.5) * 2 * spreadState.spawnRadius;
-          const baseX = origin?.x ?? spreadState.x;
-          const baseY = origin?.y ?? spreadState.y;
-          const spawnX = Math.max(halfSize, Math.min(world.width - halfSize, baseX + offsetX));
-          const spawnY = Math.max(halfSize, Math.min(world.height - halfSize, baseY + offsetY));
-
-          // Get original profile for copying
-          const originalProfile = this._entityProfiles.get(entityId);
-
-          const newEntityState = initEntityState(
-            originalProfile
-              ? originalProfile
-              : {
-                  archetype: 'spreading',
-                  movementStyle: 'creeping',
-                  speed: 3,
-                  agility: 5,
-                  energy: 5,
-                },
-            spawnX,
-            spawnY,
-          );
-          const newCopyState = { ...newEntityState as SpreadingState, isACopy: true };
-
-          const newSchema = new EntitySchema();
-          const originalSchema = this.state.entities.get(entityId);
-          newSchema.entityId = newEntityId;
-          newSchema.x = spawnX;
-          newSchema.y = spawnY;
-          newSchema.hp = originalProfile?.maxHealth ?? 1;
-          newSchema.maxHp = originalProfile?.maxHealth ?? 1;
-          newSchema.name = originalSchema?.name ?? '';
-          newSchema.archetype = 'spreading';
-          newSchema.teamId = originalSchema?.teamId ?? '';
-          newSchema.ownerSessionId = originalSchema?.ownerSessionId ?? '';
-          newSchema.parentEntityId = entityId;
-
-          this.state.entities.set(newEntityId, newSchema);
-          this._entityStates.set(newEntityId, newCopyState);
-
-          if (originalProfile) {
-            this._entityProfiles.set(newEntityId, { ...originalProfile });
+      // Environmental damage — entities that can't survive this map drain HP each tick.
+      if (this._envDyingEntities.has(entityId)) {
+        const schema = this.state.entities.get(entityId);
+        if (schema && schema.hp > 0) {
+          schema.hp = Math.max(0, schema.hp - envDps * dt);
+          if (schema.hp <= 0 && !this._dyingEntities.has(entityId)) {
+            this._dyingEntities.add(entityId);
+            toRemove.push(entityId);
           }
         }
       }
@@ -546,11 +435,7 @@ export class GameRoom extends Room<{ state: GameState }> {
       this._entityProfiles.delete(entityId);
       this.state.entities.delete(entityId);
       this._dyingEntities.delete(entityId);
-      // Clean companion relationships
-      this._companions.delete(entityId);
-      for (const [, compSet] of this._companions) {
-        compSet.delete(entityId);
-      }
+      this._envDyingEntities.delete(entityId);
     }
   }
 
@@ -571,6 +456,7 @@ export class GameRoom extends Room<{ state: GameState }> {
 
       // Spawn all pending profiles as entities simultaneously
       const entityTextures: Record<string, string> = {};
+      const mapType = this.state.currentMapType as MapType;
       for (const [sessionId, { profile, teamId, imageDataUrl }] of this._pendingProfiles) {
         const entityId = crypto.randomUUID();
 
@@ -585,10 +471,22 @@ export class GameRoom extends Room<{ state: GameState }> {
         }
         const y = 40 + Math.random() * (world.height - 80);
 
+        // Resolve effective behavior for this map. If the creature can't survive,
+        // spawn it anyway with a placeholder motion so it's visible as it dies.
+        const init = initProfileForMap(profile, mapType)
+          ?? {
+            archetype: 'stationary' as Archetype,
+            movementStyle: DEFAULT_STYLE_BY_ARCHETYPE['stationary'],
+            speed: 1,
+            agility: profile.agility,
+            energy: profile.energy,
+          };
+        const survives = canSurvive(profile, mapType);
+
         const schema = new EntitySchema();
         schema.entityId = entityId;
         schema.name = profile.name;
-        schema.archetype = profile.archetype;
+        schema.archetype = init.archetype;
         schema.teamId = teamId;
         schema.ownerSessionId = sessionId;
         schema.x = x;
@@ -596,11 +494,12 @@ export class GameRoom extends Room<{ state: GameState }> {
         schema.hp = profile.maxHealth;
         schema.maxHp = profile.maxHealth;
 
-        const entityState = initEntityState(profile, x, y);
+        const entityState = initEntityState(init, x, y);
 
         this.state.entities.set(entityId, schema);
         this._entityStates.set(entityId, entityState);
         this._entityProfiles.set(entityId, { ...profile });
+        if (!survives) this._envDyingEntities.add(entityId);
 
         // Track entities drawn per player
         this._entitiesDrawn.set(sessionId, (this._entitiesDrawn.get(sessionId) ?? 0) + 1);
@@ -618,13 +517,9 @@ export class GameRoom extends Room<{ state: GameState }> {
         this.broadcast('entity_textures', entityTextures);
       }
 
-      // Fetch interaction matrix before simulation begins
-      const allProfiles = Array.from(this._entityProfiles.values());
-      void this._fetchAndApplyInteractions(allProfiles);
-
       // Transition to simulate
       this.state.currentPhase = 'simulate';
-      this.state.phaseTimer = 30;
+      this.state.phaseTimer = 60;
     } else if (this.state.currentPhase === 'simulate') {
       this.state.currentPhase = 'results';
       this.state.phaseTimer = 4;
@@ -643,6 +538,12 @@ export class GameRoom extends Room<{ state: GameState }> {
         this._finishGame(winner);
         return;
       }
+
+      // Entities do not persist between rounds — clear before the new draw phase.
+      this._handleRemoveAllEntities();
+
+      // Pick a fresh map for the upcoming round so players see it during drawing.
+      this.state.currentMapType = this._nextMap();
 
       this.state.currentPhase = 'draw';
       this.state.phaseTimer = this.state.drawingTime;
@@ -667,7 +568,10 @@ export class GameRoom extends Room<{ state: GameState }> {
     const imageDataUrl = (typeof data?.imageDataUrl === 'string') ? data.imageDataUrl : '';
 
     try {
-      const profile = await recognizeDrawingInternal(imageDataUrl);
+      const profile = await recognizeDrawingInternal(
+        imageDataUrl,
+        this.state.currentMapType as MapType,
+      );
       this._pendingProfiles.set(client.sessionId, { profile, teamId: player.team, imageDataUrl });
     } finally {
       this._pendingRecognitions--;
@@ -688,42 +592,129 @@ export class GameRoom extends Room<{ state: GameState }> {
   }
 
   // ---------------------------------------------------------------------------
-  // Fight contact handler
+  // Collision resolution — physics-based impact between two opposing entities.
+  // Called from the chase loop when they come within the fight proximity.
   // ---------------------------------------------------------------------------
 
-  _handleFightContact(attackerId: string, targetId: string, toRemove: string[]): void {
-    const cooldownKey = `${attackerId}:${targetId}`;
+  _resolveCollision(idA: string, idB: string, toRemove: string[]): void {
+    // Canonical cooldown key so both sides of a pair share one re-hit timer.
+    const key = idA < idB ? `${idA}:${idB}` : `${idB}:${idA}`;
+    if (this._fightCooldowns.has(key)) return;
 
-    // Skip if on cooldown
-    if (this._fightCooldowns.has(cooldownKey)) return;
+    const schemaA = this.state.entities.get(idA);
+    const schemaB = this.state.entities.get(idB);
+    const stateA = this._entityStates.get(idA);
+    const stateB = this._entityStates.get(idB);
+    const profileA = this._entityProfiles.get(idA);
+    const profileB = this._entityProfiles.get(idB);
+    if (!schemaA || !schemaB || !stateA || !stateB) return;
 
-    const targetSchema = this.state.entities.get(targetId);
-    if (!targetSchema) return;
+    // Collision normal A -> B. If they're perfectly coincident fall back to
+    // +x so reflection still produces a sensible direction.
+    const dx = stateB.x - stateA.x;
+    const dy = stateB.y - stateA.y;
+    const rawDist = Math.sqrt(dx * dx + dy * dy);
+    const dist = rawDist || 1;
+    const nx = rawDist > 0 ? dx / dist : 1;
+    const ny = rawDist > 0 ? dy / dist : 0;
 
-    // Decrement HP. Attack damage scales with attacker speed (fast = more dangerous).
-    // Fallback to a flat 10 if the attacker profile is missing.
-    const attackerProfile = this._entityProfiles.get(attackerId);
-    const damage = attackerProfile
-      ? Math.max(5, Math.round(5 + attackerProfile.speed))
-      : 10;
-    targetSchema.hp = Math.max(0, targetSchema.hp - damage);
+    const vxA = 'vx' in stateA ? (stateA as { vx: number }).vx : 0;
+    const vyA = 'vy' in stateA ? (stateA as { vy: number }).vy : 0;
+    const vxB = 'vx' in stateB ? (stateB as { vx: number }).vx : 0;
+    const vyB = 'vy' in stateB ? (stateB as { vy: number }).vy : 0;
 
-    // Set cooldown
-    this._fightCooldowns.set(cooldownKey, FIGHT_COOLDOWN_MS);
+    // Closing speed along the collision normal. If it's <= 0, they're already
+    // grazing past each other and we don't reflect — only damage.
+    const approachSpeed = (vxA - vxB) * nx + (vyA - vyB) * ny;
+    const closing = Math.max(0, approachSpeed);
 
-    // Notify clients so they can play a lunge animation on the attacker.
-    this.broadcast('attack', { attackerId, targetId });
+    // Damage scales with closing speed (momentum-based). Both entities take it.
+    const BASE_DAMAGE = 5;
+    const VELOCITY_DAMAGE_K = 0.12;
+    const damage = Math.round(BASE_DAMAGE + Math.min(35, closing * VELOCITY_DAMAGE_K));
+    schemaA.hp = Math.max(0, schemaA.hp - damage);
+    schemaB.hp = Math.max(0, schemaB.hp - damage);
 
-    // If HP reaches 0, mark for removal
-    if (targetSchema.hp <= 0) {
-      this._dyingEntities.add(targetId);
-      toRemove.push(targetId);
+    // Velocity reflection along the collision normal. Strong fixed restitution
+    // so the bounce is always visually decisive — fast entities can't shoot
+    // through. Agility affects how quickly chase steering re-engages (see
+    // below), not the bounce magnitude itself.
+    const RESTITUTION = 0.9;
+    const canReflect = (s: EntityState): s is EntityState & { vx: number; vy: number; heading: number } =>
+      s.archetype === 'walking' || s.archetype === 'flying';
 
-      // Track kill for attacker's owner
-      const attackerSchema = this.state.entities.get(attackerId);
-      if (attackerSchema?.ownerSessionId) {
-        const ownerId = attackerSchema.ownerSessionId;
-        this._killCounts.set(ownerId, (this._killCounts.get(ownerId) ?? 0) + 1);
+    if (closing > 0 && canReflect(stateA)) {
+      const vAn = vxA * nx + vyA * ny;
+      const deltaA = -(1 + RESTITUTION) * Math.max(0, vAn);
+      const newVxA = vxA + deltaA * nx;
+      const newVyA = vyA + deltaA * ny;
+      (stateA as { vx: number }).vx = newVxA;
+      (stateA as { vy: number }).vy = newVyA;
+      (stateA as { heading: number }).heading = Math.atan2(newVyA, newVxA);
+    }
+    if (closing > 0 && canReflect(stateB)) {
+      const vBn = vxB * nx + vyB * ny;
+      const deltaB = -(1 + RESTITUTION) * Math.min(0, vBn);
+      const newVxB = vxB + deltaB * nx;
+      const newVyB = vyB + deltaB * ny;
+      (stateB as { vx: number }).vx = newVxB;
+      (stateB as { vy: number }).vy = newVyB;
+      (stateB as { heading: number }).heading = Math.atan2(newVyB, newVxB);
+    }
+
+    // Position separation — push them apart well beyond the collision surface
+    // so they clearly disengage and the reflected motion has room to carry
+    // them out of range before the next tick.
+    const worldDiag = Math.sqrt(WORLD_BOUNDS.width * WORLD_BOUNDS.width + WORLD_BOUNDS.height * WORLD_BOUNDS.height);
+    const desiredGap = worldDiag * FIGHT_PROXIMITY_FRACTION * 2.0;
+    const overlap = desiredGap - rawDist;
+    if (overlap > 0) {
+      const movA = canReflect(stateA);
+      const movB = canReflect(stateB);
+      const shareA = movA ? (movB ? 0.5 : 1) : 0;
+      const shareB = movB ? (movA ? 0.5 : 1) : 0;
+      if (shareA > 0) {
+        (stateA as { x: number }).x -= nx * overlap * shareA;
+        (stateA as { y: number }).y -= ny * overlap * shareA;
+      }
+      if (shareB > 0) {
+        (stateB as { x: number }).x += nx * overlap * shareB;
+        (stateB as { y: number }).y += ny * overlap * shareB;
+      }
+    }
+
+    // Chase suppression — agility decides how long the entity stays "dazed"
+    // before re-targeting. High agility recovers fast; low agility stays
+    // flung for longer. Gives the reflected motion time to play out visually.
+    const suppressMs = (agility: number): number =>
+      250 + (1 - Math.max(1, Math.min(10, agility)) / 10) * 550; // 250..800
+    if (canReflect(stateA)) this._bounceCooldowns.set(idA, suppressMs(profileA?.agility ?? 5));
+    if (canReflect(stateB)) this._bounceCooldowns.set(idB, suppressMs(profileB?.agility ?? 5));
+
+    // Re-hit cooldown for the pair.
+    this._fightCooldowns.set(key, COLLISION_REHIT_MS);
+
+    this.broadcast('attack', { attackerId: idA, targetId: idB });
+
+    // Kill tracking — in a mutual-kill, both owners get credit for the other.
+    if (schemaA.hp <= 0 && !this._dyingEntities.has(idA)) {
+      this._dyingEntities.add(idA);
+      toRemove.push(idA);
+      if (schemaB.ownerSessionId) {
+        this._killCounts.set(
+          schemaB.ownerSessionId,
+          (this._killCounts.get(schemaB.ownerSessionId) ?? 0) + 1,
+        );
+      }
+    }
+    if (schemaB.hp <= 0 && !this._dyingEntities.has(idB)) {
+      this._dyingEntities.add(idB);
+      toRemove.push(idB);
+      if (schemaA.ownerSessionId) {
+        this._killCounts.set(
+          schemaA.ownerSessionId,
+          (this._killCounts.get(schemaA.ownerSessionId) ?? 0) + 1,
+        );
       }
     }
   }
@@ -759,13 +750,18 @@ export class GameRoom extends Room<{ state: GameState }> {
       teamId: string;
     };
 
+    const habitat = (data.habitat as EntityProfile['habitat']) ?? 'land';
+
     // Build a profile using defaults for fields the client message omits.
     const profile: EntityProfile = {
       name,
       archetype,
       movementStyle: (data.movementStyle as EntityProfile['movementStyle'])
         ?? DEFAULT_STYLE_BY_ARCHETYPE[archetype],
-      speed,
+      habitat,
+      landSpeed: habitat === 'land' ? speed : undefined,
+      waterSpeed: habitat === 'water' ? speed : undefined,
+      airSpeed: habitat === 'air' ? speed : undefined,
       agility: typeof data.agility === 'number' ? data.agility : 5,
       energy: typeof data.energy === 'number' ? data.energy : 5,
       maxHealth: typeof data.maxHealth === 'number' ? data.maxHealth : 30,
@@ -783,68 +779,15 @@ export class GameRoom extends Room<{ state: GameState }> {
     schema.maxHp = profile.maxHealth;
 
     // Create EntityState for server-side simulation
-    const entityState = initEntityState(profile, x, y);
+    const entityState = initEntityState(
+      { archetype, movementStyle: profile.movementStyle, speed, agility: profile.agility, energy: profile.energy },
+      x,
+      y,
+    );
 
     this.state.entities.set(entityId, schema);
     this._entityStates.set(entityId, entityState);
     this._entityProfiles.set(entityId, profile);
-  }
-
-  _handleInteractionMatrix(_client: { sessionId: string }, msg: unknown): void {
-    this._interactionMatrix = msg as InteractionMatrix;
-
-    // Build nameIdMap from matrix entries so resolveInteraction can look up by name
-    if (this._interactionMatrix?.entries) {
-      this._buildNameIdMap();
-    }
-  }
-
-  async _fetchAndApplyInteractions(profiles: EntityProfile[]): Promise<void> {
-    try {
-      const matrix = await fetchInteractionsInternal(profiles);
-      this._interactionMatrix = matrix;
-
-      if (matrix.entries) {
-        this._buildNameIdMap();
-      }
-
-      // Log relationships for debugging
-      console.log('[interactions] Matrix loaded:');
-      for (const entry of matrix.entries) {
-        const name = this._getEntityNameById(entry.entityId);
-        const rels = Object.entries(entry.relationships)
-          .map(([otherId, type]) => `${this._getEntityNameById(otherId)}: ${type}`)
-          .join(', ');
-        console.log(`  ${name} → ${rels}`);
-      }
-      // Log befriend leaders
-      if (matrix.befriendLeaders && Object.keys(matrix.befriendLeaders).length > 0) {
-        console.log('[interactions] Befriend leaders:', matrix.befriendLeaders);
-      } else {
-        console.log('[interactions] No befriend leaders specified by AI');
-      }
-    } catch (err) {
-      console.error('[interactions] Failed to fetch interaction matrix:', err);
-      this._interactionMatrix = { entries: [] };
-    }
-  }
-
-  /** Look up entity name by the integer ID used in the interaction matrix. */
-  private _getEntityNameById(matrixId: string): string {
-    // Matrix uses integer IDs (0, 1, 2...) assigned by index during prompt building.
-    // Map back via _entityProfiles iteration order.
-    const profiles = Array.from(this._entityProfiles.values());
-    // Deduplicate by name (same as fetchInteractionsInternal)
-    const seen = new Set<string>();
-    const unique: EntityProfile[] = [];
-    for (const p of profiles) {
-      if (!seen.has(p.name)) {
-        seen.add(p.name);
-        unique.push(p);
-      }
-    }
-    const idx = parseInt(matrixId, 10);
-    return unique[idx]?.name ?? `entity#${matrixId}`;
   }
 
   _handleRemoveAllEntities(): void {
@@ -853,8 +796,7 @@ export class GameRoom extends Room<{ state: GameState }> {
     this._fightCooldowns.clear();
     this._bounceCooldowns.clear();
     this._dyingEntities.clear();
-    this._nameIdMap.clear();
-    this._interactionMatrix = null;
+    this._envDyingEntities.clear();
     this.state.entities.clear();
   }
 
@@ -922,6 +864,11 @@ export class GameRoom extends Room<{ state: GameState }> {
       player.hasSubmittedDrawing = false;
     });
 
+    // Fresh shuffled bag per game so a rematch doesn't inherit leftover ordering.
+    this._nextMap = makeMapBag();
+    // Pick the first round's map so players see it during drawing.
+    this.state.currentMapType = this._nextMap();
+
     // Start the draw phase
     this.state.currentPhase = 'draw';
     this.state.phaseTimer = this.state.drawingTime;
@@ -947,25 +894,6 @@ export class GameRoom extends Room<{ state: GameState }> {
       else if (player.team === 'blue') blue++;
     });
     return blue < red ? 'blue' : 'red';
-  }
-
-  /**
-   * Build nameIdMap from current entity profiles.
-   * Maps entity name -> sequential integer ID string for use in resolveInteraction.
-   * Uses same logic as the client WorldStage version.
-   */
-  _buildNameIdMap(): void {
-    this._nameIdMap.clear();
-    let id = 0;
-    const seen = new Set<string>();
-
-    for (const profile of this._entityProfiles.values()) {
-      if (!seen.has(profile.name)) {
-        seen.add(profile.name);
-        this._nameIdMap.set(profile.name, String(id++));
-      }
-    }
-    console.log('[interactions] nameIdMap:', Object.fromEntries(this._nameIdMap));
   }
 
   // ---------------------------------------------------------------------------

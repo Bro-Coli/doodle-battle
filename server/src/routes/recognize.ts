@@ -44,7 +44,7 @@ router.post('/', async (req, res) => {
       messages: [
         {
           role: 'user',
-          content: buildUserContent(base64) as Parameters<
+          content: buildUserContent(base64, 'land') as Parameters<
             typeof client.messages.create
           >[0]['messages'][0]['content'],
         },

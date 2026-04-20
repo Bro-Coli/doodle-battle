@@ -24,8 +24,8 @@ export class DrawingCanvas {
     height: number;
   } {
     const availableWidth = Math.max(screenWidth - leftReserved - 48, 360);
-    const width = Math.max(Math.min(availableWidth * 0.8, 860), 680);
-    const height = Math.max(Math.min(screenHeight * 0.7, 520), 400);
+    const width = Math.max(Math.min(availableWidth * 0.72, 760), 600);
+    const height = Math.max(Math.min(screenHeight * 0.6, 460), 360);
     return { width, height };
   }
 

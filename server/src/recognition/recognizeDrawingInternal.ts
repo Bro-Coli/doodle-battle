@@ -1,4 +1,4 @@
-import type { EntityProfile } from '@crayon-world/shared';
+import type { EntityProfile, MapType } from '@crayon-world/shared';
 import { MOCK_ENTITIES } from '../mock-entities.js';
 import { isMockMode } from '../routes/recognize.js';
 import { getAnthropicClient } from './anthropicClient.js';
@@ -8,9 +8,12 @@ import { SYSTEM_PROMPT, buildUserContent } from './buildPrompt.js';
 /**
  * Server-internal recognition function callable from GameRoom.
  * No caching — each round produces a fresh recognition.
- * Falls back to "Mystery Creature" (walking archetype, speed 3) on any error.
+ * Falls back to "Mystery Creature" (walking archetype) on any error.
  */
-export async function recognizeDrawingInternal(imageDataUrl: string): Promise<EntityProfile> {
+export async function recognizeDrawingInternal(
+  imageDataUrl: string,
+  mapType: MapType,
+): Promise<EntityProfile> {
   // Mock mode: return random mock entity
   if (isMockMode()) {
     return MOCK_ENTITIES[Math.floor(Math.random() * MOCK_ENTITIES.length)];
@@ -28,7 +31,7 @@ export async function recognizeDrawingInternal(imageDataUrl: string): Promise<En
       messages: [
         {
           role: 'user',
-          content: buildUserContent(base64) as Parameters<
+          content: buildUserContent(base64, mapType) as Parameters<
             typeof client.messages.create
           >[0]['messages'][0]['content'],
         },
@@ -55,12 +58,15 @@ export async function recognizeDrawingInternal(imageDataUrl: string): Promise<En
     // Fall through to Mystery Creature fallback
   }
 
-  // Mystery Creature fallback — never penalizes a player
+  // Mystery Creature fallback — gets a speed on whichever map we're on so it can still participate.
   return {
     name: 'Mystery Creature',
     archetype: 'walking',
     movementStyle: 'prowling',
-    speed: 3,
+    habitat: mapType,
+    landSpeed: mapType === 'land' ? 3 : undefined,
+    waterSpeed: mapType === 'water' ? 3 : undefined,
+    airSpeed: mapType === 'air' ? 3 : undefined,
     agility: 5,
     energy: 5,
     maxHealth: 30,

@@ -34,6 +34,7 @@ type GameSnapshot = {
   entityCounts: { red: number; blue: number };
   currentRound: number;
   maxRounds: number;
+  currentMapType: 'land' | 'water' | 'air';
 };
 
 type PlayerStat = {
@@ -59,6 +60,7 @@ export function GameScreen(): React.JSX.Element {
     entityCounts: { red: 0, blue: 0 },
     currentRound: 0,
     maxRounds: 5,
+    currentMapType: 'land',
   });
   const [hasSubmitted, setHasSubmitted] = useState(false);
   const [capturedImageUrl, setCapturedImageUrl] = useState<string | null>(null);
@@ -70,6 +72,9 @@ export function GameScreen(): React.JSX.Element {
     width: number;
     height: number;
   } | null>(null);
+  // Delay the results overlay so players can see the final world state before
+  // the panel covers it.
+  const [resultsVisible, setResultsVisible] = useState(false);
 
   const appRef = useRef<Application<Renderer> | null>(null);
   const drawingCanvasRef = useRef<DrawingCanvas | null>(null);
@@ -176,6 +181,7 @@ export function GameScreen(): React.JSX.Element {
         phaseTimer?: number;
         currentRound?: number;
         maxRounds?: number;
+        currentMapType?: string;
         players?: Map<string, { name: string; team: string; hasSubmittedDrawing: boolean }>;
         entities?: Map<string, { teamId: string }>;
       };
@@ -210,6 +216,7 @@ export function GameScreen(): React.JSX.Element {
       const phaseTimer = state.phaseTimer ?? 0;
       const currentRound = state.currentRound ?? 0;
       const maxRounds = state.maxRounds ?? 5;
+      const currentMapType = (state.currentMapType ?? 'land') as 'land' | 'water' | 'air';
 
       const prevPhase = prevPhaseRef.current;
       if (prevPhase !== currentPhase) {
@@ -258,7 +265,7 @@ export function GameScreen(): React.JSX.Element {
         }
       }
 
-      setSnapshot({ currentPhase, phaseTimer, players, entityCounts, currentRound, maxRounds });
+      setSnapshot({ currentPhase, phaseTimer, players, entityCounts, currentRound, maxRounds, currentMapType });
     }
 
     takeSnapshot();
@@ -288,6 +295,17 @@ export function GameScreen(): React.JSX.Element {
       handleSubmit();
     }
   }, [snapshot.phaseTimer, snapshot.currentPhase]);
+
+  // Show ResultsOverlay ~1s after the phase flips to 'results' so players
+  // get a moment to see which entities survived before the panel appears.
+  useEffect(() => {
+    if (snapshot.currentPhase !== 'results') {
+      setResultsVisible(false);
+      return;
+    }
+    const timer = window.setTimeout(() => setResultsVisible(true), 1000);
+    return () => window.clearTimeout(timer);
+  }, [snapshot.currentPhase]);
 
   const handleToolChange = useCallback((tool: DrawTool) => {
     drawingCanvasRef.current?.setTool(tool);
@@ -367,7 +385,7 @@ export function GameScreen(): React.JSX.Element {
     );
   }
 
-  const { currentPhase, phaseTimer, players, entityCounts, currentRound, maxRounds } = snapshot;
+  const { currentPhase, phaseTimer, players, entityCounts, currentRound, maxRounds, currentMapType } = snapshot;
   const myTeam = myTeamRef.current;
 
   return (
@@ -396,7 +414,7 @@ export function GameScreen(): React.JSX.Element {
             onSubmit={handleSubmit}
             disabled={canvasEmpty}
           />
-          <ObjectiveBanner canvasBounds={canvasBounds} />
+          <ObjectiveBanner canvasBounds={canvasBounds} mapType={currentMapType} />
           <DrawToolbar
             activeTool={activeTool}
             canUndo={!canvasEmpty}
@@ -418,7 +436,7 @@ export function GameScreen(): React.JSX.Element {
         <SimulationOverlay phaseTimer={phaseTimer} entityCounts={entityCounts} />
       )}
 
-      {currentPhase === 'results' && (
+      {currentPhase === 'results' && resultsVisible && (
         <ResultsOverlay entityCounts={entityCounts} isFinalRound={currentRound + 1 >= maxRounds} />
       )}
 

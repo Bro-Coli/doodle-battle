@@ -1,8 +1,8 @@
-import type { Archetype, EntityProfile, MovementStyle } from '../types';
+import type { Archetype, EntityProfile, MapType, MovementStyle } from '../types';
+import { activeSpeedForMap } from '../types';
 import { updateWalking } from './behaviors/walkingBehavior';
 import { updateFlying } from './behaviors/flyingBehavior';
 import { updateRooted } from './behaviors/rootedBehavior';
-import { updateSpreading } from './behaviors/spreadingBehavior';
 import { updateDrifting } from './behaviors/driftingBehavior';
 import { updateStationary } from './behaviors/stationaryBehavior';
 
@@ -16,7 +16,7 @@ export interface WorldBounds {
 }
 
 /** Canonical world bounds shared by server simulation and client rendering. */
-export const WORLD_BOUNDS: WorldBounds = { width: 1280, height: 720 };
+export const WORLD_BOUNDS: WorldBounds = { width: 900, height: 900 };
 
 // ---------------------------------------------------------------------------
 // Shared motion modulators carried by every movable state.
@@ -81,17 +81,6 @@ export interface RootedState extends MotionModulators {
   swayPhase: number;
 }
 
-export interface SpreadingState extends MotionModulators {
-  archetype: 'spreading';
-  x: number;
-  y: number;
-  spawnTimer: number;
-  spawnInterval: number;
-  spawnRadius: number;
-  isACopy: boolean;
-  pendingSpawn: boolean;
-}
-
 export interface DriftingState extends MotionModulators {
   archetype: 'drifting';
   x: number;
@@ -115,7 +104,6 @@ export type EntityState =
   | WalkingState
   | FlyingState
   | RootedState
-  | SpreadingState
   | DriftingState
   | StationaryState;
 
@@ -157,8 +145,9 @@ export const wrapPosition = clampPosition;
 
 /**
  * Extract the motion-shaping fields used by initEntityState.
- * Accepts a full EntityProfile or any object with the required fields, so the
- * factory stays callable from places that construct a minimal profile shape.
+ * The `archetype` is the *effective* archetype for the current map — callers
+ * pick walking/drifting/flying when the creature is off its home habitat, and
+ * pass `speed` as the environment-specific speed (1-10).
  */
 export interface InitProfile {
   archetype: Archetype;
@@ -251,22 +240,6 @@ export function initEntityState(
       };
     }
 
-    case 'spreading': {
-      // Energy → faster spread; fewer copies otherwise.
-      const baseInterval = 5000 - energy * 200; // 3000..4800ms
-      return {
-        ...mods,
-        archetype: 'spreading',
-        x: spawnX,
-        y: spawnY,
-        spawnTimer: 0,
-        spawnInterval: baseInterval + Math.random() * 1000,
-        spawnRadius: 40 + Math.random() * 40,
-        isACopy: false,
-        pendingSpawn: false,
-      };
-    }
-
     case 'drifting': {
       const vx = mapSpeed(profileSpeed, 8, 40);
       // Tumbling adds rotation; bobbing has none.
@@ -295,6 +268,53 @@ export function initEntityState(
       };
     }
   }
+}
+
+// ---------------------------------------------------------------------------
+// Environment resolution — decide what archetype + speed an entity uses on the
+// current map. Returns null if the creature can't survive this map.
+// ---------------------------------------------------------------------------
+
+/** Default movement style for an archetype — used when we override a
+ *  creature's archetype (e.g., grounding a flier on land). */
+const DEFAULT_STYLE: Record<Archetype, MovementStyle> = {
+  walking: 'prowling',
+  flying: 'flapping',
+  drifting: 'bobbing',
+  rooted: 'swaying',
+  stationary: 'still',
+};
+
+/**
+ * Pick the effective archetype for a creature on the given map.
+ * - Fliers on land maps are GROUNDED → walking.
+ * - Everything else keeps its own archetype: a whale swims via walking, a
+ *   jellyfish drifts, a kelp plant stays rooted. The creature's motion style
+ *   is about HOW it moves, not where.
+ */
+export function effectiveArchetypeForMap(profile: EntityProfile, map: MapType): Archetype {
+  if (profile.archetype === 'flying' && map === 'land') return 'walking';
+  return profile.archetype;
+}
+
+/**
+ * Build the InitProfile to spawn this entity on the given map.
+ * Returns null if the creature cannot survive on this map.
+ */
+export function initProfileForMap(profile: EntityProfile, map: MapType): InitProfile | null {
+  const speed = activeSpeedForMap(profile, map);
+  if (speed === undefined) return null;
+
+  const archetype = effectiveArchetypeForMap(profile, map);
+  const movementStyle = archetype === profile.archetype ? profile.movementStyle : DEFAULT_STYLE[archetype];
+
+  return {
+    archetype,
+    movementStyle,
+    speed,
+    agility: profile.agility,
+    energy: profile.energy,
+  };
 }
 
 // ---------------------------------------------------------------------------
@@ -338,8 +358,6 @@ export function dispatchBehavior(state: EntityState, dt: number, world: WorldBou
       return updateFlying(state, dt, world);
     case 'rooted':
       return updateRooted(state, dt, world);
-    case 'spreading':
-      return updateSpreading(state, dt, world);
     case 'drifting':
       return updateDrifting(state, dt, world);
     case 'stationary':

@@ -1,7 +1,7 @@
 import type { Room } from '@colyseus/sdk';
 import { Assets, Texture } from 'pixi.js';
 import type { WorldStage } from './WorldStage';
-import type { Archetype, EntityProfile } from '@crayon-world/shared/src/types';
+import type { Archetype, EntityProfile, MapType } from '@crayon-world/shared/src/types';
 import { DEFAULT_STYLE_BY_ARCHETYPE } from '@crayon-world/shared/src/types';
 
 /**
@@ -106,7 +106,15 @@ export class MultiplayerWorldBridge {
     });
 
     const callback = (state: unknown): void => {
-      const typedState = state as { entities?: Map<string, EntitySchemaLike> };
+      const typedState = state as {
+        entities?: Map<string, EntitySchemaLike>;
+        currentMapType?: string;
+      };
+
+      // Push map type to WorldStage so the play-area tint stays in sync.
+      if (typedState?.currentMapType) {
+        this._worldStage.setMapType(typedState.currentMapType as MapType);
+      }
 
       // Guard: entities map may not be populated until first server patch
       if (!typedState?.entities) return;
@@ -133,7 +141,7 @@ export class MultiplayerWorldBridge {
             name: schema.name,
             archetype: schema.archetype as Archetype,
             movementStyle: DEFAULT_STYLE_BY_ARCHETYPE[schema.archetype as Archetype],
-            speed: 0,
+            habitat: 'land',
             agility: 5,
             energy: 5,
             maxHealth: schema.maxHp ?? 1,

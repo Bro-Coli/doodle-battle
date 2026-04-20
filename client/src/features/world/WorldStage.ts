@@ -1,8 +1,8 @@
 import { Application, Container, Graphics, Ticker, Texture } from 'pixi.js';
-import { EntityProfile, InteractionMatrix } from '@crayon-world/shared/src/types';
+import { EntityProfile, InteractionMatrix, MapType } from '@crayon-world/shared/src/types';
 import { captureEntityTexture } from './captureEntityTexture';
 import { buildEntityContainer, buildEntitySprite, updateHealthBar } from './EntitySprite';
-import { EntityState, SpreadingState, initEntityState, dispatchBehavior, WORLD_BOUNDS } from '@crayon-world/shared/src/simulation/EntitySimulation';
+import { EntityState, initEntityState, dispatchBehavior, WORLD_BOUNDS } from '@crayon-world/shared/src/simulation/EntitySimulation';
 import { fetchInteractions } from './fetchInteractions';
 import { RoundOverlay, RoundOutcome } from './RoundOverlay';
 import { resolveInteraction, blendSteeringIntoAnimation, DETECTION_RANGE_FRACTION, FIGHT_PROXIMITY_FRACTION, FIGHT_COOLDOWN_MS, BEFRIEND_STOP_FRACTION, ResolvedInteraction } from '@crayon-world/shared/src/simulation/interactionBehaviors';
@@ -31,6 +31,8 @@ export class WorldStage {
   private readonly _worldRoot: Container;
   private readonly _app: Application;
   private _inWorld = false;
+  private _playArea!: Graphics;
+  private _mapType: MapType = 'land';
 
   // Round state machine
   private _roundPhase: RoundPhase = 'idle';
@@ -92,12 +94,11 @@ export class WorldStage {
     app.stage.addChild(this._drawingRoot);
     app.stage.addChild(this._worldRoot);
 
-    // White play-area fill — everything outside WORLD_BOUNDS stays on the blue
-    // canvas background, making the gutters visually distinct from the play area.
-    const playArea = new Graphics();
-    playArea.rect(0, 0, WORLD_BOUNDS.width, WORLD_BOUNDS.height).fill({ color: 0xffffff });
-    playArea.eventMode = 'none';
-    this._worldRoot.addChild(playArea);
+    // Map-tinted play-area fill — color swaps with map type via setMapType().
+    this._playArea = new Graphics();
+    this._playArea.eventMode = 'none';
+    this._worldRoot.addChild(this._playArea);
+    this._redrawPlayArea();
 
     // Start in draw mode — world is hidden
     this._worldRoot.visible = false;
@@ -212,6 +213,25 @@ export class WorldStage {
     this._mySessionId = id;
   }
 
+  /** Update the current map type — retints the play area background. */
+  setMapType(map: MapType): void {
+    if (this._mapType === map) return;
+    this._mapType = map;
+    this._redrawPlayArea();
+  }
+
+  private _redrawPlayArea(): void {
+    const colors: Record<MapType, number> = {
+      land: 0x7cc36c,   // green
+      water: 0x4ba3d9,  // blue
+      air: 0xffffff,    // white/sky
+    };
+    this._playArea.clear();
+    this._playArea
+      .rect(0, 0, WORLD_BOUNDS.width, WORLD_BOUNDS.height)
+      .fill({ color: colors[this._mapType] });
+  }
+
   /** Toggle between draw mode and world mode. */
   toggle(): void {
     this._inWorld = !this._inWorld;
@@ -242,8 +262,23 @@ export class WorldStage {
     this._worldRoot.addChild(entity);
     this._worldRoot.addChild(label);
 
-    // Initialize simulation state for this entity
-    const state = initEntityState(profile, entity.x, entity.y);
+    // Initialize simulation state for this entity. Single-player path uses
+    // the creature's home-habitat speed as its effective speed.
+    const homeSpeed =
+      profile.habitat === 'land' ? profile.landSpeed
+      : profile.habitat === 'water' ? profile.waterSpeed
+      : profile.airSpeed;
+    const state = initEntityState(
+      {
+        archetype: profile.archetype,
+        movementStyle: profile.movementStyle,
+        speed: homeSpeed ?? 5,
+        agility: profile.agility,
+        energy: profile.energy,
+      },
+      entity.x,
+      entity.y,
+    );
     this._entityStates.set(entity, state);
     this._entityTextures.set(entity, texture);
     this._entityProfiles.set(entity, profile);
@@ -516,62 +551,11 @@ export class WorldStage {
         label.y = newState.y - spriteH / 2 - 6;
       }
 
-      // Handle spreading copy spawn signal
-      if (newState.archetype === 'spreading' && newState.pendingSpawn && !newState.isACopy) {
-        this._spawnCopy(container, newState);
-        newState.pendingSpawn = false; // reset after handling
-      }
-
       this._entityStates.set(container, newState);
     }
 
     this._applyLunges(ticker.deltaMS);
   };
-
-  /**
-   * Spawn a copy of a spreading entity near its current position.
-   * Copies have isACopy = true so they never spawn further copies.
-   */
-  private _spawnCopy(parentContainer: Container, parentState: SpreadingState): void {
-    const texture = this._entityTextures.get(parentContainer);
-    const profile = this._entityProfiles.get(parentContainer);
-    if (!texture || !profile) return;
-
-    // Spawn near parent within spawnRadius
-    const angle = Math.random() * Math.PI * 2;
-    const dist = Math.random() * parentState.spawnRadius;
-    const copyX = parentState.x + Math.cos(angle) * dist;
-    const copyY = parentState.y + Math.sin(angle) * dist;
-
-    // Build a copy using existing buildEntityContainer
-    const {
-      entity: copyContainer,
-      label: copyLabel,
-      spriteHeight: copySpriteH,
-      healthBar: copyHealthBar,
-    } = buildEntityContainer(texture, profile, this._app);
-    copyContainer.x = copyX;
-    copyContainer.y = copyY;
-    copyLabel.x = copyX;
-    copyLabel.y = copyY - copySpriteH / 2 - 6;
-
-    // Initialize state as a copy (isACopy = true, so it never spawns further)
-    const copyState = initEntityState(profile, copyX, copyY);
-    if (copyState.archetype === 'spreading') {
-      (copyState as SpreadingState).isACopy = true;
-    }
-
-    this._worldRoot.addChild(copyContainer);
-    this._worldRoot.addChild(copyLabel);
-    this._entityStates.set(copyContainer, copyState);
-    this._entityTextures.set(copyContainer, texture);
-    this._entityProfiles.set(copyContainer, profile);
-    this._entityLabels.set(copyContainer, copyLabel);
-    this._entitySpriteHeights.set(copyContainer, copySpriteH);
-    this._entityHp.set(copyContainer, 1);
-    this._entityMaxHp.set(copyContainer, 1);
-    this._entityHealthBars.set(copyContainer, copyHealthBar);
-  }
 
   // ─── Interaction helpers ──────────────────────────────────────────────────
 
@@ -669,6 +653,13 @@ export class WorldStage {
       lunge.elapsed += deltaMS;
       const t = lunge.elapsed / lunge.duration;
       if (t >= 1) {
+        this._lungeAnimations.delete(container);
+        continue;
+      }
+      // Skip dying containers: _interpolateMultiplayer doesn't reset their
+      // base position each frame, so `+=` here would accumulate instead of
+      // producing a pulse — launching the corpse across the screen.
+      if (this._dyingEntities.has(container)) {
         this._lungeAnimations.delete(container);
         continue;
       }

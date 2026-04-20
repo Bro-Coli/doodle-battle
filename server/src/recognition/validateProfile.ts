@@ -1,4 +1,4 @@
-import type { Archetype, EntityProfile, MovementStyle } from '@crayon-world/shared';
+import type { Archetype, EntityProfile, Habitat, MovementStyle } from '@crayon-world/shared';
 import {
   STYLES_BY_ARCHETYPE,
   DEFAULT_STYLE_BY_ARCHETYPE,
@@ -8,10 +8,11 @@ const VALID_ARCHETYPES: Archetype[] = [
   'walking',
   'flying',
   'rooted',
-  'spreading',
   'drifting',
   'stationary',
 ];
+
+const VALID_HABITATS: Habitat[] = ['land', 'water', 'air'];
 
 /** Strip disjunctives and hedges from a recognition name ("Eagle or Hawk" → "Eagle"). */
 function normalizeName(raw: string): string {
@@ -51,6 +52,13 @@ function clampInt(raw: unknown, min: number, max: number, fallback: number): num
   return Math.round(Math.max(min, Math.min(max, raw)));
 }
 
+/** Optional 1-10 field: undefined stays undefined; numbers clamp; other → undefined. */
+function optionalSpeed(raw: unknown): number | undefined {
+  if (raw === undefined || raw === null) return undefined;
+  if (typeof raw !== 'number' || !Number.isFinite(raw)) return undefined;
+  return Math.round(Math.max(1, Math.min(10, raw)));
+}
+
 /**
  * Pure type guard for EntityProfile.
  * - Returns a valid EntityProfile on success.
@@ -82,7 +90,23 @@ export function validateEntityProfile(raw: unknown): EntityProfile | null {
       ? (rawStyle as MovementStyle)
       : DEFAULT_STYLE_BY_ARCHETYPE[archetype];
 
-  const speed = clampInt(obj['speed'], 1, 10, 5);
+  // Habitat — default to 'land' if missing/invalid.
+  const habitat: Habitat = VALID_HABITATS.includes(obj['habitat'] as Habitat)
+    ? (obj['habitat'] as Habitat)
+    : 'land';
+
+  let landSpeed = optionalSpeed(obj['landSpeed']);
+  let waterSpeed = optionalSpeed(obj['waterSpeed']);
+  let airSpeed = optionalSpeed(obj['airSpeed']);
+
+  // Guarantee the home-habitat speed exists so every creature can move on its own map.
+  if (habitat === 'land' && landSpeed === undefined) landSpeed = 5;
+  if (habitat === 'water' && waterSpeed === undefined) waterSpeed = 5;
+  if (habitat === 'air' && airSpeed === undefined) airSpeed = 5;
+
+  // Fliers must have a landSpeed so they can be grounded on land maps.
+  if (archetype === 'flying' && landSpeed === undefined) landSpeed = 2;
+
   const agility = clampInt(obj['agility'], 1, 10, 5);
   const energy = clampInt(obj['energy'], 1, 10, 5);
   const maxHealth = clampInt(obj['maxHealth'], 1, 100, 30);
@@ -91,7 +115,10 @@ export function validateEntityProfile(raw: unknown): EntityProfile | null {
     name,
     archetype,
     movementStyle,
-    speed,
+    habitat,
+    ...(landSpeed !== undefined ? { landSpeed } : {}),
+    ...(waterSpeed !== undefined ? { waterSpeed } : {}),
+    ...(airSpeed !== undefined ? { airSpeed } : {}),
     agility,
     energy,
     maxHealth,
@@ -108,7 +135,9 @@ export function mysteryBlob(): EntityProfile {
     name: 'Mystery Blob',
     archetype,
     movementStyle: DEFAULT_STYLE_BY_ARCHETYPE[archetype],
-    speed: 5,
+    habitat: 'land',
+    landSpeed: 5,
+    waterSpeed: 3,
     agility: 5,
     energy: 5,
     maxHealth: 30,

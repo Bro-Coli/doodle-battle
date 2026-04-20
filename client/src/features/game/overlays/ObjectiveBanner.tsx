@@ -1,13 +1,36 @@
 import { StrokeShadowText } from '@/ui/text/StrokeShadowText';
 
+type MapType = 'land' | 'water' | 'air';
+
 type ObjectiveBannerProps = {
   canvasBounds: { x: number; y: number; width: number; height: number } | null;
+  mapType?: MapType;
 };
 
-export function ObjectiveBanner({ canvasBounds }: ObjectiveBannerProps): React.JSX.Element {
+const MAP_LABEL: Record<MapType, string> = {
+  land: 'LAND',
+  water: 'WATER',
+  air: 'AIR',
+};
+
+const MAP_DESCRIPTION: Record<MapType, string> = {
+  land: 'Draw something that can walk — fliers will be grounded, fish will suffocate.',
+  water: 'Draw something that can swim — land dwellers and fliers will drown.',
+  air: 'Draw something that can fly — everything else will fall.',
+};
+
+const MAP_BADGE_COLOR: Record<MapType, { bg: string; text: string }> = {
+  land: { bg: 'linear-gradient(to bottom, #A8E88E 0%, #5FB34A 100%)', text: '#1f3a15' },
+  water: { bg: 'linear-gradient(to bottom, #7DD3FC 0%, #3B82C4 100%)', text: '#082a3d' },
+  air: { bg: 'linear-gradient(to bottom, #FFFFFF 0%, #D7E4F5 100%)', text: '#2a3b55' },
+};
+
+export function ObjectiveBanner({ canvasBounds, mapType = 'land' }: ObjectiveBannerProps): React.JSX.Element {
+  const badge = MAP_BADGE_COLOR[mapType];
+
   return (
     <div
-      className="fixed z-20 animate-[fadeSlideDown_0.4s_ease-out_both]"
+      className="fixed z-20 animate-[fadeSlideDown_0.4s_ease-out_both] flex flex-col items-center gap-2"
       style={{
         left: '50%',
         top: canvasBounds ? (80 + canvasBounds.y) / 2 : 76,
@@ -69,6 +92,21 @@ export function ObjectiveBanner({ canvasBounds }: ObjectiveBannerProps): React.J
             - Have more creatures alive
           </StrokeShadowText>
         </span>
+      </div>
+
+      <div
+        className="flex items-center gap-2 rounded-full px-4 py-1.5 shadow-md"
+        style={{ background: badge.bg }}
+      >
+        <span
+          className="t14-eb tracking-wider"
+          style={{ color: badge.text }}
+        >
+          NEXT MAP: {MAP_LABEL[mapType]}
+        </span>
+      </div>
+      <div className="max-w-md text-center text-white/85 t12-sb drop-shadow-[0_1px_2px_rgba(0,0,0,0.4)]">
+        {MAP_DESCRIPTION[mapType]}
       </div>
     </div>
   );

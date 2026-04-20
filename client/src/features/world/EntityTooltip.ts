@@ -41,7 +41,12 @@ export function showTooltip(profile: EntityProfile, x: number, y: number): void 
 
   const stats = document.createElement('div');
   stats.className = 'text-[12px] text-neutral-500';
-  stats.textContent = `HP ${profile.maxHealth} \u00B7 Speed ${profile.speed} \u00B7 Agility ${profile.agility} \u00B7 Energy ${profile.energy}`;
+  const speeds = [
+    profile.landSpeed !== undefined ? `Land ${profile.landSpeed}` : null,
+    profile.waterSpeed !== undefined ? `Water ${profile.waterSpeed}` : null,
+    profile.airSpeed !== undefined ? `Air ${profile.airSpeed}` : null,
+  ].filter(Boolean).join(' \u00B7 ');
+  stats.textContent = `HP ${profile.maxHealth} \u00B7 ${profile.habitat} \u00B7 ${speeds} \u00B7 Agility ${profile.agility} \u00B7 Energy ${profile.energy}`;
 
   activeTooltip.innerHTML = '';
   activeTooltip.appendChild(header);

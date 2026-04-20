@@ -1,7 +1,7 @@
 // Defines contracts consumed by both client and server.
 // Server generates EntityProfile; client receives and renders it.
 
-export type Archetype = 'walking' | 'flying' | 'rooted' | 'spreading' | 'drifting' | 'stationary';
+export type Archetype = 'walking' | 'flying' | 'rooted' | 'drifting' | 'stationary';
 
 // Animation shape for an entity's motion. The archetype decides which subset is
 // valid; numeric modifiers (speed/agility/energy) vary the feel within a shape.
@@ -22,8 +22,6 @@ export type MovementStyle =
   | 'tumbling'    // rotation + drift (leaf, feather)
   // rooted
   | 'swaying'     // lateral sine (tree, kelp)
-  // spreading
-  | 'creeping'    // slow outward spawn (vine, moss)
   // stationary
   | 'still';      // no motion (rock, statue)
 
@@ -33,7 +31,6 @@ export const STYLES_BY_ARCHETYPE: Record<Archetype, readonly MovementStyle[]> = 
   walking:    ['prowling', 'scampering', 'lumbering', 'hopping'],
   drifting:   ['bobbing', 'tumbling'],
   rooted:     ['swaying'],
-  spreading:  ['creeping'],
   stationary: ['still'],
 };
 
@@ -43,18 +40,41 @@ export const DEFAULT_STYLE_BY_ARCHETYPE: Record<Archetype, MovementStyle> = {
   walking:    'prowling',
   drifting:   'bobbing',
   rooted:     'swaying',
-  spreading:  'creeping',
   stationary: 'still',
 };
+
+/** Map type played in a given round — determines which creatures survive. */
+export type MapType = 'land' | 'water' | 'air';
+
+/** Primary environment the creature is from. */
+export type Habitat = MapType;
 
 export interface EntityProfile {
   name: string;                 // e.g. "Wolf" — Title Case, single noun phrase
   archetype: Archetype;
   movementStyle: MovementStyle; // animation shape (must match archetype)
-  speed: number;                // 1-10 — baseline velocity
+  habitat: Habitat;             // primary environment
+  /** 1-10 speed on land maps. Undefined → cannot survive on land. */
+  landSpeed?: number;
+  /** 1-10 speed on water maps. Undefined → cannot survive in water. */
+  waterSpeed?: number;
+  /** 1-10 speed on air maps. Only fliers should have this. */
+  airSpeed?: number;
   agility: number;              // 1-10 — turn responsiveness / direction changes
   energy: number;               // 1-10 — burstiness (low = steady, high = bursty/pausing)
   maxHealth: number;            // 1-100 — durability
+}
+
+/** Pick the active speed for this entity on the given map. Undefined → can't survive. */
+export function activeSpeedForMap(profile: EntityProfile, map: MapType): number | undefined {
+  if (map === 'land') return profile.landSpeed;
+  if (map === 'water') return profile.waterSpeed;
+  return profile.airSpeed;
+}
+
+/** Whether the creature can survive on the given map. */
+export function canSurvive(profile: EntityProfile, map: MapType): boolean {
+  return activeSpeedForMap(profile, map) !== undefined;
 }
 
 // Interaction types — what one entity wants to do toward another
