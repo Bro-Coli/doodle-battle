@@ -38,7 +38,7 @@ type AnyRoom = {
   _tick(deltaMS: number): void;
   _computeWinner(): 'red' | 'blue' | 'draw' | null;
   _finishGame(winner: 'red' | 'blue' | 'draw'): void;
-  _buildPlayerStats(): Record<string, { name: string; team: string; entitiesDrawn: number; entitiesSurviving: number; kills: number }>;
+  _buildPlayerStats(): Record<string, { name: string; team: string; entitiesDrawn: number; kills: number }>;
   _handleReturnToLobby(client: { sessionId: string }): void;
   _killCounts: Map<string, number>;
   _entitiesDrawn: Map<string, number>;
@@ -134,55 +134,91 @@ describe('onCreate maxRounds option', () => {
 // ---------------------------------------------------------------------------
 
 describe('_computeWinner', () => {
-  it('returns null before the round limit even if one team has 0 entities', () => {
+  it('returns null before the round limit regardless of round-win tally', () => {
     const { room, anyRoom } = setupRoom();
-    addEntity(room, 'b1', 'blue', 'p2');
-    // No red entities — but the full round count must still be played.
+    room.state.redRoundWins = 0;
+    room.state.blueRoundWins = 2;
     room.state.currentRound = 2;
     room.state.maxRounds = 5;
     expect(anyRoom._computeWinner()).toBeNull();
   });
 
-  it('returns null before the round limit when both teams have 0 entities', () => {
+  it('returns team with more round wins when currentRound >= maxRounds', () => {
     const { room, anyRoom } = setupRoom();
-    room.state.currentRound = 2;
-    room.state.maxRounds = 5;
-    expect(anyRoom._computeWinner()).toBeNull();
-  });
-
-  it('returns null when both teams have entities and round limit not reached', () => {
-    const { room, anyRoom } = setupRoom();
-    addEntity(room, 'r1', 'red', 'p1');
-    addEntity(room, 'b1', 'blue', 'p2');
-    room.state.currentRound = 2;
-    room.state.maxRounds = 5;
-    expect(anyRoom._computeWinner()).toBeNull();
-  });
-
-  it('returns team with more entities when currentRound >= maxRounds', () => {
-    const { room, anyRoom } = setupRoom();
-    addEntity(room, 'r1', 'red', 'p1');
-    addEntity(room, 'r2', 'red', 'p1');
-    addEntity(room, 'b1', 'blue', 'p2');
+    room.state.redRoundWins = 3;
+    room.state.blueRoundWins = 1;
     room.state.currentRound = 5;
     room.state.maxRounds = 5;
     expect(anyRoom._computeWinner()).toBe('red');
   });
 
-  it('returns draw when equal entity counts at round limit', () => {
+  it('returns draw when round wins are tied at round limit', () => {
     const { room, anyRoom } = setupRoom();
-    addEntity(room, 'r1', 'red', 'p1');
-    addEntity(room, 'b1', 'blue', 'p2');
+    room.state.redRoundWins = 2;
+    room.state.blueRoundWins = 2;
     room.state.currentRound = 5;
     room.state.maxRounds = 5;
     expect(anyRoom._computeWinner()).toBe('draw');
   });
 
-  it('returns draw at round limit when both teams have 0 entities', () => {
+  it('returns draw at round limit when both teams have 0 round wins', () => {
     const { room, anyRoom } = setupRoom();
     room.state.currentRound = 5;
     room.state.maxRounds = 5;
     expect(anyRoom._computeWinner()).toBe('draw');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Round-win tally at simulate -> results transition
+// ---------------------------------------------------------------------------
+
+describe('round-win tally on simulate -> results', () => {
+  it('increments redRoundWins when red has more surviving entities', () => {
+    const { room, anyRoom } = setupRoom();
+    room.state.currentPhase = 'simulate';
+    addEntity(room, 'r1', 'red', 'p1');
+    addEntity(room, 'r2', 'red', 'p1');
+    addEntity(room, 'b1', 'blue', 'p2');
+
+    anyRoom._advancePhase();
+
+    expect(room.state.redRoundWins).toBe(1);
+    expect(room.state.blueRoundWins).toBe(0);
+  });
+
+  it('increments blueRoundWins when blue has more surviving entities', () => {
+    const { room, anyRoom } = setupRoom();
+    room.state.currentPhase = 'simulate';
+    addEntity(room, 'b1', 'blue', 'p2');
+    addEntity(room, 'b2', 'blue', 'p2');
+
+    anyRoom._advancePhase();
+
+    expect(room.state.blueRoundWins).toBe(1);
+    expect(room.state.redRoundWins).toBe(0);
+  });
+
+  it('does not increment either team on a tied round', () => {
+    const { room, anyRoom } = setupRoom();
+    room.state.currentPhase = 'simulate';
+    addEntity(room, 'r1', 'red', 'p1');
+    addEntity(room, 'b1', 'blue', 'p2');
+
+    anyRoom._advancePhase();
+
+    expect(room.state.redRoundWins).toBe(0);
+    expect(room.state.blueRoundWins).toBe(0);
+  });
+
+  it('does not increment either team when both sides are wiped (0-0)', () => {
+    const { room, anyRoom } = setupRoom();
+    room.state.currentPhase = 'simulate';
+
+    anyRoom._advancePhase();
+
+    expect(room.state.redRoundWins).toBe(0);
+    expect(room.state.blueRoundWins).toBe(0);
   });
 });
 
@@ -211,13 +247,16 @@ describe('_finishGame', () => {
     expect(room.state.phaseTimer).toBe(0);
   });
 
-  it('broadcasts game_finished with winner and stats', () => {
+  it('broadcasts game_finished with winner, stats, and roundWins', () => {
     const { room, anyRoom } = setupRoom();
     addPlayer(room, anyRoom, 'p1', 'Alice', 'red');
+    room.state.redRoundWins = 3;
+    room.state.blueRoundWins = 1;
     anyRoom._finishGame('red');
     expect(anyRoom.broadcast).toHaveBeenCalledWith('game_finished', expect.objectContaining({
       winner: 'red',
       stats: expect.any(Object),
+      roundWins: { red: 3, blue: 1 },
     }));
   });
 });
@@ -231,9 +270,6 @@ describe('_advancePhase results->draw win condition', () => {
     const { room, anyRoom } = setupRoom();
     room.state.currentPhase = 'results';
     room.state.currentRound = 1;
-    // Add entities on both teams so no win condition
-    addEntity(room, 'r1', 'red', 'p1');
-    addEntity(room, 'b1', 'blue', 'p2');
 
     anyRoom._advancePhase();
 
@@ -245,34 +281,18 @@ describe('_advancePhase results->draw win condition', () => {
     room.state.currentPhase = 'results';
     room.state.currentRound = 4;
     room.state.maxRounds = 5;
-    // Only blue entities — blue will win at the round limit.
-    addEntity(room, 'b1', 'blue', 'p2');
+    room.state.blueRoundWins = 1;
 
     anyRoom._advancePhase();
 
     expect(room.state.currentPhase).toBe('finished');
   });
 
-  it('transitions to draw phase mid-game even if one team is wiped', () => {
+  it('transitions to draw phase mid-game', () => {
     const { room, anyRoom } = setupRoom();
     room.state.currentPhase = 'results';
     room.state.currentRound = 1;
     room.state.maxRounds = 5;
-    // No red entities — but the round limit has not been reached, so we keep playing.
-    addEntity(room, 'b1', 'blue', 'p2');
-
-    anyRoom._advancePhase();
-
-    expect(room.state.currentPhase).toBe('draw');
-  });
-
-  it('transitions to draw when both teams alive and round limit not reached', () => {
-    const { room, anyRoom } = setupRoom();
-    room.state.currentPhase = 'results';
-    room.state.currentRound = 1;
-    room.state.maxRounds = 5;
-    addEntity(room, 'r1', 'red', 'p1');
-    addEntity(room, 'b1', 'blue', 'p2');
 
     anyRoom._advancePhase();
 
@@ -319,19 +339,17 @@ describe('kill tracking', () => {
 // ---------------------------------------------------------------------------
 
 describe('_buildPlayerStats', () => {
-  it('includes entitiesDrawn, entitiesSurviving, kills per player', () => {
+  it('includes entitiesDrawn and kills per player', () => {
     const { room, anyRoom } = setupRoom();
     addPlayer(room, anyRoom, 'p1', 'Alice', 'red');
     addPlayer(room, anyRoom, 'p2', 'Bob', 'blue');
 
-    // Simulate p1 drew 1 entity, 1 survives, 2 kills
+    // Simulate p1 drew 1 entity, 2 kills
     anyRoom._entitiesDrawn.set('p1', 1);
     anyRoom._killCounts.set('p1', 2);
-    addEntity(room, 'r1', 'red', 'p1');
 
-    // p2 drew 2 entities, 1 survives, 0 kills
+    // p2 drew 2 entities, 0 kills
     anyRoom._entitiesDrawn.set('p2', 2);
-    addEntity(room, 'b1', 'blue', 'p2');
 
     const stats = anyRoom._buildPlayerStats();
 
@@ -339,7 +357,6 @@ describe('_buildPlayerStats', () => {
       name: 'Alice',
       team: 'red',
       entitiesDrawn: 1,
-      entitiesSurviving: 1,
       kills: 2,
     }));
 
@@ -347,7 +364,6 @@ describe('_buildPlayerStats', () => {
       name: 'Bob',
       team: 'blue',
       entitiesDrawn: 2,
-      entitiesSurviving: 1,
       kills: 0,
     }));
   });
@@ -501,6 +517,18 @@ describe('_handleReturnToLobby', () => {
     anyRoom._handleReturnToLobby({ sessionId: room.state.hostSessionId });
 
     expect(room.state.entities.size).toBe(0);
+  });
+
+  it('resets round wins to 0', () => {
+    const { room, anyRoom } = setupRoom();
+    room.state.currentPhase = 'finished';
+    room.state.redRoundWins = 3;
+    room.state.blueRoundWins = 2;
+
+    anyRoom._handleReturnToLobby({ sessionId: room.state.hostSessionId });
+
+    expect(room.state.redRoundWins).toBe(0);
+    expect(room.state.blueRoundWins).toBe(0);
   });
 
   it('clears _killCounts and _entitiesDrawn', () => {

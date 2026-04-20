@@ -13,13 +13,13 @@ export type MatchResultPlayerStat = {
   name: string;
   team: string;
   entitiesDrawn: number;
-  entitiesSurviving: number;
   kills: number;
 };
 
 export type MatchResultPayload = {
   winner: string;
   stats: Record<string, MatchResultPlayerStat>;
+  roundWins: { red: number; blue: number };
   mySessionId: string;
 };
 
@@ -42,6 +42,9 @@ export function loadMatchResult(): MatchResultPayload | null {
     if (
       typeof parsed?.winner === 'string' &&
       parsed?.stats &&
+      parsed?.roundWins &&
+      typeof parsed.roundWins.red === 'number' &&
+      typeof parsed.roundWins.blue === 'number' &&
       typeof parsed?.mySessionId === 'string'
     ) {
       return parsed;

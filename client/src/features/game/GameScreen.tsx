@@ -41,13 +41,13 @@ type PlayerStat = {
   name: string;
   team: string;
   entitiesDrawn: number;
-  entitiesSurviving: number;
   kills: number;
 };
 
 type WinnerData = {
   winner: string;
   stats: Record<string, PlayerStat>;
+  roundWins: { red: number; blue: number };
 };
 
 export function GameScreen(): React.JSX.Element {
@@ -107,6 +107,7 @@ export function GameScreen(): React.JSX.Element {
       saveMatchResult({
         winner: msg.winner,
         stats: msg.stats,
+        roundWins: msg.roundWins,
         mySessionId: room.sessionId,
       });
       intentionalStayRef.current = true;

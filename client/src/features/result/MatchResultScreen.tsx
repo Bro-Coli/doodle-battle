@@ -60,13 +60,12 @@ function TeamStatsPanel({
       <div
         className="grid px-3 pb-2 font-nunito text-[0.6rem] font-black tracking-[0.16em] uppercase text-white/55"
         style={{
-          gridTemplateColumns: '1fr auto auto auto',
+          gridTemplateColumns: '1fr auto auto',
           columnGap: '1rem',
         }}
       >
         <span>Player</span>
         <span className="text-right min-w-[2.4rem]">Drawn</span>
-        <span className="text-right min-w-[2.4rem]">Alive</span>
         <span className="text-right min-w-[2.4rem]">Kills</span>
       </div>
 
@@ -88,7 +87,7 @@ function TeamStatsPanel({
                 'animate-[fadeSlideUp_0.35s_ease-out_both]',
               )}
               style={{
-                gridTemplateColumns: '1fr auto auto auto',
+                gridTemplateColumns: '1fr auto auto',
                 columnGap: '1rem',
                 padding: '0.7rem 1rem',
                 animationDelay: `${startDelayMs + 120 + index * 60}ms`,
@@ -120,9 +119,6 @@ function TeamStatsPanel({
               </div>
               <span className="ui-hud-row__stat ui-hud-row__stat--muted" style={{ minWidth: '2.4rem' }}>
                 {stat.entitiesDrawn}
-              </span>
-              <span className="ui-hud-row__stat" style={{ minWidth: '2.4rem' }}>
-                {stat.entitiesSurviving}
               </span>
               <span
                 className="ui-hud-row__stat ui-hud-row__stat--highlight"
@@ -174,18 +170,6 @@ function ActionButton({
   );
 }
 
-function computeTeamScores(
-  stats: Record<string, MatchResultPlayerStat>,
-): { red: number; blue: number } {
-  let red = 0;
-  let blue = 0;
-  Object.values(stats).forEach((stat) => {
-    if (stat.team === 'red') red += stat.entitiesSurviving;
-    else if (stat.team === 'blue') blue += stat.entitiesSurviving;
-  });
-  return { red, blue };
-}
-
 export function MatchResultScreen(): React.JSX.Element | null {
   const [payload, setPayload] = useState<MatchResultPayload | null>(() => loadMatchResult());
 
@@ -214,22 +198,20 @@ export function MatchResultScreen(): React.JSX.Element | null {
 
   if (!payload) return null;
 
-  const { winner, stats, mySessionId } = payload;
+  const { winner, stats, roundWins, mySessionId } = payload;
   const mySessionStat = stats[mySessionId];
   const myTeamKey: 'red' | 'blue' = mySessionStat?.team === 'blue' ? 'blue' : 'red';
   const oppTeamKey: 'red' | 'blue' = myTeamKey === 'red' ? 'blue' : 'red';
 
-  const teamScore = computeTeamScores(stats);
-
   const myTeamSlot = {
     label: TEAM_LABEL[myTeamKey],
     variant: TEAM_VARIANT[myTeamKey],
-    score: teamScore[myTeamKey],
+    score: roundWins[myTeamKey],
   };
   const oppTeamSlot = {
     label: TEAM_LABEL[oppTeamKey],
     variant: TEAM_VARIANT[oppTeamKey],
-    score: teamScore[oppTeamKey],
+    score: roundWins[oppTeamKey],
   };
 
   const isVictory = winner === myTeamKey;

@@ -85,6 +85,8 @@ export class GameState extends Schema {
   @type('number') drawingTime: number = 60;
   @type('string') gameStatus: string = 'active';
   @type('string') currentMapType: string = 'land';
+  @type('number') redRoundWins: number = 0;
+  @type('number') blueRoundWins: number = 0;
 }
 
 // ---------------------------------------------------------------------------
@@ -521,6 +523,17 @@ export class GameRoom extends Room<{ state: GameState }> {
       this.state.currentPhase = 'simulate';
       this.state.phaseTimer = 60;
     } else if (this.state.currentPhase === 'simulate') {
+      // Tally this round's winner before entities are cleared. Tied rounds
+      // (including 0-0) award no points.
+      let red = 0;
+      let blue = 0;
+      this.state.entities.forEach((entity) => {
+        if (entity.teamId === 'red') red++;
+        else if (entity.teamId === 'blue') blue++;
+      });
+      if (red > blue) this.state.redRoundWins++;
+      else if (blue > red) this.state.blueRoundWins++;
+
       this.state.currentPhase = 'results';
       this.state.phaseTimer = 4;
     } else if (this.state.currentPhase === 'results') {
@@ -858,6 +871,8 @@ export class GameRoom extends Room<{ state: GameState }> {
     this._pendingRecognitions = 0;
     this._handleRemoveAllEntities();
     this.state.currentRound = 0;
+    this.state.redRoundWins = 0;
+    this.state.blueRoundWins = 0;
 
     // Reset all player submission flags
     this.state.players.forEach((player) => {
@@ -909,13 +924,8 @@ export class GameRoom extends Room<{ state: GameState }> {
     // Player forfeit (last teammate disconnects) is handled separately in onLeave.
     if (this.state.currentRound < this.state.maxRounds) return null;
 
-    let red = 0;
-    let blue = 0;
-    this.state.entities.forEach((entity) => {
-      if (entity.teamId === 'red') red++;
-      else if (entity.teamId === 'blue') blue++;
-    });
-
+    const red = this.state.redRoundWins;
+    const blue = this.state.blueRoundWins;
     if (red > blue) return 'red';
     if (blue > red) return 'blue';
     return 'draw';
@@ -924,23 +934,14 @@ export class GameRoom extends Room<{ state: GameState }> {
   /**
    * Build per-player stats for the game_finished broadcast.
    */
-  _buildPlayerStats(): Record<string, { name: string; team: string; entitiesDrawn: number; entitiesSurviving: number; kills: number }> {
-    const stats: Record<string, { name: string; team: string; entitiesDrawn: number; entitiesSurviving: number; kills: number }> = {};
-
-    // Count surviving entities per owner
-    const surviving = new Map<string, number>();
-    this.state.entities.forEach((entity) => {
-      if (entity.ownerSessionId) {
-        surviving.set(entity.ownerSessionId, (surviving.get(entity.ownerSessionId) ?? 0) + 1);
-      }
-    });
+  _buildPlayerStats(): Record<string, { name: string; team: string; entitiesDrawn: number; kills: number }> {
+    const stats: Record<string, { name: string; team: string; entitiesDrawn: number; kills: number }> = {};
 
     this.state.players.forEach((player, sessionId) => {
       stats[sessionId] = {
         name: player.name,
         team: player.team,
         entitiesDrawn: this._entitiesDrawn.get(sessionId) ?? 0,
-        entitiesSurviving: surviving.get(sessionId) ?? 0,
         kills: this._killCounts.get(sessionId) ?? 0,
       };
     });
@@ -957,7 +958,8 @@ export class GameRoom extends Room<{ state: GameState }> {
     this.state.phaseTimer = 0;
 
     const stats = this._buildPlayerStats();
-    this.broadcast('game_finished', { winner, stats });
+    const roundWins = { red: this.state.redRoundWins, blue: this.state.blueRoundWins };
+    this.broadcast('game_finished', { winner, stats, roundWins });
   }
 
   /**
@@ -972,6 +974,8 @@ export class GameRoom extends Room<{ state: GameState }> {
     this.state.gameStatus = 'active';
     this.state.currentRound = 0;
     this.state.phaseTimer = 0;
+    this.state.redRoundWins = 0;
+    this.state.blueRoundWins = 0;
 
     // Reset all player flags
     this.state.players.forEach((player) => {
