@@ -420,13 +420,14 @@ function TeamColumn({
         <ul className="flex flex-col gap-3">
           {Array.from({ length: slotCount }).map((_, i) => {
             const entry = players[i];
+            const isEntryReady = entry ? entry[0] === hostSessionId || entry[1].ready : false;
             return (
               <TeamSlot
                 key={entry ? entry[0] : `${team}-empty-${i}`}
                 team={team}
                 playerName={entry?.[1].name}
                 isMe={entry ? entry[0] === mySessionId : false}
-                isReady={entry?.[1].ready}
+                isReady={isEntryReady}
               />
             );
           })}
