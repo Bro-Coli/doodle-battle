@@ -153,7 +153,8 @@ export function WaitingOverlay({
   return (
     <GameOverlay
       centered
-      className="bg-[radial-gradient(ellipse_at_center,rgba(20,10,55,0.55)_0%,rgba(8,4,30,0.78)_100%)] backdrop-blur-sm"
+      pointerEvents
+      className="cursor-default bg-[radial-gradient(ellipse_at_center,rgba(20,10,55,0.55)_0%,rgba(8,4,30,0.78)_100%)] backdrop-blur-sm"
     >
       <div className="flex items-end justify-center gap-14 lg:gap-10 px-6">
         {/* LEFT — player's creation polaroid */}
