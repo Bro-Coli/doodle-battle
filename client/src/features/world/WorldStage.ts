@@ -2,12 +2,12 @@ import { Application, Assets, Container, Graphics, Sprite, Ticker, Texture } fro
 import { EntityProfile, InteractionMatrix, MapType } from '@crayon-world/shared/src/types';
 import landMap from './assets/maps/land.webp';
 import waterMap from './assets/maps/water.webp';
-import airMap from './assets/maps/air.webp';
+import skyMap from './assets/maps/sky.webp';
 
 const MAP_TEXTURE_URLS: Record<MapType, string> = {
   land: landMap,
   water: waterMap,
-  air: airMap,
+  sky: skyMap,
 };
 import { captureEntityTexture } from './captureEntityTexture';
 import { buildEntityContainer, buildEntitySprite, updateHealthBar } from './EntitySprite';

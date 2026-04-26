@@ -66,7 +66,7 @@ export async function recognizeDrawingInternal(
     habitat: mapType,
     landSpeed: mapType === 'land' ? 3 : undefined,
     waterSpeed: mapType === 'water' ? 3 : undefined,
-    airSpeed: mapType === 'air' ? 3 : undefined,
+    airSpeed: mapType === 'sky' ? 3 : undefined,
     agility: 5,
     energy: 5,
     maxHealth: 30,

@@ -1,6 +1,6 @@
 import { StrokeShadowText } from '@/ui/text/StrokeShadowText';
 
-type MapType = 'land' | 'water' | 'air';
+type MapType = 'land' | 'water' | 'sky';
 
 type ObjectiveBannerProps = {
   canvasBounds: { x: number; y: number; width: number; height: number } | null;
@@ -10,13 +10,13 @@ type ObjectiveBannerProps = {
 const MAP_LABEL: Record<MapType, string> = {
   land: 'LAND',
   water: 'WATER',
-  air: 'AIR',
+  sky: 'SKY',
 };
 
 const MAP_DESCRIPTION: Record<MapType, string> = {
   land: 'Grassy plains. Best for walkers.',
   water: 'Open ocean. Best for swimmers.',
-  air: 'Endless sky. Best for fliers.',
+  sky: 'Endless sky. Best for fliers.',
 };
 
 export function ObjectiveBanner({
