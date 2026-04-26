@@ -2,6 +2,10 @@
   "name": "@crayon-world/root",
   "private": true,
   "type": "module",
+  "packageManager": "pnpm@10.28.0",
+  "pnpm": {
+    "onlyBuiltDependencies": ["esbuild", "msgpackr-extract"]
+  },
   "scripts": {
     "dev:client": "pnpm --filter @crayon-world/client dev",
     "dev:server": "pnpm --filter @crayon-world/server dev",
