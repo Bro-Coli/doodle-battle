@@ -438,7 +438,13 @@ export function GameScreen(): React.JSX.Element {
       )}
 
       {currentPhase === 'results' && resultsVisible && (
-        <ResultsOverlay entityCounts={entityCounts} isFinalRound={currentRound + 1 >= maxRounds} />
+        <ResultsOverlay
+          entityCounts={entityCounts}
+          isFinalRound={currentRound + 1 >= maxRounds}
+          currentRound={currentRound}
+          maxRounds={maxRounds}
+          myTeam={myTeamRef.current === 'blue' ? 'blue' : 'red'}
+        />
       )}
 
       {currentPhase === 'idle' && <IdleOverlay />}
