@@ -142,9 +142,9 @@ export function JoinRoomScreen() {
       </div>
 
       {/* Content */}
-      <div className="flex w-full max-w-[760px] flex-col gap-6">
+      <div className="flex w-full max-w-[960px] flex-col items-center gap-6">
         {/* Enter Code — freestanding (no panel) */}
-        <section className="flex flex-col items-stretch gap-3">
+        <section className="flex w-full max-w-[520px] flex-col items-stretch gap-3">
           <div className="self-start pl-2">
             <StrokeShadowText
               className="t24-eb"
@@ -200,13 +200,13 @@ export function JoinRoomScreen() {
         </section>
 
         {/* OR divider */}
-        <div className="ui-or-divider t18-b font-nunito">
+        <div className="ui-or-divider w-full max-w-[520px] t18-b font-nunito">
           <span>OR</span>
         </div>
 
-        {/* Public Rooms panel */}
-        <section className="ui-glass-panel">
-          <header className="mb-5 flex items-center justify-between gap-4">
+        {/* Public Rooms — frameless transparent section */}
+        <section className="ui-public-rooms w-full">
+          <header className="mb-4 flex items-center justify-between gap-4">
             <StrokeShadowText
               className="t28-eb"
               fillClassName="ui-create-room-title__text"
@@ -257,7 +257,7 @@ export function JoinRoomScreen() {
           )}
 
           {roomsLoaded && rooms.length > 0 && (
-            <ul className="flex flex-col gap-3">
+            <ul className="grid grid-cols-2 gap-3">
               {rooms.map((r) => {
                 const joining = joiningRoomId === r.roomId;
                 const anyJoining = joiningRoomId !== null;
@@ -268,43 +268,43 @@ export function JoinRoomScreen() {
                   <li key={r.roomId}>
                     <div className="ui-public-room-row">
                       <span className="ui-public-room-row__icon">
-                        <Icon name="user" size={26} decorative />
+                        <Icon name="users" size={26} decorative />
                       </span>
 
                       <span
-                        className="font-mono t24-eb tracking-[0.22em]"
+                        className="font-mono t20-eb tracking-[0.16em] truncate"
                         style={{ color: '#1f2a55' }}
                       >
                         {r.roomId}
                       </span>
 
-                      <div className="ml-auto flex items-center gap-3">
+                      <div className="ml-auto flex items-center gap-2">
+                        <span className="ui-public-room-row__count font-nunito t12-b">
+                          <Icon name="user" size={16} decorative />
+                          {r.clients}/{r.maxClients}
+                        </span>
+
                         {r.drawingTime !== null && (
-                          <span className="hidden font-nunito t12-b uppercase tracking-wider text-[#1f2a55]/65 sm:hidden md:inline-flex">
+                          <span className="ui-public-room-row__count ui-public-room-row__count--dark font-nunito t12-b">
                             {r.drawingTime}s
                           </span>
                         )}
-
-                        <span className="ui-public-room-row__count font-nunito t14-b">
-                          <Icon name="user" size={14} decorative />
-                          {r.clients}/{r.maxClients}
-                        </span>
 
                         <button
                           type="button"
                           onClick={() => void joinRoom(r.roomId)}
                           disabled={disabled}
-                          className="ui-pill-button ui-pill-button--mint ui-pill-button--less-round h-[52px] px-6 shrink-0 disabled:cursor-not-allowed disabled:opacity-55"
+                          className="ui-pill-button ui-pill-button--mint ui-pill-button--less-round h-[48px] px-5 shrink-0 disabled:cursor-not-allowed disabled:opacity-55"
                         >
                           <span className="relative z-1 inline-block">
                             <span
                               aria-hidden
-                              className="pointer-events-none absolute inset-0 text-center uppercase text-transparent t16-b"
+                              className="pointer-events-none absolute inset-0 text-center uppercase text-transparent t14-b"
                               style={SECTION_STROKE}
                             >
                               {joining ? '…' : full ? 'Full' : 'Join'}
                             </span>
-                            <span className="relative text-center uppercase text-white t16-b">
+                            <span className="relative text-center uppercase text-white t14-b">
                               {joining ? '…' : full ? 'Full' : 'Join'}
                             </span>
                           </span>

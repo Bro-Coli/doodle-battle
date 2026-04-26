@@ -13,6 +13,7 @@ import { trashIcon } from './TrashIcon';
 import { trophyIcon } from './TrophyIcon';
 import { undoIcon } from './UndoIcon';
 import { userIcon } from './UserIcon';
+import { usersIcon } from './UsersIcon';
 
 export const iconDefinitions: Record<IconName, IconDefinition> = {
   arrowLeft: arrowLeftIcon,
@@ -29,4 +30,5 @@ export const iconDefinitions: Record<IconName, IconDefinition> = {
   trophy: trophyIcon,
   undo: undoIcon,
   user: userIcon,
+  users: usersIcon,
 };

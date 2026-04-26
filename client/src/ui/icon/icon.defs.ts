@@ -14,7 +14,8 @@ export type IconName =
   | 'trash'
   | 'trophy'
   | 'undo'
-  | 'user';
+  | 'user'
+  | 'users';
 
 export type IconSize = '1em' | '1rem' | 16 | 20 | 24 | 32 | 48 | 64 | number | string;
 
