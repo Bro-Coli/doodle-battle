@@ -123,6 +123,7 @@ export class WorldStage {
     // Map background sprite — texture swaps with map type via setMapType().
     this._playArea = new Sprite();
     this._playArea.eventMode = 'none';
+    this._playArea.alpha = 0.92;
     this._worldRoot.addChild(this._playArea);
     this._redrawPlayArea();
 
@@ -253,6 +254,7 @@ export class WorldStage {
       this._playArea.texture = texture;
       this._playArea.width = WORLD_BOUNDS.width;
       this._playArea.height = WORLD_BOUNDS.height;
+      this._playArea.alpha = 0.92;
     });
   }
 

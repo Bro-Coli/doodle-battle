@@ -12,6 +12,45 @@ export interface EntityBuildResult {
 
 const HEALTH_BAR_HEIGHT = 7;
 
+function createOwnerBadge(ownerName: string): Container {
+  const badge = new Container();
+  const text = new Text({
+    text: ownerName,
+    style: new TextStyle({
+      fontSize: 12,
+      fill: '#4A2A00',
+      fontWeight: '900',
+      letterSpacing: 1,
+    }),
+    resolution: window.devicePixelRatio || 2,
+  });
+  text.anchor.set(0.5, 0.5);
+
+  const bounds = text.getLocalBounds();
+  const padX = 10;
+  const padY = 5;
+  const width = Math.max(34, bounds.width + padX * 2);
+  const height = Math.max(20, bounds.height + padY * 2);
+  const bg = new Graphics();
+  bg
+    .roundRect(-width / 2, -height / 2, width, height, 7)
+    .fill({ color: 0xffc93c });
+  bg
+    .roundRect(-width / 2, -height / 2, width, Math.max(10, height * 0.48), 7)
+    .fill({ color: 0xffe788, alpha: 0.85 });
+  bg
+    .roundRect(-width / 2, height / 2 - Math.max(5, height * 0.28), width, Math.max(5, height * 0.28), 7)
+    .fill({ color: 0xe08a00, alpha: 0.85 });
+  bg
+    .roundRect(-width / 2, -height / 2, width, height, 7)
+    .stroke({ width: 1, color: 0x9b5f00, alpha: 0.55 });
+  bg.filters = [new DropShadowFilter({ blur: 2, offset: { x: 0, y: 1 }, alpha: 0.25 })];
+
+  badge.addChild(bg);
+  badge.addChild(text);
+  return badge;
+}
+
 /** Redraw a health bar for the given hp fraction (0..1). */
 export function updateHealthBar(bar: Graphics, fraction: number): void {
   const width = (bar as unknown as { _barWidth: number })._barWidth;
@@ -110,6 +149,15 @@ export function buildEntityContainer(
   // Floating name label — separate container, not a child of entity
   const label = new Container();
   const labelFill = (teamId && TEAM_LABEL_COLORS[teamId]) ? TEAM_LABEL_COLORS[teamId] : '#333333';
+  let nextY = 0;
+
+  if (ownerName) {
+    const ownerBadge = createOwnerBadge(ownerName);
+    ownerBadge.y = nextY;
+    label.addChild(ownerBadge);
+    nextY += ownerBadge.height + 4;
+  }
+
   const labelText = new Text({
     text: profile.name,
     style: new TextStyle({
@@ -119,28 +167,15 @@ export function buildEntityContainer(
     }),
     resolution: window.devicePixelRatio || 2,
   });
-  labelText.anchor.set(0.5, 1);
+  labelText.anchor.set(0.5, 0);
+  labelText.y = nextY;
   label.addChild(labelText);
-
-  if (ownerName) {
-    const ownerText = new Text({
-      text: ownerName,
-      style: new TextStyle({
-        fontSize: 16,
-        fill: '#555555',
-      }),
-      resolution: window.devicePixelRatio || 2,
-    });
-    ownerText.anchor.set(0.5, 1);
-    ownerText.y = -labelText.height + 2;
-    label.addChild(ownerText);
-  }
 
   // Health bar — sits just beneath the nametag, above the sprite
   const barWidth = Math.max(63, Math.min(140, sprite.width * 0.6));
   const healthBar = new Graphics();
   (healthBar as unknown as { _barWidth: number })._barWidth = barWidth;
-  healthBar.y = 3;
+  healthBar.y = labelText.y + labelText.height + 4;
   updateHealthBar(healthBar, 1);
   label.addChild(healthBar);
 
