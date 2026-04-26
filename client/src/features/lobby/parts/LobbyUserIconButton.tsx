@@ -12,7 +12,7 @@ export const LobbyUserIconButton = forwardRef<HTMLButtonElement, LobbyUserIconBu
       className={`ui-icon-button ui-icon-button--md sm:ui-icon-button--sm ${className}`.trim()}
       {...props}
     >
-      <Icon name="user" size={60} decorative />
+      <Icon name="user" size={54} decorative />
     </button>
   ),
 );

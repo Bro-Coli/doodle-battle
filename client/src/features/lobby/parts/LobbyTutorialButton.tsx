@@ -24,14 +24,14 @@ export function LobbyTutorialButton({ className = '' }: { className?: string }) 
               aria-hidden
               className={cn(
                 'pointer-events-none absolute inset-0 text-center uppercase text-transparent',
-                't24-b',
+                't20-b',
                 'lg:t20-b',
               )}
               style={tutorialStrokeRingStyle}
             >
               Tutorial
             </span>
-            <span className={cn('relative text-center text-white', 't24-b uppercase', 'lg:t20-b')}>
+            <span className={cn('relative text-center text-white', 't20-b uppercase', 'lg:t20-b')}>
               Tutorial
             </span>
           </span>

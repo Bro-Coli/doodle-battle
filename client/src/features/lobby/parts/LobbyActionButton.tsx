@@ -30,12 +30,12 @@ export function LobbyActionButton({ action }: LobbyActionButtonProps) {
       onClick={handleClick}
       disabled={!action.action}
       className={cn(
-        'flex-center group relative h-120 w-120 flex-col text-center',
+        'flex-center group relative h-112 w-112 flex-col text-center',
         'cursor-pointer transition-transform duration-100 ease-linear',
         'hover:scale-[1.06] active:scale-[0.96]',
         'disabled:cursor-default disabled:opacity-90',
         'disabled:hover:scale-100 disabled:active:scale-100',
-        'lg:h-114 lg:w-114',
+        'lg:h-106 lg:w-106',
       )}
       aria-label={action.title}
     >
@@ -43,10 +43,10 @@ export function LobbyActionButton({ action }: LobbyActionButtonProps) {
       <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
         <div
           className={cn(
-            'h-110 w-110 bg-contain bg-center bg-no-repeat',
+            'h-102 w-102 bg-contain bg-center bg-no-repeat',
             'transition-[filter] duration-150 ease-linear',
             'group-hover:filter-[drop-shadow(0_0_12px_var(--glow-color))_drop-shadow(0_0_28px_var(--glow-color))]',
-            'lg:h-96 lg:w-96',
+            'lg:h-92 lg:w-92',
           )}
           style={{
             backgroundImage: `url(${action.backgroundImage})`,
@@ -62,7 +62,7 @@ export function LobbyActionButton({ action }: LobbyActionButtonProps) {
           'group-hover:filter-[drop-shadow(0_0_18px_rgba(255,255,255,1))_drop-shadow(0_0_36px_rgba(255,255,255,0.9))_drop-shadow(0_0_58px_rgba(255,255,255,0.5))]',
         )}
       >
-        <Icon name={action.iconName} size="158px" />
+        <Icon name={action.iconName} size="146px" />
       </span>
       <span className="flex-center relative mt-6 flex-col">
         <StrokeShadowText

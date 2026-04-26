@@ -13,7 +13,43 @@ const app = express();
 const httpServer = createServer(app);
 const PORT = process.env.PORT ?? 3001;
 
-app.use(cors({ origin: [/^http:\/\/localhost:\d+$/], credentials: true }));
+const DEFAULT_FRONTEND_ORIGINS = new Set<string>([
+  'https://doodlebattle.online',
+  'https://www.doodlebattle.online',
+]);
+
+function isAllowedCorsOrigin(requestOrigin: string | undefined): boolean {
+  if (requestOrigin == null) {
+    return true;
+  }
+  if (/^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)$/.test(requestOrigin)) {
+    return true;
+  }
+  if (DEFAULT_FRONTEND_ORIGINS.has(requestOrigin)) {
+    return true;
+  }
+  for (const extra of (process.env.CORS_ORIGINS ?? '')
+    .split(',')
+    .map((o) => o.trim())
+    .filter(Boolean)) {
+    if (extra && extra === requestOrigin) {
+      return true;
+    }
+  }
+  if (/^https:\/\/.+\.vercel\.app$/i.test(requestOrigin)) {
+    return true;
+  }
+  return false;
+}
+
+app.use(
+  cors({
+    origin: (requestOrigin, callback) => {
+      callback(null, isAllowedCorsOrigin(requestOrigin));
+    },
+    credentials: true,
+  }),
+);
 app.use(express.json());
 app.use('/api/recognize', recognizeRouter);
 app.use('/api/interactions', interactionsRouter);

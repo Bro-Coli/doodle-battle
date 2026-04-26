@@ -1,35 +1,208 @@
 import * as Dialog from '@radix-ui/react-dialog';
-import { useEffect, useRef, useState, type CSSProperties } from 'react';
+import { useEffect, useRef, useState, type CSSProperties, type KeyboardEvent } from 'react';
 
 import { setDisplayName, useDisplayNameStore } from '@/features/lobby/displayNameStore';
 import { StrokeShadowText } from '@/ui/text/StrokeShadowText';
 import { playButtonSfx } from '../buttonSfx';
 
 type DecoItem =
-  | { type: 'star'; top: string; left: string; size: string; color?: string; glow?: string; dur?: string; delay?: string }
-  | { type: 'circle'; top: string; left: string; size: string; color?: string; glow?: string; dur?: string; delay?: string }
-  | { type: 'ring'; top: string; left: string; size: string; color?: string; glow?: string; dur?: string; delay?: string };
+  | {
+      type: 'star';
+      top: string;
+      left: string;
+      size: string;
+      color?: string;
+      glow?: string;
+      dur?: string;
+      delay?: string;
+    }
+  | {
+      type: 'circle';
+      top: string;
+      left: string;
+      size: string;
+      color?: string;
+      glow?: string;
+      dur?: string;
+      delay?: string;
+    }
+  | {
+      type: 'ring';
+      top: string;
+      left: string;
+      size: string;
+      color?: string;
+      glow?: string;
+      dur?: string;
+      delay?: string;
+    };
 
 const DECORATIONS: DecoItem[] = [
-  { type: 'star', top: '2%',  left: '6%',   size: '28px', glow: 'rgba(255,255,255,0.8)', dur: '2.2s', delay: '0s' },
-  { type: 'star', top: '8%',  left: '88%',  size: '24px', glow: 'rgba(200,180,255,0.8)', dur: '2.8s', delay: '0.4s' },
-  { type: 'star', top: '78%', left: '4%',   size: '20px', glow: 'rgba(255,220,255,0.7)', dur: '3.2s', delay: '1.1s' },
-  { type: 'star', top: '85%', left: '92%',  size: '32px', glow: 'rgba(255,255,255,0.9)', dur: '2.5s', delay: '0.6s' },
-  { type: 'star', top: '45%', left: '1%',   size: '18px', glow: 'rgba(200,200,255,0.7)', dur: '3s',   delay: '1.5s' },
-  { type: 'star', top: '30%', left: '96%',  size: '22px', glow: 'rgba(255,200,255,0.8)', dur: '2.6s', delay: '0.2s' },
-  { type: 'star', top: '62%', left: '95%',  size: '18px', glow: 'rgba(220,200,255,0.7)', dur: '3.4s', delay: '0.9s' },
+  {
+    type: 'star',
+    top: '2%',
+    left: '6%',
+    size: '28px',
+    glow: 'rgba(255,255,255,0.8)',
+    dur: '2.2s',
+    delay: '0s',
+  },
+  {
+    type: 'star',
+    top: '8%',
+    left: '88%',
+    size: '24px',
+    glow: 'rgba(200,180,255,0.8)',
+    dur: '2.8s',
+    delay: '0.4s',
+  },
+  {
+    type: 'star',
+    top: '78%',
+    left: '4%',
+    size: '20px',
+    glow: 'rgba(255,220,255,0.7)',
+    dur: '3.2s',
+    delay: '1.1s',
+  },
+  {
+    type: 'star',
+    top: '85%',
+    left: '92%',
+    size: '32px',
+    glow: 'rgba(255,255,255,0.9)',
+    dur: '2.5s',
+    delay: '0.6s',
+  },
+  {
+    type: 'star',
+    top: '45%',
+    left: '1%',
+    size: '18px',
+    glow: 'rgba(200,200,255,0.7)',
+    dur: '3s',
+    delay: '1.5s',
+  },
+  {
+    type: 'star',
+    top: '30%',
+    left: '96%',
+    size: '22px',
+    glow: 'rgba(255,200,255,0.8)',
+    dur: '2.6s',
+    delay: '0.2s',
+  },
+  {
+    type: 'star',
+    top: '62%',
+    left: '95%',
+    size: '18px',
+    glow: 'rgba(220,200,255,0.7)',
+    dur: '3.4s',
+    delay: '0.9s',
+  },
 
-  { type: 'circle', top: '12%',  left: '14%',  size: '10px', color: 'rgba(255,255,255,0.7)', glow: 'rgba(200,180,255,0.5)', dur: '3.5s', delay: '0.3s' },
-  { type: 'circle', top: '18%',  left: '82%',  size: '8px',  color: 'rgba(255,220,255,0.8)', glow: 'rgba(255,200,255,0.5)', dur: '2.8s', delay: '1.2s' },
-  { type: 'circle', top: '70%',  left: '10%',  size: '12px', color: 'rgba(200,200,255,0.7)', glow: 'rgba(180,180,255,0.5)', dur: '3.2s', delay: '0.7s' },
-  { type: 'circle', top: '90%',  left: '80%',  size: '10px', color: 'rgba(255,255,255,0.6)', glow: 'rgba(255,255,255,0.4)', dur: '4s',   delay: '1.6s' },
-  { type: 'circle', top: '55%',  left: '97%',  size: '8px',  color: 'rgba(255,200,255,0.7)', glow: 'rgba(255,180,255,0.4)', dur: '3s',   delay: '0.5s' },
-  { type: 'circle', top: '40%',  left: '2%',   size: '7px',  color: 'rgba(200,220,255,0.8)', glow: 'rgba(180,200,255,0.5)', dur: '3.6s', delay: '2s' },
+  {
+    type: 'circle',
+    top: '12%',
+    left: '14%',
+    size: '10px',
+    color: 'rgba(255,255,255,0.7)',
+    glow: 'rgba(200,180,255,0.5)',
+    dur: '3.5s',
+    delay: '0.3s',
+  },
+  {
+    type: 'circle',
+    top: '18%',
+    left: '82%',
+    size: '8px',
+    color: 'rgba(255,220,255,0.8)',
+    glow: 'rgba(255,200,255,0.5)',
+    dur: '2.8s',
+    delay: '1.2s',
+  },
+  {
+    type: 'circle',
+    top: '70%',
+    left: '10%',
+    size: '12px',
+    color: 'rgba(200,200,255,0.7)',
+    glow: 'rgba(180,180,255,0.5)',
+    dur: '3.2s',
+    delay: '0.7s',
+  },
+  {
+    type: 'circle',
+    top: '90%',
+    left: '80%',
+    size: '10px',
+    color: 'rgba(255,255,255,0.6)',
+    glow: 'rgba(255,255,255,0.4)',
+    dur: '4s',
+    delay: '1.6s',
+  },
+  {
+    type: 'circle',
+    top: '55%',
+    left: '97%',
+    size: '8px',
+    color: 'rgba(255,200,255,0.7)',
+    glow: 'rgba(255,180,255,0.4)',
+    dur: '3s',
+    delay: '0.5s',
+  },
+  {
+    type: 'circle',
+    top: '40%',
+    left: '2%',
+    size: '7px',
+    color: 'rgba(200,220,255,0.8)',
+    glow: 'rgba(180,200,255,0.5)',
+    dur: '3.6s',
+    delay: '2s',
+  },
 
-  { type: 'ring', top: '5%',   left: '50%',  size: '24px', color: 'rgba(255,255,255,0.3)', glow: 'rgba(200,180,255,0.25)', dur: '5s',   delay: '0s' },
-  { type: 'ring', top: '92%',  left: '40%',  size: '18px', color: 'rgba(255,200,255,0.3)', glow: 'rgba(255,180,255,0.2)',  dur: '4.5s', delay: '1s' },
-  { type: 'ring', top: '50%',  left: '98%',  size: '20px', color: 'rgba(200,200,255,0.25)', glow: 'rgba(180,180,255,0.2)', dur: '5.5s', delay: '0.8s' },
-  { type: 'ring', top: '35%',  left: '0%',   size: '16px', color: 'rgba(255,220,255,0.3)', glow: 'rgba(220,200,255,0.2)',  dur: '4s',   delay: '1.4s' },
+  {
+    type: 'ring',
+    top: '5%',
+    left: '50%',
+    size: '24px',
+    color: 'rgba(255,255,255,0.3)',
+    glow: 'rgba(200,180,255,0.25)',
+    dur: '5s',
+    delay: '0s',
+  },
+  {
+    type: 'ring',
+    top: '92%',
+    left: '40%',
+    size: '18px',
+    color: 'rgba(255,200,255,0.3)',
+    glow: 'rgba(255,180,255,0.2)',
+    dur: '4.5s',
+    delay: '1s',
+  },
+  {
+    type: 'ring',
+    top: '50%',
+    left: '98%',
+    size: '20px',
+    color: 'rgba(200,200,255,0.25)',
+    glow: 'rgba(180,180,255,0.2)',
+    dur: '5.5s',
+    delay: '0.8s',
+  },
+  {
+    type: 'ring',
+    top: '35%',
+    left: '0%',
+    size: '16px',
+    color: 'rgba(255,220,255,0.3)',
+    glow: 'rgba(220,200,255,0.2)',
+    dur: '4s',
+    delay: '1.4s',
+  },
 ];
 
 function ModalDecorations() {
@@ -48,8 +221,7 @@ function ModalDecorations() {
 
         if (d.type === 'star')
           return <span key={i} className="ui-deco-star ui-deco-star--4pt" style={vars} />;
-        if (d.type === 'circle')
-          return <span key={i} className="ui-deco-circle" style={vars} />;
+        if (d.type === 'circle') return <span key={i} className="ui-deco-circle" style={vars} />;
         return <span key={i} className="ui-deco-ring" style={vars} />;
       })}
     </div>
@@ -94,6 +266,12 @@ export function LobbyNameModal({ trigger }: LobbyNameModalProps) {
     setOpen(false);
   }
 
+  function handleInputKeyDown(event: KeyboardEvent<HTMLInputElement>): void {
+    if (event.key !== 'Enter') return;
+    event.preventDefault();
+    handleConfirm();
+  }
+
   return (
     <Dialog.Root open={open} onOpenChange={handleOpenChange}>
       <Dialog.Trigger asChild>
@@ -110,7 +288,7 @@ export function LobbyNameModal({ trigger }: LobbyNameModalProps) {
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 z-50 bg-black/65" />
         <Dialog.Content
-          className="fixed top-1/2 left-1/2 z-50 w-[min(92vw,700px)] -translate-x-1/2 -translate-y-1/2 outline-none"
+          className="fixed top-1/2 left-1/2 z-50 w-[min(90vw,640px)] -translate-x-1/2 -translate-y-1/2 outline-none"
           onOpenAutoFocus={(event) => {
             event.preventDefault();
             requestAnimationFrame(() => {
@@ -142,53 +320,54 @@ export function LobbyNameModal({ trigger }: LobbyNameModalProps) {
           <div className="relative">
             <ModalDecorations />
             <div className="ui-purple-glass-modal">
-            <span className="ui-name-glass-spec" aria-hidden />
-            <div className="relative z-1 flex h-full flex-col items-center justify-center text-center">
-              <StrokeShadowText
-                className="t38-eb uppercase"
-                firstStrokeColor="#1a2555"
-                secondStrokeColor="#2c5890"
-                firstStrokeWidth={10}
-                secondStrokeWidth={10}
-                // shadowOffsetY="0.4rem"
-              >
-                Enter Your Name
-              </StrokeShadowText>
-
-              <input
-                id="name-modal-input"
-                ref={inputRef}
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="Your Name..."
-                maxLength={16}
-                className="ui-name-input mt-8 px-5 t24-b font-nunito"
-              />
-              <p className="text-white/90 t16-b font-nunito mt-4">Max 16 characters</p>
-
-              <div className="mt-2 flex justify-center">
-                <button
-                  type="button"
-                  className="ui-pill-button ui-pill-button--mint px-8 mt-6 disabled:cursor-not-allowed disabled:opacity-65"
-                  onClick={handleConfirm}
-                  disabled={!canConfirm}
+              <span className="ui-name-glass-spec" aria-hidden />
+              <div className="relative z-1 flex h-full flex-col items-center justify-center text-center">
+                <StrokeShadowText
+                  className="t32-eb uppercase"
+                  firstStrokeColor="#1a2555"
+                  secondStrokeColor="#2c5890"
+                  firstStrokeWidth={10}
+                  secondStrokeWidth={10}
+                  // shadowOffsetY="0.4rem"
                 >
-                  <span className="relative z-1 inline-block">
-                    <span
-                      aria-hidden
-                      className="pointer-events-none absolute inset-0 text-center uppercase text-transparent t28-eb "
-                      style={confirmStrokeStyle}
-                    >
-                      Confirm
+                  Enter Your Name
+                </StrokeShadowText>
+
+                <input
+                  id="name-modal-input"
+                  ref={inputRef}
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  onKeyDown={handleInputKeyDown}
+                  placeholder="Your Name..."
+                  maxLength={16}
+                  className="ui-name-input mt-8 px-5 t24-b font-nunito"
+                />
+                <p className="text-white/90 t16-b font-nunito mt-4">Max 16 characters</p>
+
+                <div className="mt-2 flex justify-center">
+                  <button
+                    type="button"
+                    className="ui-pill-button ui-pill-button--mint px-7 mt-5 disabled:cursor-not-allowed disabled:opacity-65"
+                    onClick={handleConfirm}
+                    disabled={!canConfirm}
+                  >
+                    <span className="relative z-1 inline-block">
+                      <span
+                        aria-hidden
+                        className="pointer-events-none absolute inset-0 text-center uppercase text-transparent t24-eb "
+                        style={confirmStrokeStyle}
+                      >
+                        Confirm
+                      </span>
+                      <span className="relative text-center uppercase text-white t24-eb">
+                        Confirm
+                      </span>
                     </span>
-                    <span className="relative text-center uppercase text-white t28-eb">
-                      Confirm
-                    </span>
-                  </span>
-                </button>
+                  </button>
+                </div>
               </div>
             </div>
-          </div>
           </div>
         </Dialog.Content>
       </Dialog.Portal>
