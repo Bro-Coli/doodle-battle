@@ -56,6 +56,12 @@ export async function quickPlay(name: string): Promise<Room> {
   return room;
 }
 
+export async function joinFirstOpenRoom(name: string): Promise<Room | null> {
+  const rooms = await listJoinableRooms();
+  if (rooms.length === 0) return null;
+  return joinByCode(rooms[0].roomId, name);
+}
+
 export interface JoinableRoom {
   roomId: string;
   clients: number;
