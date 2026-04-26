@@ -368,9 +368,19 @@ export function CreateRoomScreen() {
         <div className="flex flex-1 flex-col items-center">
           {!created ? (
             <div className="ui-team-area flex w-full min-h-[400px] items-center justify-center">
-              <p className="t24-b font-nunito text-center text-white/40">
-                Please create a room to get started!
-              </p>
+              {loading ? (
+                <div className="flex items-center gap-3 text-white/65">
+                  <span
+                    aria-hidden
+                    className="h-8 w-8 rounded-full border-[5px] border-white/25 border-t-white animate-spin"
+                  />
+                  <p className="t24-b font-nunito text-center">Creating room...</p>
+                </div>
+              ) : (
+                <p className="t24-b font-nunito text-center text-white/40">
+                  Please create a room to get started!
+                </p>
+              )}
             </div>
           ) : (
             <div className="ui-team-area ui-team-area--filled w-full">
