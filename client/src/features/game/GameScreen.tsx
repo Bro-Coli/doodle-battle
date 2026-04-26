@@ -34,7 +34,7 @@ type GameSnapshot = {
   entityCounts: { red: number; blue: number };
   currentRound: number;
   maxRounds: number;
-  currentMapType: 'land' | 'water' | 'air';
+  currentMapType: 'land' | 'water' | 'sky';
 };
 
 type PlayerStat = {
@@ -217,7 +217,7 @@ export function GameScreen(): React.JSX.Element {
       const phaseTimer = state.phaseTimer ?? 0;
       const currentRound = state.currentRound ?? 0;
       const maxRounds = state.maxRounds ?? 5;
-      const currentMapType = (state.currentMapType ?? 'land') as 'land' | 'water' | 'air';
+      const currentMapType = (state.currentMapType ?? 'land') as 'land' | 'water' | 'sky';
 
       const prevPhase = prevPhaseRef.current;
       if (prevPhase !== currentPhase) {
@@ -438,7 +438,13 @@ export function GameScreen(): React.JSX.Element {
       )}
 
       {currentPhase === 'results' && resultsVisible && (
-        <ResultsOverlay entityCounts={entityCounts} isFinalRound={currentRound + 1 >= maxRounds} />
+        <ResultsOverlay
+          entityCounts={entityCounts}
+          isFinalRound={currentRound + 1 >= maxRounds}
+          currentRound={currentRound}
+          maxRounds={maxRounds}
+          myTeam={myTeamRef.current === 'blue' ? 'blue' : 'red'}
+        />
       )}
 
       {currentPhase === 'idle' && <IdleOverlay />}

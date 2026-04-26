@@ -21,7 +21,7 @@ const COLLISION_REHIT_MS = 450;
 import type { EntityProfile, Archetype, MapType } from '@crayon-world/shared/src/types.js';
 import { DEFAULT_STYLE_BY_ARCHETYPE, canSurvive } from '@crayon-world/shared/src/types.js';
 
-const MAP_TYPES: MapType[] = ['land', 'water', 'air'];
+const MAP_TYPES: MapType[] = ['land', 'water', 'sky'];
 
 /** Draw the next map from a shuffled bag — reshuffles once empty, so each set of
  * three rounds is guaranteed to contain one of each map. */
@@ -44,7 +44,7 @@ function makeMapBag(): () => MapType {
 const ENV_DAMAGE_DPS: Record<MapType, number> = {
   land: 8,    // water-only creatures suffocating
   water: 15,  // drowning
-  air: 25,    // unused on air — see AIR_FALL_SECONDS below
+  sky: 25,    // falling — fast death
 };
 
 /** Air maps don't drain HP gradually — non-survivors fall for this many
@@ -798,7 +798,7 @@ export class GameRoom extends Room<{ state: GameState }> {
       habitat,
       landSpeed: habitat === 'land' ? speed : undefined,
       waterSpeed: habitat === 'water' ? speed : undefined,
-      airSpeed: habitat === 'air' ? speed : undefined,
+      airSpeed: habitat === 'sky' ? speed : undefined,
       agility: typeof data.agility === 'number' ? data.agility : 5,
       energy: typeof data.energy === 'number' ? data.energy : 5,
       maxHealth: typeof data.maxHealth === 'number' ? data.maxHealth : 30,

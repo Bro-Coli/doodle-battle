@@ -44,7 +44,7 @@ export const DEFAULT_STYLE_BY_ARCHETYPE: Record<Archetype, MovementStyle> = {
 };
 
 /** Map type played in a given round — determines which creatures survive. */
-export type MapType = 'land' | 'water' | 'air';
+export type MapType = 'land' | 'water' | 'sky';
 
 /** Primary environment the creature is from. */
 export type Habitat = MapType;
@@ -58,7 +58,7 @@ export interface EntityProfile {
   landSpeed?: number;
   /** 1-10 speed on water maps. Undefined → cannot survive in water. */
   waterSpeed?: number;
-  /** 1-10 speed on air maps. Only fliers should have this. */
+  /** 1-10 speed on sky maps. Only fliers should have this. */
   airSpeed?: number;
   agility: number;              // 1-10 — turn responsiveness / direction changes
   energy: number;               // 1-10 — burstiness (low = steady, high = bursty/pausing)

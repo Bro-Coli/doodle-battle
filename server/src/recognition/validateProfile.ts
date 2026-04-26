@@ -12,7 +12,7 @@ const VALID_ARCHETYPES: Archetype[] = [
   'stationary',
 ];
 
-const VALID_HABITATS: Habitat[] = ['land', 'water', 'air'];
+const VALID_HABITATS: Habitat[] = ['land', 'water', 'sky'];
 
 /** Strip disjunctives and hedges from a recognition name ("Eagle or Hawk" → "Eagle"). */
 function normalizeName(raw: string): string {
@@ -102,7 +102,7 @@ export function validateEntityProfile(raw: unknown): EntityProfile | null {
   // Guarantee the home-habitat speed exists so every creature can move on its own map.
   if (habitat === 'land' && landSpeed === undefined) landSpeed = 5;
   if (habitat === 'water' && waterSpeed === undefined) waterSpeed = 5;
-  if (habitat === 'air' && airSpeed === undefined) airSpeed = 5;
+  if (habitat === 'sky' && airSpeed === undefined) airSpeed = 5;
 
   // Fliers must have a landSpeed so they can be grounded on land maps.
   if (archetype === 'flying' && landSpeed === undefined) landSpeed = 2;

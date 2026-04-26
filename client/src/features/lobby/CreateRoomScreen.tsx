@@ -6,6 +6,7 @@ import { setDisplayName, useDisplayNameStore } from './displayNameStore';
 import { Icon } from '@/ui/icon/Icon';
 import { NeonIcon } from '@/ui/icon/NeonIcon';
 import { StrokeShadowText } from '@/ui/text/StrokeShadowText';
+import { TeamColumn } from './parts/TeamColumn';
 
 const MAX_PLAYER_OPTIONS = [2, 4, 6, 8] as const;
 const ROUND_OPTIONS = [3, 5, 10] as const;
@@ -383,68 +384,33 @@ export function CreateRoomScreen() {
               )}
             </div>
           ) : (
-            <div className="ui-team-area ui-team-area--filled w-full">
-              {/* Team headers */}
-              <div className="mb-4 flex w-full items-center">
-                <div className="flex-1 text-center">
-                  <span className="inline-flex items-center gap-2 t18-b font-nunito uppercase tracking-wider text-white">
-                    <span className="ui-team-dot ui-team-dot--blue" aria-hidden />
-                    Blue Team
-                  </span>
-                </div>
-                <div className="w-12" />
-                <div className="flex-1 text-center">
-                  <span className="inline-flex items-center gap-2 t18-b font-nunito uppercase tracking-wider text-white">
-                    <span className="ui-team-dot ui-team-dot--red" aria-hidden />
-                    Red Team
-                  </span>
-                </div>
-              </div>
+            <div className="w-full">
+              <div className="ui-waiting-room-arena__teams">
+                <TeamColumn
+                  team="blue"
+                  label="Blue Team"
+                  players={teamBPlayers}
+                  slotCount={teamSlotCount}
+                  mySessionId={mySessionId}
+                  hostSessionId={hostSessionId}
+                />
 
-              {/* Team columns */}
-              <div className="flex w-full gap-3">
-                {/* Team A */}
-                <div className="flex flex-1 flex-col gap-4">
-                  {Array.from({ length: teamSlotCount }).map((_, i) => {
-                    const entry = teamAPlayers[i];
-                    return (
-                      <TeamSlot
-                        key={entry ? entry[0] : `a-empty-${i}`}
-                        playerName={entry?.[1].name}
-                        isHost={entry ? entry[0] === hostSessionId : false}
-                        isMe={entry ? entry[0] === mySessionId : false}
-                        isReady={entry?.[1].ready}
-                      />
-                    );
-                  })}
-                </div>
+                <NeonIcon
+                  name="arrowSwap"
+                  size={56}
+                  color="currentColor"
+                  neonColor="#71bff0"
+                  neonIntensity={2}
+                />
 
-                {/* Swap icon */}
-                <div className="flex items-center justify-center">
-                  <NeonIcon
-                    name="arrowSwap"
-                    size={48}
-                    color="currentColor"
-                    neonColor="#71bff0"
-                    neonIntensity={2}
-                  />
-                </div>
-
-                {/* Team B */}
-                <div className="flex flex-1 flex-col gap-4">
-                  {Array.from({ length: teamSlotCount }).map((_, i) => {
-                    const entry = teamBPlayers[i];
-                    return (
-                      <TeamSlot
-                        key={entry ? entry[0] : `b-empty-${i}`}
-                        playerName={entry?.[1].name}
-                        isHost={entry ? entry[0] === hostSessionId : false}
-                        isMe={entry ? entry[0] === mySessionId : false}
-                        isReady={entry?.[1].ready}
-                      />
-                    );
-                  })}
-                </div>
+                <TeamColumn
+                  team="red"
+                  label="Red Team"
+                  players={teamAPlayers}
+                  slotCount={teamSlotCount}
+                  mySessionId={mySessionId}
+                  hostSessionId={hostSessionId}
+                />
               </div>
 
               {/* Status text */}
@@ -624,51 +590,3 @@ function HeartIcon() {
   );
 }
 
-function TeamSlot({
-  playerName,
-  isMe,
-  isReady,
-}: {
-  playerName?: string;
-  isHost: boolean;
-  isMe: boolean;
-  isReady?: boolean;
-}) {
-  if (!playerName) {
-    return (
-      <div className="ui-team-slot ui-team-slot--empty font-nunito">
-        <span className="relative z-2">Waiting...</span>
-      </div>
-    );
-  }
-
-  return (
-    <div className="ui-team-slot ui-team-slot--filled font-nunito">
-      <div className="flex min-w-0 items-center gap-2">
-        <span className="truncate t16-b">{playerName}</span>
-        {isMe && (
-          <span
-            className="shrink-0 rounded-md px-1.5 py-0.5 font-black text-[0.72rem] tracking-[0.14em] uppercase"
-            style={{
-              background: 'linear-gradient(180deg, #FFE788 0%, #FFC93C 55%, #E08A00 100%)',
-              color: '#4A2A00',
-              boxShadow:
-                'inset 0 1px 0 rgba(255,255,255,0.65), 0 1px 0 rgba(80,44,0,0.5), 0 0 10px rgba(255,200,60,0.45)',
-            }}
-          >
-            You
-          </span>
-        )}
-      </div>
-      {isReady && (
-        <Icon
-          name="check"
-          size={32}
-          color="#34d399"
-          className="shrink-0 drop-shadow-[0_0_6px_rgba(52,211,153,0.6)]"
-          decorative
-        />
-      )}
-    </div>
-  );
-}
