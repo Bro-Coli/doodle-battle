@@ -27,7 +27,7 @@
 
   .ui-purple-glass-modal--tutorial {
     /* Taller than name modal; shorter than default --lg (78vh / 620px) — content scale unchanged. */
-    height: min(74vh, 620px);
+    height: min(70vh, 580px);
     box-shadow:
       0 10px 20px rgba(92, 68, 132, 0.24),
       inset 0 1px 1px rgba(255, 255, 255, 0.68);
@@ -208,7 +208,7 @@
   .ui-tutorial-card-grid {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 22px;
+    gap: 18px;
     width: 100%;
     min-height: 0;
   }
@@ -221,7 +221,7 @@
     align-items: center;
     justify-content: flex-start;
     overflow: hidden;
-    border-radius: 28px;
+    border-radius: 24px;
     border: 2px solid rgba(212, 225, 255, 0.32);
     /* Softer, image-like top depth: elliptical vignette + gentle wash (no hard band). */
     background:
@@ -238,7 +238,7 @@
     box-shadow:
       inset 0 1px 0 rgba(255, 255, 255, 0.09),
       inset 0 20px 36px -24px rgba(4, 10, 40, 0.07);
-    padding: clamp(0.65rem, 1.2vw, 1rem) clamp(0.65rem, 1.2vw, 1rem) 0.85rem;
+    padding: clamp(0.55rem, 1vw, 0.85rem) clamp(0.55rem, 1vw, 0.85rem) 0.7rem;
     text-align: center;
   }
 
@@ -270,7 +270,7 @@
   .ui-tutorial-icon-wrap {
     position: relative;
     display: grid;
-    width: clamp(120px, 15vw, 194px);
+    width: clamp(108px, 13vw, 170px);
     aspect-ratio: 1;
     place-items: center;
     color: var(--tutorial-icon-color, #30dce6);
@@ -352,12 +352,12 @@
 
   .ui-tutorial-card-title {
     position: relative;
-    margin-top: clamp(0.7rem, 1.3vh, 1.05rem);
+    margin-top: clamp(0.55rem, 1vh, 0.85rem);
   }
 
   .ui-tutorial-card-description {
     position: relative;
-    margin-top: 0.65rem;
+    margin-top: 0.5rem;
   }
 
   .ui-tutorial-modal-title {
@@ -405,7 +405,7 @@
   }
 
   .ui-purple-glass-modal--tutorial {
-    height: min(78vh, 640px);
+    height: min(72vh, 560px);
   }
 
   .ui-name-input {
@@ -416,16 +416,16 @@
 
   .ui-tutorial-card-grid {
     grid-template-columns: 1fr;
-    gap: 18px;
+    gap: 14px;
     overflow-y: auto;
     padding-right: 4px;
   }
 
   .ui-tutorial-card {
-    min-height: 284px;
+    min-height: 252px;
   }
 
   .ui-tutorial-icon-wrap {
-    width: 136px;
+    width: 120px;
   }
 }

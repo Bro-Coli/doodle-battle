@@ -72,7 +72,7 @@ export function TutorialModal() {
   return (
     <Dialog.Portal>
       <Dialog.Overlay className="fixed inset-0 z-50 bg-black/70" />
-      <Dialog.Content className="fixed top-1/2 left-1/2 z-50 w-[min(96vw,1140px)] -translate-x-1/2 -translate-y-1/2 outline-none">
+      <Dialog.Content className="fixed top-1/2 left-1/2 z-50 w-[min(96vw,1060px)] -translate-x-1/2 -translate-y-1/2 outline-none">
         <Dialog.Title className="sr-only">Tutorial</Dialog.Title>
         <Dialog.Description className="sr-only">
           How to play Doodle Battle. Close this dialog with the button or by pressing Escape.
@@ -81,11 +81,11 @@ export function TutorialModal() {
         <Dialog.Close
           type="button"
           aria-label="Close tutorial"
-          className="ui-icon-button ui-icon-button--modal-close absolute -top-8 -right-8 z-30 focus-visible:ring-2 focus-visible:ring-[#c7a5ff] focus-visible:ring-offset-2 focus-visible:outline-none sm:top-4 sm:right-4"
+          className="ui-icon-button ui-icon-button--modal-close absolute -top-8 -right-24 z-30 focus-visible:ring-2 focus-visible:ring-[#c7a5ff] focus-visible:ring-offset-2 focus-visible:outline-none sm:top-4 sm:right-4"
         >
           <Icon
             name="close"
-            size={62}
+            size={68}
             color="#dbd4ef"
             decorative
             className="ui-tutorial-close-icon"
@@ -95,10 +95,10 @@ export function TutorialModal() {
         <div className="ui-purple-glass-modal ui-purple-glass-modal--lg ui-purple-glass-modal--tutorial">
           <span className="ui-name-glass-spec" aria-hidden />
 
-          <div className="relative z-[1] flex h-full flex-col px-7 pt-12 pb-10 text-white sm:px-4 sm:pt-6 sm:pb-5">
+          <div className="relative z-[1] flex h-full flex-col px-6 pt-10 pb-8 text-white sm:px-4 sm:pt-6 sm:pb-5">
             <div className="mb-8 flex justify-center sm:mb-4">
               <StrokeShadowText
-                className="t60-eb sm:t48-eb"
+                className="t50-eb sm:t48-eb"
                 fillClassName="ui-create-room-title__text"
                 fillStyle={{
                   backgroundImage:
@@ -110,9 +110,9 @@ export function TutorialModal() {
                 secondStrokeColor="#2c5890"
                 firstStrokeWidth={12}
                 secondStrokeWidth={8}
-                shadowOffsetY="0.32rem"
+                shadowOffsetY="0.3rem"
                 deepShadowColor="rgba(20, 38, 92, 0.92)"
-                deepShadowOffsetY="0.7rem"
+                deepShadowOffsetY="0.4rem"
                 deepShadowStrokeWidth={12}
                 deepShadowBlur="1px"
               >
