@@ -1,5 +1,14 @@
-import { Application, Container, Graphics, Ticker, Texture } from 'pixi.js';
+import { Application, Assets, Container, Graphics, Sprite, Ticker, Texture } from 'pixi.js';
 import { EntityProfile, InteractionMatrix, MapType } from '@crayon-world/shared/src/types';
+import landMap from './assets/maps/land.webp';
+import waterMap from './assets/maps/water.webp';
+import airMap from './assets/maps/air.webp';
+
+const MAP_TEXTURE_URLS: Record<MapType, string> = {
+  land: landMap,
+  water: waterMap,
+  air: airMap,
+};
 import { captureEntityTexture } from './captureEntityTexture';
 import { buildEntityContainer, buildEntitySprite, updateHealthBar } from './EntitySprite';
 import { EntityState, initEntityState, dispatchBehavior, WORLD_BOUNDS } from '@crayon-world/shared/src/simulation/EntitySimulation';
@@ -31,7 +40,7 @@ export class WorldStage {
   private readonly _worldRoot: Container;
   private readonly _app: Application;
   private _inWorld = false;
-  private _playArea!: Graphics;
+  private _playArea!: Sprite;
   private _mapType: MapType = 'land';
 
   // Round state machine
@@ -94,8 +103,8 @@ export class WorldStage {
     app.stage.addChild(this._drawingRoot);
     app.stage.addChild(this._worldRoot);
 
-    // Map-tinted play-area fill — color swaps with map type via setMapType().
-    this._playArea = new Graphics();
+    // Map background sprite — texture swaps with map type via setMapType().
+    this._playArea = new Sprite();
     this._playArea.eventMode = 'none';
     this._worldRoot.addChild(this._playArea);
     this._redrawPlayArea();
@@ -221,15 +230,13 @@ export class WorldStage {
   }
 
   private _redrawPlayArea(): void {
-    const colors: Record<MapType, number> = {
-      land: 0x7cc36c,   // green
-      water: 0x4ba3d9,  // blue
-      air: 0xffffff,    // white/sky
-    };
-    this._playArea.clear();
-    this._playArea
-      .rect(0, 0, WORLD_BOUNDS.width, WORLD_BOUNDS.height)
-      .fill({ color: colors[this._mapType] });
+    const requested = this._mapType;
+    void Assets.load<Texture>(MAP_TEXTURE_URLS[requested]).then((texture) => {
+      if (this._mapType !== requested) return;
+      this._playArea.texture = texture;
+      this._playArea.width = WORLD_BOUNDS.width;
+      this._playArea.height = WORLD_BOUNDS.height;
+    });
   }
 
   /** Toggle between draw mode and world mode. */
@@ -380,8 +387,6 @@ export class WorldStage {
 
       if (resolved && resolved.type === 'befriend') {
         const targetState = this._entityStates.get(resolved.targetContainer);
-        const selfName = this._entityProfiles.get(container)?.name ?? '?';
-        const targetName = this._entityProfiles.get(resolved.targetContainer)?.name ?? '?';
 
         if (targetState) {
           // Track as companions once close enough (bidirectional)
