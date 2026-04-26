@@ -211,7 +211,7 @@ export function CreateRoomScreen() {
               <input
                 type="range"
                 min={10}
-                max={600}
+                max={120}
                 step={10}
                 value={drawingTime}
                 onChange={(e) => setDrawingTime(Number(e.target.value))}
