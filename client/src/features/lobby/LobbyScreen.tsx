@@ -90,7 +90,7 @@ export function LobbyScreen(): React.JSX.Element {
         background: 'var(--gradient-lobby)',
       }}
     >
-      <div className="flex min-w-[1680px] max-w-7xl flex-col items-center gap-6 pt-8 sm:gap-5 sm:pt-6">
+      <div className="flex flex-col items-center gap-6 pt-8 sm:gap-5 sm:pt-6">
         <img
           src={mainTitle}
           alt="Doodle Battle"
