@@ -1,5 +1,5 @@
 import { Application, Assets, Container, Graphics, Sprite, Text, Ticker, Texture } from 'pixi.js';
-import { EntityProfile, InteractionMatrix, MapType } from '@crayon-world/shared/src/types';
+import { EntityProfile, InteractionMatrix, MapType, canSurvive } from '@crayon-world/shared/src/types';
 import { captureEntityTexture } from './captureEntityTexture';
 import { buildEntityContainer, buildEntitySprite, updateHealthBar } from './EntitySprite';
 import { EntityState, initEntityState, dispatchBehavior, WORLD_BOUNDS } from '@crayon-world/shared/src/simulation/EntitySimulation';
@@ -836,10 +836,11 @@ export class WorldStage {
     this._entityContainersById.set(entityId, entity);
     this._entityIdByContainer.set(entity, entityId);
 
-    // Non-fliers on a sky map can't survive — they fall the moment they spawn.
-    // Server keeps HP full for ~1s then snaps it to 0; the spawn-time fall keeps
-    // visuals in sync without waiting for the death notification.
-    if (this._mapType === 'sky' && profile.archetype !== 'flying') {
+    // Sky-map non-survivors fall the moment they spawn. Use the same
+    // canSurvive check as the server (airSpeed !== undefined) so drifting
+    // clouds, etc. — which the server treats as sky-survivors — don't get
+    // a phantom fall visual while their HP stays full.
+    if (this._mapType === 'sky' && !canSurvive(profile, 'sky')) {
       this._startFallFromSpawn(entity);
     }
   }
@@ -1062,14 +1063,40 @@ export class WorldStage {
       return;
     }
 
-    // Water sinks more slowly than sky falls; both fade to zero scale + alpha.
-    const isSky = this._mapType === 'sky';
-    const duration = isSky ? 1000 : 1800;
-    const descentPx = isSky ? 60 : 0;
+    // Sky deaths (fliers killed in combat) plunge offscreen — body falls,
+    // no shrink, no fade. Matches the spawn-fall visual for non-fliers.
+    if (this._mapType === 'sky') {
+      const duration = 1000;
+      const descentPx = 700;
+      let elapsed = 0;
+      const initialY = container.y;
+      const labelInitialY = label ? label.y : 0;
+
+      const animate = (ticker: Ticker): void => {
+        if (container.destroyed) {
+          this._app.ticker.remove(animate);
+          return;
+        }
+        elapsed += ticker.deltaMS;
+        const t = Math.min(1, elapsed / duration);
+        const dy = descentPx * t * t;
+        container.y = initialY + dy;
+        if (label && !label.destroyed) label.y = labelInitialY + dy;
+        if (t >= 1) {
+          this._app.ticker.remove(animate);
+          this._destroyEntity(container);
+        }
+      };
+
+      this._app.ticker.add(animate);
+      return;
+    }
+
+    // Water: slow sink — scale and alpha fade to zero in place.
+    const duration = 1800;
     let elapsed = 0;
     const initialScaleX = container.scale.x;
     const initialScaleY = container.scale.y;
-    const initialY = container.y;
 
     const animate = (ticker: Ticker): void => {
       // The container can be destroyed externally (cleanupOrphans on phase
@@ -1085,13 +1112,6 @@ export class WorldStage {
       container.scale.set(initialScaleX * factor, initialScaleY * factor);
       container.alpha = factor;
       if (label && !label.destroyed) label.alpha = factor;
-      if (descentPx > 0) {
-        container.y = initialY + descentPx * t;
-        const spriteH = this._entitySpriteHeights.get(container);
-        if (label && !label.destroyed && spriteH !== undefined) {
-          label.y = container.y - (spriteH * Math.abs(factor)) / 2 - 6;
-        }
-      }
       if (t >= 1) {
         this._app.ticker.remove(animate);
         this._destroyEntity(container);
@@ -1110,13 +1130,17 @@ export class WorldStage {
   private _startFallFromSpawn(container: Container): void {
     this._fallingFromSpawn.add(container);
 
+    // Fixed descent over fixed duration — every faller travels the same
+    // distance regardless of spawn y, so a higher-spawned entity gets no
+    // survival advantage. Server snaps HP to 0 at elapsed = SKY_FALL_SECONDS.
+    // Descent is large enough to clear the world (900px tall) from any spawn y;
+    // quadratic easing gives a gravity-like accelerating plunge.
     const duration = 1000; // matches server SKY_FALL_SECONDS
-    const descentPx = 60;
+    const descentPx = 700;
     let elapsed = 0;
-    const initialScaleX = container.scale.x;
-    const initialScaleY = container.scale.y;
     const initialY = container.y;
     const label = this._entityLabels.get(container);
+    const labelInitialY = label ? label.y : 0;
 
     const animate = (ticker: Ticker): void => {
       if (container.destroyed) {
@@ -1125,18 +1149,12 @@ export class WorldStage {
       }
       elapsed += ticker.deltaMS;
       const t = Math.min(1, elapsed / duration);
-      const factor = 1 - t;
-      container.scale.set(initialScaleX * factor, initialScaleY * factor);
-      container.alpha = factor;
-      if (label && !label.destroyed) label.alpha = factor;
-      container.y = initialY + descentPx * t;
-      const spriteH = this._entitySpriteHeights.get(container);
-      if (label && !label.destroyed && spriteH !== undefined) {
-        label.y = container.y - (spriteH * Math.abs(factor)) / 2 - 6;
-      }
+      const dy = descentPx * t * t;
+      container.y = initialY + dy;
+      if (label && !label.destroyed) label.y = labelInitialY + dy;
       if (t >= 1) {
         this._app.ticker.remove(animate);
-        // Stay at scale 0 / alpha 0 until the server-driven removal lands.
+        // Hold at the final fallen position until the server-driven removal lands.
       }
     };
 
