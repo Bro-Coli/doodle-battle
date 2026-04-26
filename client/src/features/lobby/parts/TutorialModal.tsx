@@ -89,7 +89,7 @@ export function TutorialModal() {
             size={62}
             color="#dbd4ef"
             decorative
-            className="drop-shadow-[0_2px_0_rgba(53,28,115,0.55)]"
+            className="ui-tutorial-close-icon"
           />
         </Dialog.Close>
 
@@ -98,19 +98,15 @@ export function TutorialModal() {
           alt="How to Play"
           width={4747}
           height={879}
-          className="pointer-events-none absolute top-6 left-1/2 z-20 w-[min(84vw,720px)] -translate-x-1/2 -translate-y-1/2 select-none object-contain sm:w-[min(86vw,640px)]"
-          style={{
-            filter:
-              'hue-rotate(12deg) saturate(1.08) brightness(1.01) drop-shadow(0 0 6px rgba(211, 176, 255, 0.8)) drop-shadow(0 0 16px rgba(198, 153, 255, 0.55))',
-          }}
+          className="ui-tutorial-modal-title pointer-events-none absolute top-6 left-1/2 z-20 w-[min(84vw,720px)] -translate-x-1/2 -translate-y-1/2 select-none object-contain sm:w-[min(86vw,640px)]"
           draggable={false}
           decoding="async"
         />
 
-        <div className="ui-purple-glass-modal ui-purple-glass-modal--lg">
+        <div className="ui-purple-glass-modal ui-purple-glass-modal--lg ui-purple-glass-modal--tutorial">
           <span className="ui-name-glass-spec" aria-hidden />
 
-          <div className="relative z-[1] flex h-full px-7 pt-22 pb-7 text-white sm:px-4 sm:pt-18 sm:pb-5">
+          <div className="relative z-[1] flex h-full px-7 pt-26 pb-7 text-white sm:px-4 sm:pt-18 sm:pb-5">
             <div className="ui-tutorial-card-grid">
               {tutorialSteps.map((step) => (
                 <article className="ui-tutorial-card" key={step.title}>
