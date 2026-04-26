@@ -38,7 +38,7 @@ function TeamScore({
 }): React.JSX.Element {
   return (
     <div className="relative flex flex-col items-center">
-      <div className="h-9 mb-1.5 flex items-end">{isMine ? <YouBadge /> : null}</div>
+      <div className="h-9 flex items-end">{isMine ? <YouBadge /> : null}</div>
       <div
         className={cn(
           'ui-hud-counter',
@@ -77,6 +77,7 @@ export function ResultsOverlay({
       <GameOverlayCard
         className={cn(
           'animate-[scaleIn_0.5s_cubic-bezier(0.34,1.56,0.64,1)_both]',
+          'ui-hud-card--results',
           'relative min-w-[480px] px-12! py-10! text-center',
         )}
       >

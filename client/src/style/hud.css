@@ -89,6 +89,38 @@
       0 0 60px var(--color-team-blue-glow-soft);
   }
 
+  .ui-hud-card--results {
+    background: linear-gradient(
+      180deg,
+      rgba(188, 160, 255, 0.76) 0%,
+      rgba(155, 122, 235, 0.8) 52%,
+      rgba(126, 96, 206, 0.86) 100%
+    );
+    border-color: rgba(246, 238, 255, 0.88);
+    box-shadow:
+      inset 0 0 0 2px rgba(255, 255, 255, 0.2),
+      inset 0 3px 0 rgba(255, 255, 255, 0.34),
+      inset 0 20px 40px -20px rgba(255, 255, 255, 0.2),
+      inset 0 -10px 24px -8px rgba(54, 31, 108, 0.28),
+      0 6px 0 rgba(54, 31, 108, 0.28),
+      0 18px 38px rgba(32, 14, 74, 0.34),
+      0 0 24px rgba(189, 160, 255, 0.22),
+      0 0 54px rgba(160, 120, 245, 0.14);
+  }
+
+  .ui-hud-card--results::before {
+    background: linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.42) 0%,
+      rgba(255, 255, 255, 0.16) 45%,
+      rgba(255, 255, 255, 0.03) 100%
+    );
+  }
+
+  .ui-hud-card--results::after {
+    background: rgba(255, 255, 255, 0.36);
+  }
+
   .ui-hud-card--sm {
     border-radius: 22px;
     border-width: 4px;

@@ -4,6 +4,7 @@ import { DrawingCanvas } from '../drawing/DrawingCanvas';
 import type { DrawTool } from '../drawing/DrawingCanvas';
 import { WorldStage } from '../world/WorldStage';
 import { MultiplayerWorldBridge } from '../world/MultiplayerWorldBridge';
+import { hideTooltip } from '../world/EntityTooltip';
 import { exportPng } from '../drawing/exportPng';
 import { captureEntityTexture } from '../world/captureEntityTexture';
 import { TEAM_TINTS } from '../world/EntitySprite';
@@ -306,6 +307,12 @@ export function GameScreen(): React.JSX.Element {
     }
     const timer = window.setTimeout(() => setResultsVisible(true), 1000);
     return () => window.clearTimeout(timer);
+  }, [snapshot.currentPhase]);
+
+  useEffect(() => {
+    if (snapshot.currentPhase !== 'simulate') {
+      hideTooltip();
+    }
   }, [snapshot.currentPhase]);
 
   const handleToolChange = useCallback((tool: DrawTool) => {
