@@ -16,6 +16,13 @@ const MAP_TEXTURE_URLS: Record<MapType, string> = {
   sky: skyMap,
 };
 
+/** Constant descent speed (px/s) used by water sink animations — both the
+ *  spawn-time sink for non-survivors and the death sink for combat kills.
+ *  Decoupled from the server drown timer (WATER_DROWN_SECONDS): entities
+ *  that reach the floor first hold there, ones still mid-sink at the kill
+ *  time disappear in place. */
+const SINK_SPEED_PX_PER_SEC = 60;
+
 /**
  * Round lifecycle phases.
  * - idle: no active round; entities are frozen
@@ -52,6 +59,10 @@ export class WorldStage {
   // when the server later removes them (HP snaps to 0 after ~1s) we skip the
   // normal removeEntity animation since they're already invisible.
   private _fallingFromSpawn = new Set<Container>();
+  // Water-map non-survivors start sinking immediately at spawn and settle
+  // ~10% from the bottom while the server gradually drains HP. When the
+  // server later removes them we skip the death-time sink (already settled).
+  private _sinkingFromSpawn = new Set<Container>();
   private _bounceCooldowns = new Map<Container, number>(); // ms remaining after wall bounce
   private _interactionMatrix: InteractionMatrix | null = null;
   private _roundTimer: number | null = null;
@@ -842,6 +853,10 @@ export class WorldStage {
     // a phantom fall visual while their HP stays full.
     if (this._mapType === 'sky' && !canSurvive(profile, 'sky')) {
       this._startFallFromSpawn(entity);
+    } else if (this._mapType === 'water' && !canSurvive(profile, 'water')) {
+      // Water-map non-survivors sink to ~10% from the bottom and hold there
+      // while the server gradually drains HP via env damage.
+      this._startSinkFromSpawn(entity);
     }
   }
 
@@ -936,7 +951,15 @@ export class WorldStage {
 
     for (const [entityId, curr] of this._currSnapshot) {
       const container = this._entityContainersById.get(entityId);
-      if (!container || this._dyingEntities.has(container)) continue;
+      // Skip containers whose y is being driven by a death/spawn animation —
+      // re-lerping them to server y would yank a sinking entity off the
+      // floor or a fallen entity back into the sky.
+      if (
+        !container ||
+        this._dyingEntities.has(container) ||
+        this._fallingFromSpawn.has(container) ||
+        this._sinkingFromSpawn.has(container)
+      ) continue;
 
       const prev = this._prevSnapshot.get(entityId);
       if (!prev) continue; // new entity, already snapped in applyPositions
@@ -1039,6 +1062,11 @@ export class WorldStage {
       this._destroyEntity(container);
       return;
     }
+    // Already settled at the floor from spawn-time sink — just clean up.
+    if (this._sinkingFromSpawn.has(container)) {
+      this._destroyEntity(container);
+      return;
+    }
 
     const label = this._entityLabels.get(container);
     const healthBar = this._entityHealthBars.get(container);
@@ -1092,27 +1120,30 @@ export class WorldStage {
       return;
     }
 
-    // Water: slow sink — scale and alpha fade to zero in place.
-    const duration = 1800;
+    // Water deaths (combat kill of a water-survivor) sink to the floor at
+    // the same constant speed as spawn-sink, no shrink, no fade, then destroy.
+    // If already at/below the floor, skip the animation.
+    const targetY = WORLD_BOUNDS.height * 0.9;
+    const initialY = container.y;
+    if (initialY >= targetY) {
+      this._destroyEntity(container);
+      return;
+    }
+    const totalDescent = targetY - initialY;
+    const speedPxPerSec = SINK_SPEED_PX_PER_SEC;
     let elapsed = 0;
-    const initialScaleX = container.scale.x;
-    const initialScaleY = container.scale.y;
+    const labelInitialY = label ? label.y : 0;
 
     const animate = (ticker: Ticker): void => {
-      // The container can be destroyed externally (cleanupOrphans on phase
-      // transition) before this animation completes. Touching scale/alpha on
-      // a destroyed container throws and kills the whole Pixi ticker.
       if (container.destroyed) {
         this._app.ticker.remove(animate);
         return;
       }
       elapsed += ticker.deltaMS;
-      const t = Math.min(1, elapsed / duration);
-      const factor = 1 - t;
-      container.scale.set(initialScaleX * factor, initialScaleY * factor);
-      container.alpha = factor;
-      if (label && !label.destroyed) label.alpha = factor;
-      if (t >= 1) {
+      const dy = Math.min(totalDescent, (speedPxPerSec * elapsed) / 1000);
+      container.y = initialY + dy;
+      if (label && !label.destroyed) label.y = labelInitialY + dy;
+      if (dy >= totalDescent) {
         this._app.ticker.remove(animate);
         this._destroyEntity(container);
       }
@@ -1162,6 +1193,44 @@ export class WorldStage {
   }
 
   /**
+   * Begin the spawn-time sink animation for a non-survivor on a water map.
+   * Constant-speed descent (slower than gravity — water resistance feel)
+   * decoupled from the server drown timer. Entities that reach the floor
+   * before the server kills them simply hold at the floor; entities still
+   * mid-sink when the server kill lands disappear at their current y.
+   */
+  private _startSinkFromSpawn(container: Container): void {
+    this._sinkingFromSpawn.add(container);
+
+    const targetY = WORLD_BOUNDS.height * 0.9;
+    const initialY = container.y;
+    if (initialY >= targetY) return; // already at or below the floor
+
+    const totalDescent = targetY - initialY;
+    const speedPxPerSec = SINK_SPEED_PX_PER_SEC;
+    let elapsed = 0;
+    const label = this._entityLabels.get(container);
+    const labelInitialY = label ? label.y : 0;
+
+    const animate = (ticker: Ticker): void => {
+      if (container.destroyed) {
+        this._app.ticker.remove(animate);
+        return;
+      }
+      elapsed += ticker.deltaMS;
+      const dy = Math.min(totalDescent, (speedPxPerSec * elapsed) / 1000);
+      container.y = initialY + dy;
+      if (label && !label.destroyed) label.y = labelInitialY + dy;
+      if (dy >= totalDescent) {
+        this._app.ticker.remove(animate);
+        // Hold at the floor until the server-driven removal lands.
+      }
+    };
+
+    this._app.ticker.add(animate);
+  }
+
+  /**
    * Destroy a corpse or fully-faded entity: drop all map references and free
    * GPU resources for both the container and its label.
    */
@@ -1180,6 +1249,7 @@ export class WorldStage {
     this._dyingEntities.delete(container);
     this._deadInPlace.delete(container);
     this._fallingFromSpawn.delete(container);
+    this._sinkingFromSpawn.delete(container);
     // These tickers iterate maps keyed by container — orphaned entries would
     // touch a destroyed container next tick and kill the whole Pixi loop.
     this._lungeAnimations.delete(container);

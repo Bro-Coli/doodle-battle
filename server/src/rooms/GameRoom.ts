@@ -40,17 +40,24 @@ function makeMapBag(): () => MapType {
   };
 }
 
-/** HP lost per second when an entity cannot survive the current map. */
+/** HP lost per second when an entity cannot survive the current map. Only
+ *  consulted for land — water and sky use fairness-normalized timers below. */
 const ENV_DAMAGE_DPS: Record<MapType, number> = {
   land: 8,    // water-only creatures suffocating
-  water: 15,  // drowning
-  sky: 25,    // falling — fast death
+  water: 0,   // unused — water drowning uses WATER_DROWN_SECONDS
+  sky: 0,     // unused — sky falling uses SKY_FALL_SECONDS
 };
 
 /** Sky maps don't drain HP gradually — non-survivors fall for this many
  *  seconds with full HP, then HP snaps to 0 simultaneously regardless of
  *  health pool, so big-HP creatures get no advantage. */
 const SKY_FALL_SECONDS = 1.0;
+
+/** Water maps drain HP at maxHp / WATER_DROWN_SECONDS per second, so every
+ *  non-survivor reaches HP=0 at the same elapsed time regardless of pool.
+ *  Independent of the client sink visual — entities that reach the floor
+ *  before this timer just sit there until the server kill lands. */
+const WATER_DROWN_SECONDS = 8.0;
 
 // ---------------------------------------------------------------------------
 // Schemas
@@ -430,8 +437,17 @@ export class GameRoom extends Room<{ state: GameState }> {
               this._dyingEntities.add(entityId);
               toRemove.push(entityId);
             }
+          } else if (mapType === 'water') {
+            // Drowning: drain HP as a fraction of maxHp per second, so every
+            // non-survivor hits 0 at the same elapsed time (no HP-pool advantage).
+            const drainPerSecond = schema.maxHp / WATER_DROWN_SECONDS;
+            schema.hp = Math.max(0, schema.hp - drainPerSecond * dt);
+            if (schema.hp <= 0 && !this._dyingEntities.has(entityId)) {
+              this._dyingEntities.add(entityId);
+              toRemove.push(entityId);
+            }
           } else {
-            // Land/water: gradual drain.
+            // Land: gradual drain at fixed dps.
             schema.hp = Math.max(0, schema.hp - envDps * dt);
             if (schema.hp <= 0 && !this._dyingEntities.has(entityId)) {
               this._dyingEntities.add(entityId);
