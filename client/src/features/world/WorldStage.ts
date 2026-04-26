@@ -1,4 +1,4 @@
-import { Application, Container, Graphics, Ticker, Texture } from 'pixi.js';
+import { Application, Container, Graphics, Text, Ticker, Texture } from 'pixi.js';
 import { EntityProfile, InteractionMatrix, MapType } from '@crayon-world/shared/src/types';
 import { captureEntityTexture } from './captureEntityTexture';
 import { buildEntityContainer, buildEntitySprite, updateHealthBar } from './EntitySprite';
@@ -37,6 +37,12 @@ export class WorldStage {
   // Round state machine
   private _roundPhase: RoundPhase = 'idle';
   private _dyingEntities = new Set<Container>();
+  // Land-map deaths leave a frozen corpse instead of destroying — wiped on round restart.
+  private _deadInPlace = new Set<Container>();
+  // Non-fliers spawned on an air map start the fall animation immediately —
+  // when the server later removes them (HP snaps to 0 after ~1s) we skip the
+  // normal removeEntity animation since they're already invisible.
+  private _fallingFromSpawn = new Set<Container>();
   private _bounceCooldowns = new Map<Container, number>(); // ms remaining after wall bounce
   private _interactionMatrix: InteractionMatrix | null = null;
   private _roundTimer: number | null = null;
@@ -155,7 +161,7 @@ export class WorldStage {
 
   /** Number of active (non-dying) entities in the world. */
   get entityCount(): number {
-    return this._entityStates.size;
+    return this._entityStates.size - this._deadInPlace.size;
   }
 
   /** Current round phase. */
@@ -690,6 +696,10 @@ export class WorldStage {
    */
   async startRound(): Promise<void> {
     if (this._roundPhase !== 'idle') return;
+
+    // Wipe any frozen corpses left from the previous round before fresh action.
+    this.clearCorpses();
+
     if (this._entityStates.size === 0) return;
 
     // Increment round number and snapshot entity names BEFORE async work (avoid off-by-one)
@@ -741,7 +751,12 @@ export class WorldStage {
 
     // Compute outcome BEFORE transitioning to idle so lastOutcome is populated
     // when the phase-change callback fires and main.ts reads it.
-    const namesNow = new Set(Array.from(this._entityProfiles.values()).map(p => p.name));
+    // Corpses (frozen dead-on-land entities) are not survivors.
+    const namesNow = new Set(
+      Array.from(this._entityProfiles.entries())
+        .filter(([container]) => !this._deadInPlace.has(container))
+        .map(([, p]) => p.name),
+    );
     this._lastOutcome = {
       roundNumber: this._roundNumber,
       survivors: [...namesNow],
@@ -800,6 +815,13 @@ export class WorldStage {
     // Store in UUID-keyed maps (multiplayer lookup)
     this._entityContainersById.set(entityId, entity);
     this._entityIdByContainer.set(entity, entityId);
+
+    // Non-fliers on an air map can't survive — they fall the moment they spawn.
+    // Server keeps HP full for ~1s then snaps it to 0; the spawn-time fall keeps
+    // visuals in sync without waiting for the death notification.
+    if (this._mapType === 'air' && profile.archetype !== 'flying') {
+      this._startFallFromSpawn(entity);
+    }
   }
 
   /**
@@ -948,9 +970,8 @@ export class WorldStage {
   }
 
   /**
-   * Remove an entity by UUID (used when server removes it from Schema).
-   * Delegates to removeEntity() for fade-out animation.
-   * Also cleans UUID-keyed maps when the fade completes.
+   * Remove an entity by UUID, applying the appropriate death animation for the
+   * current map type. Used when an entity dies mid-round.
    */
   removeEntityById(entityId: string): void {
     const container = this._entityContainersById.get(entityId);
@@ -958,16 +979,33 @@ export class WorldStage {
     this.removeEntity(container);
   }
 
+  /**
+   * Immediately destroy an entity by UUID with no animation. Used at round
+   * end when the server clears the schema — survivors should be wiped, not
+   * death-animated.
+   */
+  cleanupEntityById(entityId: string): void {
+    const container = this._entityContainersById.get(entityId);
+    if (!container) return;
+    this._destroyEntity(container);
+  }
+
   // ─── Entity removal ───────────────────────────────────────────────────────
 
   /**
-   * Fade out an entity over 0.5s then remove it from all 5 maps, destroy label
-   * and container GPU resources.
+   * Handle an entity's death.
+   *
+   * - Land map: leave a frozen corpse with empty HP bar and "(Dead)" label;
+   *   destruction is deferred until clearCorpses() / cleanupAllEntities() runs.
+   * - Air map: scale-and-fall animation, then destroy.
+   * - Water map: slow scale-and-fade ("sinking"), then destroy.
+   *
+   * Spawn-fall optimization: non-fliers spawned on air maps already started
+   * their fall animation in spawnFromSchema and are at scale ~0 by the time
+   * the server snaps HP to 0 — skip the redundant animation, destroy directly.
    *
    * Idempotent: calling removeEntity() on a container that is already dying is
    * a no-op.
-   *
-   * Public so Phase 8 fight resolution can call it directly.
    *
    * @param container - The entity's root Container (used as map key)
    */
@@ -975,48 +1013,205 @@ export class WorldStage {
     if (this._dyingEntities.has(container)) return; // already dying
     this._dyingEntities.add(container);
 
+    // Already invisible from the spawn-time fall — just clean up.
+    if (this._fallingFromSpawn.has(container)) {
+      this._destroyEntity(container);
+      return;
+    }
+
     const label = this._entityLabels.get(container);
-    const fadeDuration = 500; // 0.5s
+    const healthBar = this._entityHealthBars.get(container);
+    if (healthBar) updateHealthBar(healthBar, 0);
+
+    if (this._mapType === 'land') {
+      // Freeze in place. Mark the label "(Dead)" and dim the corpse.
+      if (label) {
+        const text = label.children[0];
+        if (text instanceof Text && !text.text.endsWith(' (Dead)')) {
+          text.text = `${text.text} (Dead)`;
+        }
+        label.alpha = 0.7;
+      }
+      container.alpha = 0.55;
+      // Make the corpse non-interactive — it should never intercept pointer
+      // events meant for the drawing canvas or other live entities.
+      container.eventMode = 'none';
+      container.cursor = 'default';
+      container.removeAllListeners();
+      this._deadInPlace.add(container);
+      return;
+    }
+
+    // Water sinks more slowly than air falls; both fade to zero scale + alpha.
+    const isAir = this._mapType === 'air';
+    const duration = isAir ? 1000 : 1800;
+    const descentPx = isAir ? 60 : 0;
     let elapsed = 0;
+    const initialScaleX = container.scale.x;
+    const initialScaleY = container.scale.y;
+    const initialY = container.y;
 
-    const fadeOut = (ticker: Ticker): void => {
+    const animate = (ticker: Ticker): void => {
       elapsed += ticker.deltaMS;
-      const alpha = Math.max(0, 1 - elapsed / fadeDuration);
-      container.alpha = alpha;
-      if (label) label.alpha = alpha;
-
-      if (alpha <= 0) {
-        this._app.ticker.remove(fadeOut);
-
-        // Delete from all maps BEFORE destroy() to prevent leaked texture references
-        this._entityStates.delete(container);
-        this._entityTextures.delete(container);
-        this._entityProfiles.delete(container);
-        this._entityLabels.delete(container);
-        this._entitySpriteHeights.delete(container);
-        this._entityHp.delete(container);
-        this._entityMaxHp.delete(container);
-        this._entityHealthBars.delete(container);
-        this._dyingEntities.delete(container);
-
-        // Clean UUID-keyed maps (multiplayer mode)
-        const entityId = this._entityIdByContainer.get(container);
-        if (entityId !== undefined) {
-          this._entityContainersById.delete(entityId);
+      const t = Math.min(1, elapsed / duration);
+      const factor = 1 - t;
+      container.scale.set(initialScaleX * factor, initialScaleY * factor);
+      container.alpha = factor;
+      if (label) label.alpha = factor;
+      if (descentPx > 0) {
+        container.y = initialY + descentPx * t;
+        const spriteH = this._entitySpriteHeights.get(container);
+        if (label && spriteH !== undefined) {
+          label.y = container.y - (spriteH * Math.abs(factor)) / 2 - 6;
         }
-        this._entityIdByContainer.delete(container);
-
-        // Clean companion relationships — remove this entity from all companion sets
-        this._companions.delete(container);
-        for (const [, compSet] of this._companions) {
-          compSet.delete(container);
-        }
-
-        label?.destroy({ children: true });
-        container.destroy({ children: true });
+      }
+      if (t >= 1) {
+        this._app.ticker.remove(animate);
+        this._destroyEntity(container);
       }
     };
 
-    this._app.ticker.add(fadeOut);
+    this._app.ticker.add(animate);
+  }
+
+  /**
+   * Begin the spawn-time fall animation for a non-flier on an air map.
+   * Runs for AIR_FALL_DURATION_MS — the entity's HP stays full server-side
+   * during this window; the server snaps HP to 0 at the same instant for all
+   * fallers, then the bridge removes the entity (already invisible).
+   */
+  private _startFallFromSpawn(container: Container): void {
+    this._fallingFromSpawn.add(container);
+
+    const duration = 1000; // matches server AIR_FALL_SECONDS
+    const descentPx = 60;
+    let elapsed = 0;
+    const initialScaleX = container.scale.x;
+    const initialScaleY = container.scale.y;
+    const initialY = container.y;
+    const label = this._entityLabels.get(container);
+
+    const animate = (ticker: Ticker): void => {
+      elapsed += ticker.deltaMS;
+      const t = Math.min(1, elapsed / duration);
+      const factor = 1 - t;
+      container.scale.set(initialScaleX * factor, initialScaleY * factor);
+      container.alpha = factor;
+      if (label) label.alpha = factor;
+      container.y = initialY + descentPx * t;
+      const spriteH = this._entitySpriteHeights.get(container);
+      if (label && spriteH !== undefined) {
+        label.y = container.y - (spriteH * Math.abs(factor)) / 2 - 6;
+      }
+      if (t >= 1) {
+        this._app.ticker.remove(animate);
+        // Stay at scale 0 / alpha 0 until the server-driven removal lands.
+      }
+    };
+
+    this._app.ticker.add(animate);
+  }
+
+  /**
+   * Destroy a corpse or fully-faded entity: drop all map references and free
+   * GPU resources for both the container and its label.
+   */
+  private _destroyEntity(container: Container): void {
+    const label = this._entityLabels.get(container);
+
+    // Delete from all maps BEFORE destroy() to prevent leaked texture references
+    this._entityStates.delete(container);
+    this._entityTextures.delete(container);
+    this._entityProfiles.delete(container);
+    this._entityLabels.delete(container);
+    this._entitySpriteHeights.delete(container);
+    this._entityHp.delete(container);
+    this._entityMaxHp.delete(container);
+    this._entityHealthBars.delete(container);
+    this._dyingEntities.delete(container);
+    this._deadInPlace.delete(container);
+    this._fallingFromSpawn.delete(container);
+
+    // Clean UUID-keyed maps (multiplayer mode)
+    const entityId = this._entityIdByContainer.get(container);
+    if (entityId !== undefined) {
+      this._entityContainersById.delete(entityId);
+    }
+    this._entityIdByContainer.delete(container);
+
+    // Clean companion relationships — remove this entity from all companion sets
+    this._companions.delete(container);
+    for (const [, compSet] of this._companions) {
+      compSet.delete(container);
+    }
+
+    label?.destroy({ children: true });
+    container.destroy({ children: true });
+  }
+
+  /**
+   * Destroy any frozen corpses left over from a previous round.
+   * Called by single-player startRound() to clean up land-map corpses.
+   */
+  clearCorpses(): void {
+    for (const container of this._deadInPlace) {
+      this._destroyEntity(container);
+    }
+    this._deadInPlace.clear();
+  }
+
+  /**
+   * Immediately destroy every multiplayer-tracked entity (survivors AND corpses)
+   * with no death animation. Called by MultiplayerWorldBridge at round restart
+   * so that healthy survivors don't get incorrectly treated as fresh kills when
+   * the server clears the schema.
+   *
+   * Each destroy is wrapped in try/catch so a single broken container can't
+   * abort the rest of the cleanup pass.
+   */
+  cleanupAllEntities(): void {
+    const containers = Array.from(this._entityIdByContainer.keys());
+    for (const container of containers) {
+      try {
+        this._destroyEntity(container);
+      } catch (err) {
+        console.error('[WorldStage] cleanupAllEntities: destroy failed:', err);
+      }
+    }
+  }
+
+  /**
+   * Destroy any tracked entity whose entityId is NOT in `currentIds`.
+   *
+   * - When `preserveDying === true` (during simulate), entities mid-death
+   *   (water sink, air fall, dead-on-land corpses) are preserved so their
+   *   animations / corpse visuals can complete or persist for the round.
+   * - When `preserveDying === false` (any non-simulate phase), every orphan
+   *   is destroyed immediately — corpses included. This is the key call that
+   *   guarantees no leftover entity from round N can persist into round N+1,
+   *   regardless of phase-transition timing or which patches the bridge
+   *   actually observed.
+   *
+   * Called every state callback by MultiplayerWorldBridge.
+   */
+  cleanupOrphans(currentIds: Set<string>, preserveDying: boolean): void {
+    const toDestroy: Container[] = [];
+    for (const [container, entityId] of this._entityIdByContainer) {
+      if (currentIds.has(entityId)) continue;
+      if (preserveDying && this._dyingEntities.has(container)) continue;
+      toDestroy.push(container);
+    }
+    for (const container of toDestroy) {
+      try {
+        this._destroyEntity(container);
+      } catch (err) {
+        console.error('[WorldStage] cleanupOrphans: destroy failed:', err);
+      }
+    }
+  }
+
+  /** True if a multiplayer entity with this UUID is currently tracked. */
+  hasEntity(entityId: string): boolean {
+    return this._entityContainersById.has(entityId);
   }
 }

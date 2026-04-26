@@ -44,8 +44,13 @@ function makeMapBag(): () => MapType {
 const ENV_DAMAGE_DPS: Record<MapType, number> = {
   land: 8,    // water-only creatures suffocating
   water: 15,  // drowning
-  air: 25,    // falling — fast death
+  air: 25,    // unused on air — see AIR_FALL_SECONDS below
 };
+
+/** Air maps don't drain HP gradually — non-survivors fall for this many
+ *  seconds with full HP, then HP snaps to 0 simultaneously regardless of
+ *  health pool, so big-HP creatures get no advantage. */
+const AIR_FALL_SECONDS = 1.0;
 
 // ---------------------------------------------------------------------------
 // Schemas
@@ -114,6 +119,8 @@ export class GameRoom extends Room<{ state: GameState }> {
   _entitiesDrawn: Map<string, number> = new Map();
   // Entities that can't survive the current map — drained each tick until dead.
   _envDyingEntities: Set<string> = new Set();
+  // Air-fall timers — entityId → seconds elapsed since spawn while falling.
+  _envDyingElapsed: Map<string, number> = new Map();
   // Per-game shuffled map bag — guarantees a balanced distribution of maps.
   _nextMap: () => MapType = makeMapBag();
 
@@ -409,14 +416,27 @@ export class GameRoom extends Room<{ state: GameState }> {
         this._bounceCooldowns.set(entityId, 500); // 500ms cooldown
       }
 
-      // Environmental damage — entities that can't survive this map drain HP each tick.
+      // Environmental damage — entities that can't survive this map die.
       if (this._envDyingEntities.has(entityId)) {
         const schema = this.state.entities.get(entityId);
         if (schema && schema.hp > 0) {
-          schema.hp = Math.max(0, schema.hp - envDps * dt);
-          if (schema.hp <= 0 && !this._dyingEntities.has(entityId)) {
-            this._dyingEntities.add(entityId);
-            toRemove.push(entityId);
+          if (mapType === 'air') {
+            // Falling: HP stays full for AIR_FALL_SECONDS, then snaps to 0
+            // simultaneously for every non-survivor (no HP-pool advantage).
+            const elapsed = (this._envDyingElapsed.get(entityId) ?? 0) + dt;
+            this._envDyingElapsed.set(entityId, elapsed);
+            if (elapsed >= AIR_FALL_SECONDS) {
+              schema.hp = 0;
+              this._dyingEntities.add(entityId);
+              toRemove.push(entityId);
+            }
+          } else {
+            // Land/water: gradual drain.
+            schema.hp = Math.max(0, schema.hp - envDps * dt);
+            if (schema.hp <= 0 && !this._dyingEntities.has(entityId)) {
+              this._dyingEntities.add(entityId);
+              toRemove.push(entityId);
+            }
           }
         }
       }
@@ -441,6 +461,7 @@ export class GameRoom extends Room<{ state: GameState }> {
       this.state.entities.delete(entityId);
       this._dyingEntities.delete(entityId);
       this._envDyingEntities.delete(entityId);
+      this._envDyingElapsed.delete(entityId);
     }
   }
 
@@ -813,6 +834,7 @@ export class GameRoom extends Room<{ state: GameState }> {
     this._bounceCooldowns.clear();
     this._dyingEntities.clear();
     this._envDyingEntities.clear();
+    this._envDyingElapsed.clear();
     this.state.entities.clear();
   }
 
