@@ -14,9 +14,9 @@ const MAP_LABEL: Record<MapType, string> = {
 };
 
 const MAP_DESCRIPTION: Record<MapType, string> = {
-  land: 'Draw something that can walk — fliers will be grounded, fish will suffocate.',
-  water: 'Draw something that can swim — land dwellers and fliers will drown.',
-  air: 'Draw something that can fly — everything else will fall.',
+  land: 'Grassy plains. Best for walkers.',
+  water: 'Open ocean. Best for swimmers.',
+  air: 'Endless sky. Best for fliers.',
 };
 
 export function ObjectiveBanner({
