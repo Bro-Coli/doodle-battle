@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import * as Dialog from '@radix-ui/react-dialog';
 import { Icon, StrokeShadowText, type IconName } from '@/ui';
-import tutorialTitle from '../assets/tutorial-title.webp';
 
 type TutorialStep = {
   description: string;
@@ -28,7 +27,7 @@ const tutorialSteps: TutorialStep[] = [
   },
   {
     title: 'Win!',
-    description: "End the round with more living drawings than your opponent.",
+    description: 'End the round with more living drawings than your opponent.',
     iconSrc: '/tutorial-icons/win-conditions.png',
     fallbackIconName: 'trophy',
     iconTone: 'green',
@@ -82,7 +81,7 @@ export function TutorialModal() {
         <Dialog.Close
           type="button"
           aria-label="Close tutorial"
-          className="ui-icon-button ui-icon-button--modal-close absolute -top-8 -right-8 z-30 focus-visible:ring-2 focus-visible:ring-[#c7a5ff] focus-visible:ring-offset-2 focus-visible:outline-none sm:-top-4 sm:-right-4"
+          className="ui-icon-button ui-icon-button--modal-close absolute -top-8 -right-8 z-30 focus-visible:ring-2 focus-visible:ring-[#c7a5ff] focus-visible:ring-offset-2 focus-visible:outline-none sm:top-4 sm:right-4"
         >
           <Icon
             name="close"
@@ -93,21 +92,35 @@ export function TutorialModal() {
           />
         </Dialog.Close>
 
-        <img
-          src={tutorialTitle}
-          alt="How to Play"
-          width={4747}
-          height={879}
-          className="ui-tutorial-modal-title pointer-events-none absolute top-6 left-1/2 z-20 w-[min(84vw,720px)] -translate-x-1/2 -translate-y-1/2 select-none object-contain sm:w-[min(86vw,640px)]"
-          draggable={false}
-          decoding="async"
-        />
-
         <div className="ui-purple-glass-modal ui-purple-glass-modal--lg ui-purple-glass-modal--tutorial">
           <span className="ui-name-glass-spec" aria-hidden />
 
-          <div className="relative z-[1] flex h-full px-7 pt-26 pb-7 text-white sm:px-4 sm:pt-18 sm:pb-5">
-            <div className="ui-tutorial-card-grid">
+          <div className="relative z-[1] flex h-full flex-col px-7 pt-12 pb-10 text-white sm:px-4 sm:pt-6 sm:pb-5">
+            <div className="mb-8 flex justify-center sm:mb-4">
+              <StrokeShadowText
+                className="t60-eb sm:t48-eb"
+                fillClassName="ui-create-room-title__text"
+                fillStyle={{
+                  backgroundImage:
+                    'linear-gradient(180deg, #ffffff 0%, #eef7ff 35%, #bfe4ff 72%, #8fd2ff 100%)',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                }}
+                firstStrokeColor="#1a2555"
+                secondStrokeColor="#2c5890"
+                firstStrokeWidth={12}
+                secondStrokeWidth={8}
+                shadowOffsetY="0.32rem"
+                deepShadowColor="rgba(20, 38, 92, 0.92)"
+                deepShadowOffsetY="0.7rem"
+                deepShadowStrokeWidth={12}
+                deepShadowBlur="1px"
+              >
+                How to Play
+              </StrokeShadowText>
+            </div>
+
+            <div className="ui-tutorial-card-grid flex-1">
               {tutorialSteps.map((step) => (
                 <article className="ui-tutorial-card" key={step.title}>
                   <TutorialStepIcon step={step} />

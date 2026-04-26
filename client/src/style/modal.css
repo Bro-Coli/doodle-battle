@@ -22,12 +22,12 @@
 
   .ui-purple-glass-modal--lg {
     width: min(96vw, 1140px);
-    height: min(78vh, 620px);
+    height: min(78vh, 640px);
   }
 
   .ui-purple-glass-modal--tutorial {
     /* Taller than name modal; shorter than default --lg (78vh / 620px) — content scale unchanged. */
-    height: min(68vh, 540px);
+    height: min(74vh, 620px);
     box-shadow:
       0 10px 20px rgba(92, 68, 132, 0.24),
       inset 0 1px 1px rgba(255, 255, 255, 0.68);
@@ -252,7 +252,12 @@
     -webkit-mask-image: linear-gradient(180deg, transparent, #000 16%, #000 100%);
     mask-image: linear-gradient(180deg, transparent, #000 16%, #000 100%);
     background:
-      linear-gradient(90deg, rgba(255, 255, 255, 0.05) 0%, transparent 18% 82%, rgba(20, 28, 90, 0.06) 100%),
+      linear-gradient(
+        90deg,
+        rgba(255, 255, 255, 0.05) 0%,
+        transparent 18% 82%,
+        rgba(20, 28, 90, 0.06) 100%
+      ),
       radial-gradient(ellipse 100% 60% at 50% 22%, rgba(255, 255, 255, 0.05), transparent 55%);
     pointer-events: none;
   }
@@ -400,7 +405,7 @@
   }
 
   .ui-purple-glass-modal--tutorial {
-    height: min(72vh, 580px);
+    height: min(78vh, 640px);
   }
 
   .ui-name-input {
