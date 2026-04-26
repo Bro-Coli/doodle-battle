@@ -10,7 +10,7 @@ export interface EntityBuildResult {
   healthBar: Graphics;
 }
 
-const HEALTH_BAR_HEIGHT = 4;
+const HEALTH_BAR_HEIGHT = 7;
 
 /** Redraw a health bar for the given hp fraction (0..1). */
 export function updateHealthBar(bar: Graphics, fraction: number): void {
@@ -37,12 +37,12 @@ export function buildEntitySprite(texture: Texture): Sprite {
   const sprite = new Sprite(texture);
   sprite.anchor.set(0.5, 0.5);
 
-  // Scale down to ~1:5, clamping so minimum dimension is at least 30px
-  const scaleFactor = 0.2;
+  // Scale down, clamping so minimum dimension is at least 52px
+  const scaleFactor = 0.35;
   const scaledW = texture.width * scaleFactor;
   const scaledH = texture.height * scaleFactor;
   const minDim = Math.min(scaledW, scaledH);
-  const finalScale = minDim < 30 ? scaleFactor * (30 / minDim) : scaleFactor;
+  const finalScale = minDim < 52 ? scaleFactor * (52 / minDim) : scaleFactor;
   sprite.scale.set(finalScale);
 
   // Drop shadow filter — pixi-filters v6 uses `offset` (PointData), not `distance`
@@ -112,7 +112,7 @@ export function buildEntityContainer(
   const labelText = new Text({
     text: profile.name,
     style: new TextStyle({
-      fontSize: 14,
+      fontSize: 24,
       fill: labelFill,
       fontWeight: 'bold',
     }),
@@ -122,7 +122,7 @@ export function buildEntityContainer(
   label.addChild(labelText);
 
   // Health bar — sits just beneath the nametag, above the sprite
-  const barWidth = Math.max(36, Math.min(80, sprite.width * 0.6));
+  const barWidth = Math.max(63, Math.min(140, sprite.width * 0.6));
   const healthBar = new Graphics();
   (healthBar as unknown as { _barWidth: number })._barWidth = barWidth;
   healthBar.y = 3;
