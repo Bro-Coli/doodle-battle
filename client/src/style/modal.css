@@ -25,6 +25,14 @@
     height: min(78vh, 620px);
   }
 
+  .ui-purple-glass-modal--tutorial {
+    /* Taller than name modal; shorter than default --lg (78vh / 620px) — content scale unchanged. */
+    height: min(68vh, 540px);
+    box-shadow:
+      0 10px 20px rgba(92, 68, 132, 0.24),
+      inset 0 1px 1px rgba(255, 255, 255, 0.68);
+  }
+
   .ui-purple-glass-modal::before {
     content: '';
     position: absolute;
@@ -56,6 +64,16 @@
     border-radius: 45% 55% 12% 12% / 28% 28% 18% 18%;
     filter: blur(4px);
     pointer-events: none;
+  }
+
+  .ui-purple-glass-modal--tutorial::after {
+    background: radial-gradient(
+      120% 100% at 50% 0%,
+      rgba(150, 110, 255, 0.14) 0%,
+      rgba(150, 110, 255, 0.06) 45%,
+      transparent 72%
+    );
+    filter: none;
   }
 
   .ui-name-glass-spec {
@@ -154,7 +172,7 @@
   .ui-tutorial-card-grid {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 14px;
+    gap: 22px;
     width: 100%;
     min-height: 0;
   }
@@ -169,15 +187,22 @@
     overflow: hidden;
     border-radius: 28px;
     border: 2px solid rgba(212, 225, 255, 0.32);
+    /* Softer, image-like top depth: elliptical vignette + gentle wash (no hard band). */
     background:
-      linear-gradient(180deg, rgba(119, 114, 198, 0.84) 0%, rgba(72, 104, 183, 0.9) 100%),
-      radial-gradient(circle at 50% 8%, rgba(255, 255, 255, 0.28) 0%, transparent 44%);
+      radial-gradient(
+        ellipse 130% 75% at 50% -8%,
+        rgba(10, 16, 52, 0.11) 0%,
+        rgba(10, 16, 52, 0.04) 45%,
+        transparent 70%
+      ),
+      linear-gradient(180deg, rgba(20, 28, 78, 0.05) 0%, rgba(20, 28, 78, 0) 38%),
+      linear-gradient(180deg, rgba(119, 114, 198, 0.68) 0%, rgba(72, 104, 183, 0.74) 100%),
+      radial-gradient(ellipse 95% 55% at 50% 6%, rgba(255, 255, 255, 0.12) 0%, transparent 55%);
+    /* Whisper-thin top rim; micro inner blur for soft “baked” edge (stays under ::before but reads at rim). */
     box-shadow:
-      inset 0 2px 0 rgba(255, 255, 255, 0.22),
-      inset 0 -4px 0 rgba(38, 52, 123, 0.16),
-      0 8px 0 rgba(46, 52, 134, 0.26),
-      0 12px 22px rgba(37, 40, 120, 0.18);
-    padding: clamp(0.75rem, 1.5vw, 1.25rem) clamp(0.75rem, 1.5vw, 1.25rem) 1rem;
+      inset 0 1px 0 rgba(255, 255, 255, 0.09),
+      inset 0 20px 36px -24px rgba(4, 10, 40, 0.07);
+    padding: clamp(0.65rem, 1.2vw, 1rem) clamp(0.65rem, 1.2vw, 1rem) 0.85rem;
     text-align: center;
   }
 
@@ -185,17 +210,26 @@
     content: '';
     position: absolute;
     inset: 0;
+    z-index: 0;
     border-radius: inherit;
+    /* Fade overlay out toward the top so the soft top vignette + inset read like lit art, not a flat tint. */
+    -webkit-mask-image: linear-gradient(180deg, transparent, #000 16%, #000 100%);
+    mask-image: linear-gradient(180deg, transparent, #000 16%, #000 100%);
     background:
-      linear-gradient(90deg, rgba(255, 255, 255, 0.13) 0%, transparent 13% 87%, rgba(24, 34, 126, 0.12) 100%),
-      radial-gradient(circle at 12% 0%, rgba(255, 255, 255, 0.22), transparent 36%);
+      linear-gradient(90deg, rgba(255, 255, 255, 0.05) 0%, transparent 18% 82%, rgba(20, 28, 90, 0.06) 100%),
+      radial-gradient(ellipse 100% 60% at 50% 22%, rgba(255, 255, 255, 0.05), transparent 55%);
     pointer-events: none;
+  }
+
+  .ui-tutorial-card > * {
+    position: relative;
+    z-index: 1;
   }
 
   .ui-tutorial-icon-wrap {
     position: relative;
     display: grid;
-    width: clamp(132px, 17vw, 214px);
+    width: clamp(120px, 15vw, 194px);
     aspect-ratio: 1;
     place-items: center;
     color: var(--tutorial-icon-color, #30dce6);
@@ -207,7 +241,11 @@
     background:
       radial-gradient(circle at 30% 20%, rgba(255, 255, 255, 0.75) 0 4%, transparent 5%),
       radial-gradient(circle at 35% 25%, rgba(255, 255, 255, 0.36) 0%, transparent 25%),
-      radial-gradient(circle at 55% 58%, var(--tutorial-icon-mid, #24d8df) 0%, var(--tutorial-icon-edge, #18a5c4) 68%),
+      radial-gradient(
+        circle at 55% 58%,
+        var(--tutorial-icon-mid, #24d8df) 0%,
+        var(--tutorial-icon-edge, #18a5c4) 68%
+      ),
       linear-gradient(180deg, rgba(255, 255, 255, 0.42), rgba(255, 255, 255, 0));
     border: clamp(4px, 0.55vw, 7px) solid var(--tutorial-icon-border, #236d9e);
     box-shadow:
@@ -273,11 +311,20 @@
 
   .ui-tutorial-card-title {
     position: relative;
-    margin-top: clamp(1rem, 2vh, 1.5rem);
+    margin-top: clamp(0.7rem, 1.3vh, 1.05rem);
   }
 
   .ui-tutorial-card-description {
     position: relative;
+    margin-top: 0.65rem;
+  }
+
+  .ui-tutorial-modal-title {
+    filter: none;
+  }
+
+  .ui-tutorial-close-icon {
+    filter: none;
   }
 }
 
@@ -316,6 +363,10 @@
     height: 82vh;
   }
 
+  .ui-purple-glass-modal--tutorial {
+    height: min(72vh, 580px);
+  }
+
   .ui-name-input {
     height: 70px;
     border-radius: 24px;
@@ -324,17 +375,16 @@
 
   .ui-tutorial-card-grid {
     grid-template-columns: 1fr;
-    gap: 12px;
+    gap: 18px;
     overflow-y: auto;
     padding-right: 4px;
   }
 
   .ui-tutorial-card {
-    min-height: 310px;
+    min-height: 284px;
   }
 
   .ui-tutorial-icon-wrap {
-    width: 148px;
+    width: 136px;
   }
-
 }
