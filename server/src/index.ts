@@ -6,6 +6,7 @@ import { WebSocketTransport } from '@colyseus/ws-transport';
 import cors from 'cors';
 import recognizeRouter from './routes/recognize.js';
 import interactionsRouter from './routes/interactions.js';
+import roomsRouter from './routes/rooms.js';
 import { GameRoom } from './rooms/GameRoom.js';
 
 const app = express();
@@ -16,6 +17,7 @@ app.use(cors({ origin: [/^http:\/\/localhost:\d+$/], credentials: true }));
 app.use(express.json());
 app.use('/api/recognize', recognizeRouter);
 app.use('/api/interactions', interactionsRouter);
+app.use('/api/rooms', roomsRouter);
 
 // Colyseus matchmaking HTTP endpoint — the SDK POSTs here to join/create rooms
 app.post('/matchmake/:method/:roomName', async (req, res) => {

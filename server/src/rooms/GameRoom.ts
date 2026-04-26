@@ -132,6 +132,9 @@ export class GameRoom extends Room<{ state: GameState }> {
       this.setPrivate(true);
     }
 
+    // Expose drawingTime in matchmaking metadata so the server browser can show it.
+    void this.setMetadata({ drawingTime: this.state.drawingTime });
+
     // Initialize server-side simulation state
     this._entityStates = new Map();
     this._entityProfiles = new Map();

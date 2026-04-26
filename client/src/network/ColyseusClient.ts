@@ -55,3 +55,16 @@ export async function quickPlay(name: string): Promise<Room> {
   activeRoom = room;
   return room;
 }
+
+export interface JoinableRoom {
+  roomId: string;
+  clients: number;
+  maxClients: number;
+  drawingTime: number | null;
+}
+
+export async function listJoinableRooms(): Promise<JoinableRoom[]> {
+  const res = await fetch('/api/rooms');
+  if (!res.ok) throw new Error('Failed to load rooms');
+  return (await res.json()) as JoinableRoom[];
+}
