@@ -28,7 +28,7 @@ const tutorialSteps: TutorialStep[] = [
   },
   {
     title: 'Win!',
-    description: 'Survive longer than\nother teams to win.',
+    description: "End the round with more living drawings than your opponent.",
     iconSrc: '/tutorial-icons/win-conditions.png',
     fallbackIconName: 'trophy',
     iconTone: 'green',
