@@ -153,7 +153,16 @@ export function GameScreen(): React.JSX.Element {
         currentPhase?: string;
         players?: Map<string, { team: string }>;
       };
-      if (roomState.currentPhase === 'draw') {
+      // Sync stage mode to current phase — the first takeSnapshot ran before
+      // this IIFE finished, so any phase-change toggle it should have done was
+      // skipped (stage was null). Set it explicitly now.
+      const phaseNow = roomState.currentPhase;
+      if (phaseNow === 'simulate' || phaseNow === 'results') {
+        worldStage.setMode('world');
+      } else {
+        worldStage.setMode('draw');
+      }
+      if (phaseNow === 'draw') {
         const myPlayer = roomState.players?.get(room.sessionId);
         if (myPlayer) {
           const teamTint = TEAM_TINTS[myPlayer.team];
@@ -258,12 +267,12 @@ export function GameScreen(): React.JSX.Element {
 
           const stage = worldStageRef.current;
           if (stage) {
-            if (stage.inWorld) stage.toggle();
+            stage.setMode('draw');
             drawingCanvasRef.current?.clear();
           }
         } else if (currentPhase === 'simulate' || currentPhase === 'results') {
           const stage = worldStageRef.current;
-          if (stage && !stage.inWorld) stage.toggle();
+          if (stage) stage.setMode('world');
         }
       }
 

@@ -247,7 +247,16 @@ export class WorldStage {
 
   /** Toggle between draw mode and world mode. */
   toggle(): void {
-    this._inWorld = !this._inWorld;
+    this.setMode(this._inWorld ? 'draw' : 'world');
+  }
+
+  /**
+   * Explicitly set draw vs. world mode. Idempotent — safe to call when already
+   * in the requested mode. Prefer this over toggle() at phase transitions so a
+   * desynced inWorld flag can't leave the wrong root visible.
+   */
+  setMode(mode: 'draw' | 'world'): void {
+    this._inWorld = mode === 'world';
     this._drawingRoot.visible = !this._inWorld;
     this._worldRoot.visible = this._inWorld;
   }
@@ -661,6 +670,12 @@ export class WorldStage {
   private _applyLunges(deltaMS: number): void {
     if (this._lungeAnimations.size === 0) return;
     for (const [container, lunge] of this._lungeAnimations) {
+      // Defensive: an external destroy (cleanupOrphans on phase transition)
+      // can leave orphaned lunge entries; skip + drop them.
+      if (container.destroyed) {
+        this._lungeAnimations.delete(container);
+        continue;
+      }
       lunge.elapsed += deltaMS;
       const t = lunge.elapsed / lunge.duration;
       if (t >= 1) {
@@ -1057,16 +1072,23 @@ export class WorldStage {
     const initialY = container.y;
 
     const animate = (ticker: Ticker): void => {
+      // The container can be destroyed externally (cleanupOrphans on phase
+      // transition) before this animation completes. Touching scale/alpha on
+      // a destroyed container throws and kills the whole Pixi ticker.
+      if (container.destroyed) {
+        this._app.ticker.remove(animate);
+        return;
+      }
       elapsed += ticker.deltaMS;
       const t = Math.min(1, elapsed / duration);
       const factor = 1 - t;
       container.scale.set(initialScaleX * factor, initialScaleY * factor);
       container.alpha = factor;
-      if (label) label.alpha = factor;
+      if (label && !label.destroyed) label.alpha = factor;
       if (descentPx > 0) {
         container.y = initialY + descentPx * t;
         const spriteH = this._entitySpriteHeights.get(container);
-        if (label && spriteH !== undefined) {
+        if (label && !label.destroyed && spriteH !== undefined) {
           label.y = container.y - (spriteH * Math.abs(factor)) / 2 - 6;
         }
       }
@@ -1097,15 +1119,19 @@ export class WorldStage {
     const label = this._entityLabels.get(container);
 
     const animate = (ticker: Ticker): void => {
+      if (container.destroyed) {
+        this._app.ticker.remove(animate);
+        return;
+      }
       elapsed += ticker.deltaMS;
       const t = Math.min(1, elapsed / duration);
       const factor = 1 - t;
       container.scale.set(initialScaleX * factor, initialScaleY * factor);
       container.alpha = factor;
-      if (label) label.alpha = factor;
+      if (label && !label.destroyed) label.alpha = factor;
       container.y = initialY + descentPx * t;
       const spriteH = this._entitySpriteHeights.get(container);
-      if (label && spriteH !== undefined) {
+      if (label && !label.destroyed && spriteH !== undefined) {
         label.y = container.y - (spriteH * Math.abs(factor)) / 2 - 6;
       }
       if (t >= 1) {
@@ -1136,6 +1162,10 @@ export class WorldStage {
     this._dyingEntities.delete(container);
     this._deadInPlace.delete(container);
     this._fallingFromSpawn.delete(container);
+    // These tickers iterate maps keyed by container — orphaned entries would
+    // touch a destroyed container next tick and kill the whole Pixi loop.
+    this._lungeAnimations.delete(container);
+    this._bounceCooldowns.delete(container);
 
     // Clean UUID-keyed maps (multiplayer mode)
     const entityId = this._entityIdByContainer.get(container);
