@@ -279,16 +279,16 @@ export function JoinRoomScreen() {
                       </span>
 
                       <div className="ml-auto flex items-center gap-2">
-                        <span className="ui-public-room-row__count font-nunito t12-b">
-                          <Icon name="user" size={16} decorative />
-                          {r.clients}/{r.maxClients}
-                        </span>
-
                         {r.drawingTime !== null && (
-                          <span className="ui-public-room-row__count ui-public-room-row__count--dark font-nunito t12-b">
+                          <span className="ui-public-room-row__count font-nunito t12-b">
                             {r.drawingTime}s
                           </span>
                         )}
+
+                        <span className="ui-public-room-row__count ui-public-room-row__count--dark font-nunito t12-b">
+                          <Icon name="user" size={16} decorative />
+                          {r.clients}/{r.maxClients}
+                        </span>
 
                         <button
                           type="button"
