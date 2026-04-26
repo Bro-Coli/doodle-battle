@@ -94,9 +94,9 @@ export function LobbyScreen(): React.JSX.Element {
         <img
           src={mainTitle}
           alt="Doodle Battle"
-          width={2096}
-          height={992}
-          className="w-full max-w-[580px] object-contain  lg:max-w-[520px]"
+          width={520}
+          height={300}
+          className="w-full max-w-[520px] object-contain lg:max-w-[480px]"
           decoding="async"
         />
         <div className="-translate-x-4 mx-auto flex w-max items-center justify-center -space-x-4 lg:-space-x-16">
@@ -124,7 +124,7 @@ export function LobbyScreen(): React.JSX.Element {
         )}
       </div>
       <div className="absolute top-6 right-6 z-10 flex items-center gap-3 sm:top-4 sm:right-4">
-        <LobbyTutorialButton className="h-[92px] px-8 sm:h-[76px] sm:px-7" />
+        <LobbyTutorialButton className="h-[84px] px-7 sm:h-[70px] sm:px-6" />
         <LobbyNameModal trigger={<LobbyUserIconButton />} />
       </div>
     </main>
