@@ -21,8 +21,8 @@
   }
 
   .ui-purple-glass-modal--lg {
-    width: min(96vw, 1120px);
-    height: min(84vh, 720px);
+    width: min(96vw, 1140px);
+    height: min(78vh, 620px);
   }
 
   .ui-purple-glass-modal::before {
@@ -150,6 +150,135 @@
     box-shadow: 0 0 8px 1px var(--glow, rgba(200, 180, 255, 0.35));
     animation: deco-float var(--dur, 4s) ease-in-out var(--delay, 0s) infinite;
   }
+
+  .ui-tutorial-card-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 14px;
+    width: 100%;
+    min-height: 0;
+  }
+
+  .ui-tutorial-card {
+    position: relative;
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    overflow: hidden;
+    border-radius: 28px;
+    border: 2px solid rgba(212, 225, 255, 0.32);
+    background:
+      linear-gradient(180deg, rgba(119, 114, 198, 0.84) 0%, rgba(72, 104, 183, 0.9) 100%),
+      radial-gradient(circle at 50% 8%, rgba(255, 255, 255, 0.28) 0%, transparent 44%);
+    box-shadow:
+      inset 0 2px 0 rgba(255, 255, 255, 0.22),
+      inset 0 -4px 0 rgba(38, 52, 123, 0.16),
+      0 8px 0 rgba(46, 52, 134, 0.26),
+      0 12px 22px rgba(37, 40, 120, 0.18);
+    padding: clamp(0.75rem, 1.5vw, 1.25rem) clamp(0.75rem, 1.5vw, 1.25rem) 1rem;
+    text-align: center;
+  }
+
+  .ui-tutorial-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background:
+      linear-gradient(90deg, rgba(255, 255, 255, 0.13) 0%, transparent 13% 87%, rgba(24, 34, 126, 0.12) 100%),
+      radial-gradient(circle at 12% 0%, rgba(255, 255, 255, 0.22), transparent 36%);
+    pointer-events: none;
+  }
+
+  .ui-tutorial-icon-wrap {
+    position: relative;
+    display: grid;
+    width: clamp(132px, 17vw, 214px);
+    aspect-ratio: 1;
+    place-items: center;
+    color: var(--tutorial-icon-color, #30dce6);
+    flex: 0 0 auto;
+  }
+
+  .ui-tutorial-icon-wrap[data-state='fallback'] {
+    border-radius: 999px;
+    background:
+      radial-gradient(circle at 30% 20%, rgba(255, 255, 255, 0.75) 0 4%, transparent 5%),
+      radial-gradient(circle at 35% 25%, rgba(255, 255, 255, 0.36) 0%, transparent 25%),
+      radial-gradient(circle at 55% 58%, var(--tutorial-icon-mid, #24d8df) 0%, var(--tutorial-icon-edge, #18a5c4) 68%),
+      linear-gradient(180deg, rgba(255, 255, 255, 0.42), rgba(255, 255, 255, 0));
+    border: clamp(4px, 0.55vw, 7px) solid var(--tutorial-icon-border, #236d9e);
+    box-shadow:
+      inset 0 5px 8px rgba(255, 255, 255, 0.45),
+      inset 0 -12px 16px rgba(17, 35, 102, 0.22),
+      0 5px 0 var(--tutorial-icon-shadow, #205483),
+      0 10px 16px rgba(24, 30, 93, 0.3);
+  }
+
+  .ui-tutorial-icon-wrap[data-state='fallback']::after {
+    content: '';
+    position: absolute;
+    right: 17%;
+    bottom: 17%;
+    width: 15%;
+    height: 8%;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.22);
+    transform: rotate(-38deg);
+    filter: blur(1px);
+    pointer-events: none;
+  }
+
+  .ui-tutorial-icon-wrap[data-tone='cyan'] {
+    --tutorial-icon-color: #e7fdff;
+    --tutorial-icon-mid: #2fdde6;
+    --tutorial-icon-edge: #16a6c4;
+    --tutorial-icon-border: #225c96;
+    --tutorial-icon-shadow: #1e477d;
+  }
+
+  .ui-tutorial-icon-wrap[data-tone='pink'] {
+    --tutorial-icon-color: #fff0fb;
+    --tutorial-icon-mid: #f64091;
+    --tutorial-icon-edge: #ce2476;
+    --tutorial-icon-border: #8c2366;
+    --tutorial-icon-shadow: #731d63;
+  }
+
+  .ui-tutorial-icon-wrap[data-tone='green'] {
+    --tutorial-icon-color: #f1ffe9;
+    --tutorial-icon-mid: #9bed4d;
+    --tutorial-icon-edge: #45b94d;
+    --tutorial-icon-border: #267b4b;
+    --tutorial-icon-shadow: #22623e;
+  }
+
+  .ui-tutorial-icon-fallback,
+  .ui-tutorial-icon-img {
+    grid-area: 1 / 1;
+  }
+
+  .ui-tutorial-icon-fallback {
+    filter: drop-shadow(0 3px 0 rgba(31, 38, 89, 0.32));
+  }
+
+  .ui-tutorial-icon-img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    filter: drop-shadow(0 8px 10px rgba(24, 30, 93, 0.22));
+  }
+
+  .ui-tutorial-card-title {
+    position: relative;
+    margin-top: clamp(1rem, 2vh, 1.5rem);
+  }
+
+  .ui-tutorial-card-description {
+    position: relative;
+  }
 }
 
 @keyframes deco-twinkle {
@@ -192,4 +321,20 @@
     border-radius: 24px;
     font-size: 42px;
   }
+
+  .ui-tutorial-card-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+    overflow-y: auto;
+    padding-right: 4px;
+  }
+
+  .ui-tutorial-card {
+    min-height: 310px;
+  }
+
+  .ui-tutorial-icon-wrap {
+    width: 148px;
+  }
+
 }
