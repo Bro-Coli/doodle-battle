@@ -288,17 +288,7 @@
 
   /* ── Top bar invite chip (compact, for top-right corner) ── */
 
-  .ui-waiting-room-layout {
-    min-width: 1380px;
-    grid-template-columns: 340px minmax(0, 1fr) minmax(0, 1fr);
-  }
-
-  .ui-waiting-room-sidebar {
-    align-self: stretch;
-  }
-
   .ui-waiting-room-arena {
-    grid-column: 2 / span 2;
     display: flex;
     min-width: 0;
     flex-direction: column;
@@ -426,6 +416,22 @@
       rgba(255, 255, 255, 0.18) 82%,
       rgba(255, 255, 255, 0) 100%
     );
+  }
+
+  .ui-command-card__vdivider {
+    flex-shrink: 0;
+    width: 1px;
+    height: 44px;
+    background: linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0) 0%,
+      rgba(255, 255, 255, 0.22) 50%,
+      rgba(255, 255, 255, 0) 100%
+    );
+  }
+
+  .ui-command-card--horizontal {
+    padding: 1rem 1.5rem;
   }
 
   /* ── OR divider (line — OR — line) ── */
