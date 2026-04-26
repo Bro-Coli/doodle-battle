@@ -249,7 +249,9 @@ export class MultiplayerWorldBridge {
         } else {
           texture = this._entityTextures.get(entityId);
         }
-        const ownerName = typedState.players?.get(schema.ownerSessionId)?.name;
+        const ownerName = isMyEntity
+          ? '(YOU)'
+          : typedState.players?.get(schema.ownerSessionId)?.name;
         this._worldStage.spawnFromSchema(entityId, profile, schema.x, schema.y, schema.teamId, texture, ownerName);
         this._knownEntityIds.add(entityId);
       }
