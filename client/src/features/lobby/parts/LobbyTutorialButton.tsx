@@ -10,11 +10,15 @@ const tutorialStrokeRingStyle: CSSProperties & { '--stroke': string } = {
   WebkitTextStroke: 'var(--stroke) #3a56c8',
 };
 
-export function LobbyTutorialButton() {
+export function LobbyTutorialButton({ className = '' }: { className?: string }) {
   return (
     <Dialog.Root>
       <Dialog.Trigger asChild>
-        <button type="button" aria-label="Tutorial" className="ui-pill-button">
+        <button
+          type="button"
+          aria-label="Tutorial"
+          className={cn('ui-pill-button', className)}
+        >
           <span className="relative z-1 inline-block tracking-wide">
             <span
               aria-hidden

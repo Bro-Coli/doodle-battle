@@ -123,31 +123,8 @@ export function LobbyScreen(): React.JSX.Element {
           </div>
         )}
       </div>
-      <div className="absolute bottom-8 left-8 sm:bottom-4 sm:left-4">
-        <LobbyTutorialButton />
-      </div>
-      {import.meta.env.DEV && (
-        <div className="absolute bottom-8 right-8 z-10 sm:bottom-4 sm:right-4">
-          <div className="ui-dev-dock">
-            <span className="ui-dev-dock__label">Dev</span>
-            <button
-              type="button"
-              onClick={() => navigate('/dev/scenario')}
-              className="ui-dev-dock__btn"
-            >
-              Scenario
-            </button>
-            <button
-              type="button"
-              onClick={() => navigate('/dev/result')}
-              className="ui-dev-dock__btn"
-            >
-              Result
-            </button>
-          </div>
-        </div>
-      )}
-      <div className="absolute top-6 right-6 z-10 sm:top-4 sm:right-4">
+      <div className="absolute top-6 right-6 z-10 flex items-center gap-3 sm:top-4 sm:right-4">
+        <LobbyTutorialButton className="h-[92px] px-8 sm:h-[76px] sm:px-7" />
         <LobbyNameModal trigger={<LobbyUserIconButton />} />
       </div>
     </main>
