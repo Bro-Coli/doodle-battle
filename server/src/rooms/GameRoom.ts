@@ -47,10 +47,10 @@ const ENV_DAMAGE_DPS: Record<MapType, number> = {
   sky: 25,    // falling — fast death
 };
 
-/** Air maps don't drain HP gradually — non-survivors fall for this many
+/** Sky maps don't drain HP gradually — non-survivors fall for this many
  *  seconds with full HP, then HP snaps to 0 simultaneously regardless of
  *  health pool, so big-HP creatures get no advantage. */
-const AIR_FALL_SECONDS = 1.0;
+const SKY_FALL_SECONDS = 1.0;
 
 // ---------------------------------------------------------------------------
 // Schemas
@@ -421,11 +421,11 @@ export class GameRoom extends Room<{ state: GameState }> {
         const schema = this.state.entities.get(entityId);
         if (schema && schema.hp > 0) {
           if (mapType === 'sky') {
-            // Falling: HP stays full for AIR_FALL_SECONDS, then snaps to 0
+            // Falling: HP stays full for SKY_FALL_SECONDS, then snaps to 0
             // simultaneously for every non-survivor (no HP-pool advantage).
             const elapsed = (this._envDyingElapsed.get(entityId) ?? 0) + dt;
             this._envDyingElapsed.set(entityId, elapsed);
-            if (elapsed >= AIR_FALL_SECONDS) {
+            if (elapsed >= SKY_FALL_SECONDS) {
               schema.hp = 0;
               this._dyingEntities.add(entityId);
               toRemove.push(entityId);

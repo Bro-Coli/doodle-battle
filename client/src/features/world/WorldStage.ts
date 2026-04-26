@@ -1,5 +1,11 @@
 import { Application, Assets, Container, Graphics, Sprite, Text, Ticker, Texture } from 'pixi.js';
 import { EntityProfile, InteractionMatrix, MapType } from '@crayon-world/shared/src/types';
+import { captureEntityTexture } from './captureEntityTexture';
+import { buildEntityContainer, buildEntitySprite, updateHealthBar } from './EntitySprite';
+import { EntityState, initEntityState, dispatchBehavior, WORLD_BOUNDS } from '@crayon-world/shared/src/simulation/EntitySimulation';
+import { fetchInteractions } from './fetchInteractions';
+import { RoundOverlay, RoundOutcome } from './RoundOverlay';
+import { resolveInteraction, blendSteeringIntoAnimation, DETECTION_RANGE_FRACTION, FIGHT_PROXIMITY_FRACTION, FIGHT_COOLDOWN_MS, BEFRIEND_STOP_FRACTION, ResolvedInteraction } from '@crayon-world/shared/src/simulation/interactionBehaviors';
 import landMap from './assets/maps/land.webp';
 import waterMap from './assets/maps/water.webp';
 import skyMap from './assets/maps/sky.webp';
@@ -9,12 +15,6 @@ const MAP_TEXTURE_URLS: Record<MapType, string> = {
   water: waterMap,
   sky: skyMap,
 };
-import { captureEntityTexture } from './captureEntityTexture';
-import { buildEntityContainer, buildEntitySprite, updateHealthBar } from './EntitySprite';
-import { EntityState, initEntityState, dispatchBehavior, WORLD_BOUNDS } from '@crayon-world/shared/src/simulation/EntitySimulation';
-import { fetchInteractions } from './fetchInteractions';
-import { RoundOverlay, RoundOutcome } from './RoundOverlay';
-import { resolveInteraction, blendSteeringIntoAnimation, DETECTION_RANGE_FRACTION, FIGHT_PROXIMITY_FRACTION, FIGHT_COOLDOWN_MS, BEFRIEND_STOP_FRACTION, ResolvedInteraction } from '@crayon-world/shared/src/simulation/interactionBehaviors';
 
 /**
  * Round lifecycle phases.
@@ -48,7 +48,7 @@ export class WorldStage {
   private _dyingEntities = new Set<Container>();
   // Land-map deaths leave a frozen corpse instead of destroying — wiped on round restart.
   private _deadInPlace = new Set<Container>();
-  // Non-fliers spawned on an air map start the fall animation immediately —
+  // Non-fliers spawned on a sky map start the fall animation immediately —
   // when the server later removes them (HP snaps to 0 after ~1s) we skip the
   // normal removeEntity animation since they're already invisible.
   private _fallingFromSpawn = new Set<Container>();
@@ -821,7 +821,7 @@ export class WorldStage {
     this._entityContainersById.set(entityId, entity);
     this._entityIdByContainer.set(entity, entityId);
 
-    // Non-fliers on an air map can't survive — they fall the moment they spawn.
+    // Non-fliers on a sky map can't survive — they fall the moment they spawn.
     // Server keeps HP full for ~1s then snaps it to 0; the spawn-time fall keeps
     // visuals in sync without waiting for the death notification.
     if (this._mapType === 'sky' && profile.archetype !== 'flying') {
@@ -1002,10 +1002,10 @@ export class WorldStage {
    *
    * - Land map: leave a frozen corpse with empty HP bar and "(Dead)" label;
    *   destruction is deferred until clearCorpses() / cleanupAllEntities() runs.
-   * - Air map: scale-and-fall animation, then destroy.
+   * - Sky map: scale-and-fall animation, then destroy.
    * - Water map: slow scale-and-fade ("sinking"), then destroy.
    *
-   * Spawn-fall optimization: non-fliers spawned on air maps already started
+   * Spawn-fall optimization: non-fliers spawned on sky maps already started
    * their fall animation in spawnFromSchema and are at scale ~0 by the time
    * the server snaps HP to 0 — skip the redundant animation, destroy directly.
    *
@@ -1047,10 +1047,10 @@ export class WorldStage {
       return;
     }
 
-    // Water sinks more slowly than air falls; both fade to zero scale + alpha.
-    const isAir = this._mapType === 'sky';
-    const duration = isAir ? 1000 : 1800;
-    const descentPx = isAir ? 60 : 0;
+    // Water sinks more slowly than sky falls; both fade to zero scale + alpha.
+    const isSky = this._mapType === 'sky';
+    const duration = isSky ? 1000 : 1800;
+    const descentPx = isSky ? 60 : 0;
     let elapsed = 0;
     const initialScaleX = container.scale.x;
     const initialScaleY = container.scale.y;
@@ -1080,15 +1080,15 @@ export class WorldStage {
   }
 
   /**
-   * Begin the spawn-time fall animation for a non-flier on an air map.
-   * Runs for AIR_FALL_DURATION_MS — the entity's HP stays full server-side
+   * Begin the spawn-time fall animation for a non-flier on a sky map.
+   * Runs for SKY_FALL_DURATION_MS — the entity's HP stays full server-side
    * during this window; the server snaps HP to 0 at the same instant for all
    * fallers, then the bridge removes the entity (already invisible).
    */
   private _startFallFromSpawn(container: Container): void {
     this._fallingFromSpawn.add(container);
 
-    const duration = 1000; // matches server AIR_FALL_SECONDS
+    const duration = 1000; // matches server SKY_FALL_SECONDS
     const descentPx = 60;
     let elapsed = 0;
     const initialScaleX = container.scale.x;

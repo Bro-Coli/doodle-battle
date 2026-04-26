@@ -214,107 +214,105 @@ export function WaitingRoomScreen(): React.JSX.Element {
 
       {/* ─── Battle arena ─── */}
       <div className="flex flex-1 flex-col items-center mt-8 gap-6 w-full">
-       <div className="flex w-full max-w-[1008px] flex-col items-stretch gap-6">
-        {/* Horizontal command bar (room code + match settings) */}
-        <div className="ui-command-card ui-command-card--horizontal w-full">
-          <div className="relative z-1 flex flex-wrap items-center gap-x-8 gap-y-4">
-            <div className="flex flex-col leading-none gap-1">
-              <span className="t12-b font-nunito uppercase tracking-[0.18em] text-white/55">
-                Room Code
-              </span>
-              <div className="flex items-center gap-3">
-                <span className="font-mono t28-eb tracking-[0.18em] text-white">
-                  {roomCode}
+        <div className="flex w-full max-w-[1008px] flex-col items-stretch gap-6">
+          {/* Horizontal command bar (room code + match settings) */}
+          <div className="ui-command-card ui-command-card--horizontal w-full">
+            <div className="relative z-1 flex flex-wrap items-center gap-x-8 gap-y-4">
+              <div className="flex flex-col leading-none gap-1">
+                <span className="t12-b font-nunito uppercase tracking-[0.18em] text-white/55">
+                  Room Code
                 </span>
-                <button
-                  type="button"
-                  onClick={handleCopyCode}
-                  className="ui-invite-chip__copy"
-                  aria-label="Copy room code"
-                >
-                  <span className="font-nunito t12-b uppercase text-white">
-                    {copied ? 'Copied' : 'Copy'}
+                <div className="flex items-center gap-3">
+                  <span className="font-mono t28-eb tracking-[0.18em] text-white">{roomCode}</span>
+                  <button
+                    type="button"
+                    onClick={handleCopyCode}
+                    className="ui-invite-chip__copy"
+                    aria-label="Copy room code"
+                  >
+                    <span className="font-nunito t12-b uppercase text-white">
+                      {copied ? 'Copied' : 'Copy'}
+                    </span>
+                  </button>
+                </div>
+              </div>
+
+              <div className="ui-command-card__vdivider" />
+
+              <div className="flex flex-1 flex-wrap items-center justify-around gap-x-6 gap-y-3">
+                <div className="flex flex-col leading-none gap-1">
+                  <span className="t12-b font-nunito uppercase tracking-[0.18em] text-white/55">
+                    Players
                   </span>
-                </button>
-              </div>
-            </div>
+                  <div className="flex items-center gap-2">
+                    <Icon
+                      name="user"
+                      size={24}
+                      color="#71bff0"
+                      decorative
+                      style={{ filter: 'drop-shadow(0 0 6px rgba(113,191,240,0.5))' }}
+                    />
+                    <span className="font-mono t18-b text-white">
+                      {playerCount}
+                      <span className="text-white/45"> / {maxPlayers}</span>
+                    </span>
+                  </div>
+                </div>
 
-            <div className="ui-command-card__vdivider" />
-
-            <div className="flex flex-1 flex-wrap items-center justify-around gap-x-6 gap-y-3">
-              <div className="flex flex-col leading-none gap-1">
-                <span className="t12-b font-nunito uppercase tracking-[0.18em] text-white/55">
-                  Players
-                </span>
-                <div className="flex items-center gap-2">
-                  <Icon
-                    name="user"
-                    size={20}
-                    color="#71bff0"
-                    decorative
-                    style={{ filter: 'drop-shadow(0 0 6px rgba(113,191,240,0.5))' }}
-                  />
-                  <span className="font-mono t18-b text-white">
-                    {playerCount}
-                    <span className="text-white/45"> / {maxPlayers}</span>
+                <div className="flex flex-col leading-none gap-1">
+                  <span className="t12-b font-nunito uppercase tracking-[0.18em] text-white/55">
+                    Rounds
                   </span>
+                  <div className="flex items-center gap-2">
+                    <Icon
+                      name="trophy"
+                      size={18}
+                      color="#ffd56a"
+                      decorative
+                      style={{ filter: 'drop-shadow(0 0 6px rgba(255,213,106,0.5))' }}
+                    />
+                    <span className="font-mono t18-b text-white">{maxRounds}</span>
+                  </div>
+                </div>
+
+                <div className="flex flex-col leading-none gap-1">
+                  <span className="t12-b font-nunito uppercase tracking-[0.18em] text-white/55">
+                    Draw Time
+                  </span>
+                  <div className="flex items-center gap-2">
+                    <Icon
+                      name="timer"
+                      size={24}
+                      color="#9fe8ff"
+                      decorative
+                      style={{ filter: 'drop-shadow(0 0 6px rgba(159,232,255,0.55))' }}
+                    />
+                    <span className="font-mono t18-b text-white">{drawingTime}s</span>
+                  </div>
                 </div>
               </div>
 
-              <div className="flex flex-col leading-none gap-1">
-                <span className="t12-b font-nunito uppercase tracking-[0.18em] text-white/55">
-                  Rounds
-                </span>
-                <div className="flex items-center gap-2">
-                  <Icon
-                    name="trophy"
-                    size={20}
-                    color="#ffd56a"
-                    decorative
-                    style={{ filter: 'drop-shadow(0 0 6px rgba(255,213,106,0.5))' }}
-                  />
-                  <span className="font-mono t18-b text-white">{maxRounds}</span>
-                </div>
-              </div>
-
-              <div className="flex flex-col leading-none gap-1">
-                <span className="t12-b font-nunito uppercase tracking-[0.18em] text-white/55">
-                  Draw Time
-                </span>
-                <div className="flex items-center gap-2">
-                  <Icon
-                    name="timer"
-                    size={22}
-                    color="#9fe8ff"
-                    decorative
-                    style={{ filter: 'drop-shadow(0 0 6px rgba(159,232,255,0.55))' }}
-                  />
-                  <span className="font-mono t18-b text-white">{drawingTime}s</span>
-                </div>
-              </div>
+              {status && (
+                <>
+                  <div className="ui-command-card__vdivider" />
+                  <div
+                    className={
+                      'ui-status-chip justify-center font-nunito t14-b' +
+                      (status.variant === 'success'
+                        ? ' ui-status-chip--success'
+                        : status.variant === 'warning'
+                          ? ' ui-status-chip--warning'
+                          : '')
+                    }
+                  >
+                    {status.content}
+                  </div>
+                </>
+              )}
             </div>
-
-            {status && (
-              <>
-                <div className="ui-command-card__vdivider" />
-                <div
-                  className={
-                    'ui-status-chip justify-center font-nunito t14-b' +
-                    (status.variant === 'success'
-                      ? ' ui-status-chip--success'
-                      : status.variant === 'warning'
-                        ? ' ui-status-chip--warning'
-                        : '')
-                  }
-                >
-                  {status.content}
-                </div>
-              </>
-            )}
           </div>
-        </div>
 
-        <section className="ui-waiting-room-arena w-full">
+          <section className="ui-waiting-room-arena w-full">
             <div className="ui-waiting-room-arena__teams">
               <TeamColumn
                 team="blue"
@@ -371,7 +369,7 @@ export function WaitingRoomScreen(): React.JSX.Element {
               )}
             </div>
           </section>
-       </div>
+        </div>
       </div>
     </main>
   );
@@ -409,4 +407,3 @@ function ReadyButton({ room, isReady }: { room: Room; isReady: boolean }) {
     </button>
   );
 }
-
