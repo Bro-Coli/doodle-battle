@@ -427,4 +427,197 @@
       rgba(255, 255, 255, 0) 100%
     );
   }
+
+  /* ── OR divider (line — OR — line) ── */
+
+  .ui-or-divider {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    width: 100%;
+    color: rgba(255, 255, 255, 0.85);
+    font-weight: 900;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    text-shadow: 0 2px 4px rgba(20, 12, 60, 0.45);
+    user-select: none;
+  }
+
+  .ui-or-divider::before,
+  .ui-or-divider::after {
+    content: '';
+    flex: 1;
+    height: 4px;
+    border-radius: 999px;
+    background: linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0) 0%,
+      rgba(255, 255, 255, 0.55) 50%,
+      rgba(255, 255, 255, 0) 100%
+    );
+    box-shadow:
+      0 1px 0 rgba(20, 12, 60, 0.35),
+      0 0 12px rgba(255, 255, 255, 0.25);
+  }
+
+  /* ── Public room row (glossy filled list item) ── */
+
+  .ui-public-room-row {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    width: 100%;
+    height: 76px;
+    padding: 0 0.6rem 0 1rem;
+    border-radius: 22px;
+    border: 3px solid #3d52b8;
+    overflow: hidden;
+    background: linear-gradient(
+      180deg,
+      #cfe9ff 0%,
+      #a3d2fb 30%,
+      #7fb9f3 60%,
+      #5e9aea 100%
+    );
+    box-shadow:
+      inset 0 0 0 3px rgba(255, 255, 255, 0.55),
+      inset 0 3px 0 rgba(255, 255, 255, 0.55),
+      inset 0 14px 28px -12px rgba(255, 255, 255, 0.45),
+      inset 0 -5px 0 rgba(30, 50, 130, 0.28),
+      0 4px 0 #3552b0,
+      0 8px 18px rgba(38, 58, 145, 0.28),
+      0 0 14px rgba(120, 175, 255, 0.22);
+    color: #1f2a55;
+    transition:
+      transform 0.12s ease,
+      filter 0.12s ease,
+      box-shadow 0.12s ease;
+  }
+
+  .ui-public-room-row::before {
+    content: '';
+    position: absolute;
+    left: 12px;
+    right: 12px;
+    top: 5px;
+    height: 42%;
+    border-radius: 16px;
+    background: linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.62) 0%,
+      rgba(255, 255, 255, 0.18) 60%,
+      rgba(255, 255, 255, 0.02) 100%
+    );
+    pointer-events: none;
+  }
+
+  .ui-public-room-row > * {
+    position: relative;
+    z-index: 1;
+  }
+
+  .ui-public-room-row__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 52px;
+    height: 52px;
+    border-radius: 999px;
+    flex-shrink: 0;
+    border: 2px solid rgba(40, 70, 160, 0.5);
+    background: linear-gradient(180deg, #ffffff 0%, #cfe5ff 55%, #9cc7f7 100%);
+    color: #224b9a;
+    box-shadow:
+      inset 0 0 0 2px rgba(255, 255, 255, 0.6),
+      inset 0 -2px 0 rgba(40, 70, 160, 0.22),
+      0 2px 6px rgba(40, 70, 160, 0.28);
+  }
+
+  .ui-public-room-row__count {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.3rem 0.85rem;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.85);
+    border: 2px solid rgba(40, 70, 160, 0.32);
+    color: #1f2a55;
+    font-weight: 900;
+    font-variant-numeric: tabular-nums;
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.85),
+      inset 0 -1px 0 rgba(40, 70, 160, 0.18),
+      0 2px 4px rgba(40, 70, 160, 0.18);
+  }
+
+  /* ── Refresh chip (compact glossy chip — matches default ui-pill-button blue) ── */
+
+  .ui-refresh-chip {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    height: 44px;
+    padding: 0 1.1rem;
+    border-radius: 999px;
+    overflow: hidden;
+    border: 2px solid #3d52b8;
+    background: linear-gradient(180deg, #aee8ff 0%, #5890e8 55%, #3a56c8 100%);
+    color: #ffffff;
+    font-weight: 900;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    cursor: pointer;
+    box-shadow:
+      inset 0 0 0 2px rgba(255, 255, 255, 0.4),
+      inset 0 2px 0 rgba(255, 255, 255, 0.45),
+      inset 0 -3px 0 rgba(38, 58, 145, 0.32),
+      0 2px 0 #3552b0,
+      0 4px 10px rgba(38, 58, 145, 0.32),
+      0 0 12px rgba(80, 140, 255, 0.22);
+    transition:
+      transform 0.12s ease,
+      filter 0.12s ease,
+      box-shadow 0.12s ease;
+  }
+
+  .ui-refresh-chip::before {
+    content: '';
+    position: absolute;
+    left: 8px;
+    right: 8px;
+    top: 3px;
+    height: 44%;
+    border-radius: 999px;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.55) 0%, rgba(255, 255, 255, 0.1) 100%);
+    pointer-events: none;
+  }
+
+  .ui-refresh-chip > * {
+    position: relative;
+    z-index: 1;
+  }
+
+  .ui-refresh-chip:hover {
+    transform: translateY(-1px) scale(1.03);
+    filter: brightness(1.05);
+  }
+
+  .ui-refresh-chip:active {
+    transform: translateY(1px) scale(0.98);
+    box-shadow:
+      inset 0 0 0 2px rgba(255, 255, 255, 0.35),
+      inset 0 2px 4px rgba(38, 58, 145, 0.25),
+      0 1px 0 #3552b0,
+      0 2px 6px rgba(38, 58, 145, 0.28);
+  }
+
+  .ui-refresh-chip:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+    transform: none;
+    filter: none;
+  }
 }
