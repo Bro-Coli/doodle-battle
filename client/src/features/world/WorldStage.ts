@@ -821,10 +821,11 @@ export class WorldStage {
     y: number,
     teamId?: string,
     texture?: Texture,
+    ownerName?: string,
   ): void {
     // Use provided texture or 1x1 white placeholder
     const tex = texture ?? Texture.WHITE;
-    const { entity, label, spriteHeight, healthBar } = buildEntityContainer(tex, profile, this._app, teamId);
+    const { entity, label, spriteHeight, healthBar } = buildEntityContainer(tex, profile, this._app, teamId, ownerName);
 
     entity.x = x;
     entity.y = y;

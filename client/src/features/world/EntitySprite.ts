@@ -86,6 +86,7 @@ export function buildEntityContainer(
   profile: EntityProfile,
   app: Application,
   teamId?: string,
+  ownerName?: string,
 ): EntityBuildResult {
   const entity = new Container();
   entity.eventMode = 'static';
@@ -120,6 +121,20 @@ export function buildEntityContainer(
   });
   labelText.anchor.set(0.5, 1);
   label.addChild(labelText);
+
+  if (ownerName) {
+    const ownerText = new Text({
+      text: ownerName,
+      style: new TextStyle({
+        fontSize: 16,
+        fill: '#555555',
+      }),
+      resolution: window.devicePixelRatio || 2,
+    });
+    ownerText.anchor.set(0.5, 1);
+    ownerText.y = -labelText.height + 2;
+    label.addChild(ownerText);
+  }
 
   // Health bar — sits just beneath the nametag, above the sprite
   const barWidth = Math.max(63, Math.min(140, sprite.width * 0.6));

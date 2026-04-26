@@ -148,6 +148,7 @@ export class MultiplayerWorldBridge {
   private _processStateChange(state: unknown): void {
     const typedState = state as {
       entities?: Map<string, EntitySchemaLike>;
+      players?: Map<string, { name: string }>;
       currentMapType?: string;
       currentPhase?: string;
     };
@@ -248,7 +249,8 @@ export class MultiplayerWorldBridge {
         } else {
           texture = this._entityTextures.get(entityId);
         }
-        this._worldStage.spawnFromSchema(entityId, profile, schema.x, schema.y, schema.teamId, texture);
+        const ownerName = typedState.players?.get(schema.ownerSessionId)?.name;
+        this._worldStage.spawnFromSchema(entityId, profile, schema.x, schema.y, schema.teamId, texture, ownerName);
         this._knownEntityIds.add(entityId);
       }
     }
