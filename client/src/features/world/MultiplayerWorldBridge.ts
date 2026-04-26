@@ -1,7 +1,7 @@
 import type { Room } from '@colyseus/sdk';
 import { Assets, Texture } from 'pixi.js';
 import type { WorldStage } from './WorldStage';
-import type { Archetype, EntityProfile, MapType } from '@crayon-world/shared/src/types';
+import type { Archetype, EntityProfile, Habitat, MapType, MovementStyle } from '@crayon-world/shared/src/types';
 import { DEFAULT_STYLE_BY_ARCHETYPE } from '@crayon-world/shared/src/types';
 
 /**
@@ -16,6 +16,13 @@ interface EntitySchemaLike {
   maxHp: number;
   name: string;
   archetype: string;
+  movementStyle: string;
+  habitat: string;
+  landSpeed: number;
+  waterSpeed: number;
+  airSpeed: number;
+  agility: number;
+  energy: number;
   teamId: string;
   ownerSessionId: string;
   vx: number;
@@ -223,13 +230,20 @@ export class MultiplayerWorldBridge {
     // (D) Spawn new entities.
     for (const [entityId, schema] of entities) {
       if (!this._knownEntityIds.has(entityId)) {
+        const archetype = schema.archetype as Archetype;
+        const movementStyle = (schema.movementStyle as MovementStyle)
+          || DEFAULT_STYLE_BY_ARCHETYPE[archetype];
+        const habitat = (schema.habitat as Habitat) || 'land';
         const profile: EntityProfile = {
           name: schema.name,
-          archetype: schema.archetype as Archetype,
-          movementStyle: DEFAULT_STYLE_BY_ARCHETYPE[schema.archetype as Archetype],
-          habitat: 'land',
-          agility: 5,
-          energy: 5,
+          archetype,
+          movementStyle,
+          habitat,
+          ...(schema.landSpeed > 0 ? { landSpeed: schema.landSpeed } : {}),
+          ...(schema.waterSpeed > 0 ? { waterSpeed: schema.waterSpeed } : {}),
+          ...(schema.airSpeed > 0 ? { airSpeed: schema.airSpeed } : {}),
+          agility: schema.agility ?? 5,
+          energy: schema.energy ?? 5,
           maxHealth: schema.maxHp ?? 1,
         };
         const isMyEntity = this._room && schema.ownerSessionId === this._room.sessionId;
