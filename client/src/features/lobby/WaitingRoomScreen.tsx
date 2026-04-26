@@ -217,25 +217,25 @@ export function WaitingRoomScreen(): React.JSX.Element {
         {/* Horizontal command bar (room code + match settings) */}
         <div className="ui-command-card ui-command-card--horizontal w-full">
           <div className="relative z-1 flex flex-wrap items-center gap-x-8 gap-y-4">
-            <div className="flex items-center gap-3">
-              <div className="flex flex-col leading-none">
-                <span className="t12-b font-nunito uppercase tracking-[0.18em] text-white/55">
-                  Room Code
-                </span>
+            <div className="flex flex-col leading-none gap-1">
+              <span className="t12-b font-nunito uppercase tracking-[0.18em] text-white/55">
+                Room Code
+              </span>
+              <div className="flex items-center gap-3">
                 <span className="font-mono t28-eb tracking-[0.18em] text-white">
                   {roomCode}
                 </span>
+                <button
+                  type="button"
+                  onClick={handleCopyCode}
+                  className="ui-invite-chip__copy"
+                  aria-label="Copy room code"
+                >
+                  <span className="font-nunito t12-b uppercase text-white">
+                    {copied ? 'Copied' : 'Copy'}
+                  </span>
+                </button>
               </div>
-              <button
-                type="button"
-                onClick={handleCopyCode}
-                className="ui-invite-chip__copy"
-                aria-label="Copy room code"
-              >
-                <span className="font-nunito t12-b uppercase text-white">
-                  {copied ? 'Copied' : 'Copy'}
-                </span>
-              </button>
             </div>
 
             <div className="ui-command-card__vdivider" />
