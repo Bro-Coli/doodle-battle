@@ -824,7 +824,7 @@ export class WorldStage {
     // Non-fliers on an air map can't survive — they fall the moment they spawn.
     // Server keeps HP full for ~1s then snaps it to 0; the spawn-time fall keeps
     // visuals in sync without waiting for the death notification.
-    if (this._mapType === 'air' && profile.archetype !== 'flying') {
+    if (this._mapType === 'sky' && profile.archetype !== 'flying') {
       this._startFallFromSpawn(entity);
     }
   }
@@ -1048,7 +1048,7 @@ export class WorldStage {
     }
 
     // Water sinks more slowly than air falls; both fade to zero scale + alpha.
-    const isAir = this._mapType === 'air';
+    const isAir = this._mapType === 'sky';
     const duration = isAir ? 1000 : 1800;
     const descentPx = isAir ? 60 : 0;
     let elapsed = 0;

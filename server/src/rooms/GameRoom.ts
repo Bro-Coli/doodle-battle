@@ -420,7 +420,7 @@ export class GameRoom extends Room<{ state: GameState }> {
       if (this._envDyingEntities.has(entityId)) {
         const schema = this.state.entities.get(entityId);
         if (schema && schema.hp > 0) {
-          if (mapType === 'air') {
+          if (mapType === 'sky') {
             // Falling: HP stays full for AIR_FALL_SECONDS, then snaps to 0
             // simultaneously for every non-survivor (no HP-pool advantage).
             const elapsed = (this._envDyingElapsed.get(entityId) ?? 0) + dt;
