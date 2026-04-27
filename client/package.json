@@ -10,6 +10,7 @@
     "@colyseus/sdk": "^0.17.38",
     "@crayon-world/shared": "workspace:*",
     "@radix-ui/react-dialog": "^1.1.15",
+    "@vercel/analytics": "^2.0.1",
     "canvas-confetti": "^1.9.4",
     "pixi-filters": "^6.1.5",
     "pixi.js": "^8.16.0",

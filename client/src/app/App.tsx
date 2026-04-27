@@ -8,6 +8,7 @@ import { GameScreen } from '../features/game/GameScreen';
 import { ScenarioRevealScreen } from '../features/scenario/ScenarioRevealScreen';
 import { MatchResultScreen } from '../features/result/MatchResultScreen';
 import { ResultScreen } from '../features/result/ResultScreen';
+import { Analytics } from '@vercel/analytics/react';
 
 const DEFAULT_TITLE = 'Doodle Battle';
 const ROUTE_META: Record<string, { description: string; title: string }> = {
@@ -76,20 +77,25 @@ export function App(): React.JSX.Element {
     updateMeta('description', meta.description);
   }, [pathname]);
 
-  if (pathname === '/game') return <GameScreen />;
-  if (pathname === '/lobby') return <NameInputScreen />;
-  if (pathname === '/create') return <CreateRoomScreen />;
-  if (pathname === '/join') return <JoinRoomScreen />;
-  if (pathname === '/waiting') return <WaitingRoomScreen />;
-  if (pathname === '/result') return <MatchResultScreen />;
+  let page: React.JSX.Element;
 
+  if (pathname === '/game') page = <GameScreen />;
+  else if (pathname === '/lobby') page = <NameInputScreen />;
+  else if (pathname === '/create') page = <CreateRoomScreen />;
+  else if (pathname === '/join') page = <JoinRoomScreen />;
+  else if (pathname === '/waiting') page = <WaitingRoomScreen />;
+  else if (pathname === '/result') page = <MatchResultScreen />;
   // Dev-only markup previews: these are accessible only during development
   // (the lobby dev-dock is already gated behind `import.meta.env.DEV`) and
   // fall back to the lobby in production so a stray URL can't leak them.
-  if (import.meta.env.DEV) {
-    if (pathname === '/dev/scenario') return <ScenarioRevealScreen />;
-    if (pathname === '/dev/result') return <ResultScreen />;
-  }
+  else if (import.meta.env.DEV && pathname === '/dev/scenario') page = <ScenarioRevealScreen />;
+  else if (import.meta.env.DEV && pathname === '/dev/result') page = <ResultScreen />;
+  else page = <LobbyScreen />;
 
-  return <LobbyScreen />;
+  return (
+    <>
+      {page}
+      <Analytics />
+    </>
+  );
 }
