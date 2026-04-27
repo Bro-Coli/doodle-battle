@@ -11,6 +11,7 @@ interface PlayerSnapshot {
   name: string;
   team: string;
   ready: boolean;
+  inLobby: boolean;
 }
 
 type StatusVariant = 'default' | 'success' | 'warning';
@@ -67,8 +68,13 @@ export function WaitingRoomScreen(): React.JSX.Element {
       return;
     }
 
+    // Only kick out players who land here while a game is actually in progress.
+    // 'finished' is a transient state when arriving via Play Again — the server
+    // will flip it to 'idle' once it processes our return_to_lobby message, so
+    // we wait for that instead of redirecting.
     const phase = (room.state as { currentPhase?: string }).currentPhase;
-    if (phase && phase !== 'idle') {
+    const ACTIVE_GAME_PHASES = ['draw', 'simulate', 'results'];
+    if (phase && ACTIVE_GAME_PHASES.includes(phase)) {
       leaveActiveRoom();
       navigate('/');
       return;
@@ -77,7 +83,10 @@ export function WaitingRoomScreen(): React.JSX.Element {
     function takeSnapshot(): void {
       if (!room) return;
       const state = room.state as {
-        players: Map<string, { name: string; team: string; ready: boolean }>;
+        players: Map<
+          string,
+          { name: string; team: string; ready: boolean; inLobby: boolean }
+        >;
         hostSessionId: string;
         maxPlayers: number;
         maxRounds: number;
@@ -86,7 +95,7 @@ export function WaitingRoomScreen(): React.JSX.Element {
 
       const snap = new Map<string, PlayerSnapshot>();
       state.players?.forEach((p, sid) => {
-        snap.set(sid, { name: p.name, team: p.team, ready: p.ready });
+        snap.set(sid, { name: p.name, team: p.team, ready: p.ready, inLobby: p.inLobby });
       });
       setPlayers(snap);
       setHostSessionId(state.hostSessionId);
@@ -137,9 +146,13 @@ export function WaitingRoomScreen(): React.JSX.Element {
 
   const teamSlotCount = Math.max(1, Math.floor(maxPlayers / 2));
   const playerCount = players.size;
+  // Only players currently in the lobby gate the start. Anyone still on the
+  // result screen (inLobby=false) is ignored — see server-side _handleStartGame.
   const othersReady =
     playerCount >= 2 &&
-    [...players.entries()].every(([sid, p]) => sid === hostSessionId || p.ready);
+    [...players.entries()].every(
+      ([sid, p]) => sid === hostSessionId || !p.inLobby || p.ready,
+    );
   const teamsBalanced = blueTeamPlayers.length === redTeamPlayers.length;
   const canStart = othersReady && teamsBalanced;
 

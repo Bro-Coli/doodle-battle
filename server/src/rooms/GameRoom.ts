@@ -91,6 +91,7 @@ export class PlayerSchema extends Schema {
   @type('string') team: string = 'red';
   @type('boolean') ready: boolean = false;
   @type('boolean') hasSubmittedDrawing: boolean = false;
+  @type('boolean') inLobby: boolean = true;
 }
 
 export class GameState extends Schema {
@@ -200,6 +201,7 @@ export class GameRoom extends Room<{ state: GameState }> {
     player.name = ((options.name as string) ?? 'Player').slice(0, 20);
     player.team = this._assignTeam();
     player.ready = false;
+    player.inLobby = true;
 
     this.state.players.set(client.sessionId, player);
 
@@ -239,13 +241,22 @@ export class GameRoom extends Room<{ state: GameState }> {
       this.state.players.delete(client.sessionId);
     }
 
-    // Re-assign host if the host left
+    // Re-assign host if the host left. Prefer a random player who's already
+    // in the lobby; if none are, leave host empty so the next player to click
+    // Play Again can claim it via _handleReturnToLobby.
     if (this.state.hostSessionId === client.sessionId) {
-      const remaining = (this.clients as { sessionId: string }[]).filter(
-        (c) => c.sessionId !== client.sessionId,
-      );
-      if (remaining.length > 0) {
-        this.state.hostSessionId = remaining[0].sessionId;
+      const lobbyCandidates: string[] = [];
+      this.state.players.forEach((p, sid) => {
+        if (p.inLobby) lobbyCandidates.push(sid);
+      });
+      if (lobbyCandidates.length > 0) {
+        const idx = Math.floor(Math.random() * lobbyCandidates.length);
+        const newHostId = lobbyCandidates[idx];
+        this.state.hostSessionId = newHostId;
+        // Clear the promoted player's stale ready flag — they now drive Start
+        // Game and shouldn't trigger auto-start from a pre-promotion ready-up.
+        const newHost = this.state.players.get(newHostId);
+        if (newHost) newHost.ready = false;
       } else {
         this.state.hostSessionId = '';
       }
@@ -908,10 +919,15 @@ export class GameRoom extends Room<{ state: GameState }> {
     if (client.sessionId !== this.state.hostSessionId) return;
     if ((this.clients as unknown[]).length < 2) return;
 
-    // All non-host players must be ready
+    // All non-host players currently in the lobby must be ready. Players who
+    // are still on the result screen (inLobby=false) are skipped — otherwise
+    // a single afk player could indefinitely block everyone else from starting
+    // a rematch.
     let allReady = true;
     this.state.players.forEach((player, sid) => {
-      if (sid !== this.state.hostSessionId && !player.ready) allReady = false;
+      if (sid !== this.state.hostSessionId && player.inLobby && !player.ready) {
+        allReady = false;
+      }
     });
     if (!allReady) return;
 
@@ -937,9 +953,11 @@ export class GameRoom extends Room<{ state: GameState }> {
     this.state.redRoundWins = 0;
     this.state.blueRoundWins = 0;
 
-    // Reset all player submission flags
+    // Reset all player submission flags. Players have left the lobby by
+    // entering the game; inLobby is reclaimed when they click Play Again.
     this.state.players.forEach((player) => {
       player.hasSubmittedDrawing = false;
+      player.inLobby = false;
     });
 
     // Fresh shuffled bag per game so a rematch doesn't inherit leftover ordering.
@@ -1027,12 +1045,27 @@ export class GameRoom extends Room<{ state: GameState }> {
 
   /**
    * Return to lobby: reset room state for a rematch.
-   * Guard: only valid when currentPhase === 'finished'.
+   * The first sender after a finished game flips the room into 'idle';
+   * subsequent senders just mark themselves as in the lobby.
+   * If the host slot is vacant (host left while no one was in the lobby),
+   * the sender claims it.
    */
-  _handleReturnToLobby(_client: { sessionId: string }): void {
+  _handleReturnToLobby(client: { sessionId: string }): void {
+    const player = this.state.players.get(client.sessionId);
+    if (player) {
+      player.inLobby = true;
+
+      if (
+        this.state.hostSessionId === '' ||
+        !this.state.players.has(this.state.hostSessionId)
+      ) {
+        this.state.hostSessionId = client.sessionId;
+      }
+    }
+
     if (this.state.currentPhase !== 'finished') return;
 
-    // Reset game state
+    // First Play Again after game-over — reset room for a rematch.
     this.state.currentPhase = 'idle';
     this.state.gameStatus = 'active';
     this.state.currentRound = 0;
@@ -1040,22 +1073,18 @@ export class GameRoom extends Room<{ state: GameState }> {
     this.state.redRoundWins = 0;
     this.state.blueRoundWins = 0;
 
-    // Reset all player flags
-    this.state.players.forEach((player) => {
-      player.ready = false;
-      player.hasSubmittedDrawing = false;
+    this.state.players.forEach((p) => {
+      p.ready = false;
+      p.hasSubmittedDrawing = false;
     });
 
-    // Clear all entities and simulation state
     this._handleRemoveAllEntities();
 
-    // Clear tracking maps and pending state
     this._killCounts.clear();
     this._entitiesDrawn.clear();
     this._pendingProfiles.clear();
     this._pendingRecognitions = 0;
 
-    // Unlock room for new players
     this.unlock();
   }
 }

@@ -1,6 +1,6 @@
 import { Icon } from '@/ui/icon/Icon';
 
-export type TeamRosterEntry = { name: string; ready: boolean };
+export type TeamRosterEntry = { name: string; ready: boolean; inLobby: boolean };
 export type TeamRoster = Array<[string, TeamRosterEntry]>;
 export type TeamSide = 'blue' | 'red';
 
@@ -22,7 +22,12 @@ export function TeamColumn({
   hostSessionId,
 }: TeamColumnProps): React.JSX.Element {
   const filledCount = players.length;
-  const readyCount = players.filter(([sid, p]) => sid === hostSessionId || p.ready).length;
+  // The host slot displays as ready (no Ready button), but only once they've
+  // actually entered the lobby — otherwise we'd be showing a host still on
+  // the result screen as "ready", which misleads the other players.
+  const readyCount = players.filter(
+    ([sid, p]) => (sid === hostSessionId && p.inLobby) || p.ready,
+  ).length;
   const progressPct = slotCount === 0 ? 0 : Math.round((readyCount / slotCount) * 100);
 
   return (
@@ -51,7 +56,9 @@ export function TeamColumn({
         <ul className="flex flex-col gap-3">
           {Array.from({ length: slotCount }).map((_, i) => {
             const entry = players[i];
-            const isEntryReady = entry ? entry[0] === hostSessionId || entry[1].ready : false;
+            const isEntryReady = entry
+              ? (entry[0] === hostSessionId && entry[1].inLobby) || entry[1].ready
+              : false;
             return (
               <TeamSlot
                 key={entry ? entry[0] : `${team}-empty-${i}`}
