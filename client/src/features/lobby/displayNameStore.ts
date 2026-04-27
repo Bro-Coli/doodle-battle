@@ -3,6 +3,9 @@ import { useSyncExternalStore } from 'react';
 const DISPLAY_NAME_STORAGE_KEY = 'doodle_battle_display_name';
 const MAX_DISPLAY_NAME_LENGTH = 16;
 
+const NAME_PREFIXES = ['Neon', 'Swift', 'Lucky', 'Tiny', 'Cosmic', 'Wild', 'Misty', 'Brave'] as const;
+const NAME_SUFFIXES = ['Fox', 'Panda', 'Raven', 'Otter', 'Tiger', 'Moth', 'Bean', 'Drift'] as const;
+
 type DisplayNameState = {
   displayName: string;
   isHydrated: boolean;
@@ -24,6 +27,21 @@ function setState(next: DisplayNameState): void {
   emit();
 }
 
+function createRandomDisplayName(): string {
+  const prefix = NAME_PREFIXES[Math.floor(Math.random() * NAME_PREFIXES.length)];
+  const suffix = NAME_SUFFIXES[Math.floor(Math.random() * NAME_SUFFIXES.length)];
+  const number = Math.floor(Math.random() * 20) + 1;
+  const base = `${prefix}${suffix}`;
+  const suffixWithNumber = `${number}`;
+
+  if (base.length + suffixWithNumber.length <= MAX_DISPLAY_NAME_LENGTH) {
+    return `${base}${suffixWithNumber}`;
+  }
+
+  const availableForBase = MAX_DISPLAY_NAME_LENGTH - suffixWithNumber.length;
+  return `${base.slice(0, Math.max(0, availableForBase))}${suffixWithNumber}`;
+}
+
 export function hydrateDisplayName(): void {
   if (state.isHydrated) return;
 
@@ -34,8 +52,14 @@ export function hydrateDisplayName(): void {
 
   const saved = window.localStorage.getItem(DISPLAY_NAME_STORAGE_KEY) ?? '';
   const normalized = saved.trim().slice(0, MAX_DISPLAY_NAME_LENGTH);
+  const displayName = normalized || createRandomDisplayName();
+
+  if (!normalized) {
+    window.localStorage.setItem(DISPLAY_NAME_STORAGE_KEY, displayName);
+  }
+
   setState({
-    displayName: normalized,
+    displayName,
     isHydrated: true,
   });
 }

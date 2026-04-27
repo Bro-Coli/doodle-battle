@@ -234,7 +234,6 @@ interface LobbyNameModalProps {
 
 export function LobbyNameModal({ trigger }: LobbyNameModalProps) {
   const displayName = useDisplayNameStore((store) => store.displayName);
-  const isHydrated = useDisplayNameStore((store) => store.isHydrated);
   const [name, setName] = useState('');
   const [open, setOpen] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -242,22 +241,12 @@ export function LobbyNameModal({ trigger }: LobbyNameModalProps) {
     '--stroke': '5px',
     WebkitTextStroke: 'var(--stroke) #0f6b7f',
   };
-  const requiresName = isHydrated && !displayName.trim();
   const canConfirm = !!name.trim();
-
-  useEffect(() => {
-    if (requiresName) setOpen(true);
-  }, [requiresName]);
 
   useEffect(() => {
     if (!open) return;
     setName(displayName);
   }, [open, displayName]);
-
-  function handleOpenChange(nextOpen: boolean): void {
-    if (requiresName && !nextOpen) return;
-    setOpen(nextOpen);
-  }
 
   function handleConfirm(): void {
     if (!canConfirm) return;
@@ -273,14 +262,14 @@ export function LobbyNameModal({ trigger }: LobbyNameModalProps) {
   }
 
   return (
-    <Dialog.Root open={open} onOpenChange={handleOpenChange}>
+    <Dialog.Root open={open} onOpenChange={setOpen}>
       <Dialog.Trigger asChild>
         {trigger ?? (
           <button
             type="button"
             className="rounded-full border border-white/25 bg-black/25 px-5 py-2 font-nunito t14-b text-white/90 backdrop-blur-sm hover:bg-black/35"
           >
-            Name Modal (Temp)
+            Edit Name
           </button>
         )}
       </Dialog.Trigger>
@@ -299,23 +288,9 @@ export function LobbyNameModal({ trigger }: LobbyNameModalProps) {
               input.setSelectionRange(cursorAt, cursorAt);
             });
           }}
-          onEscapeKeyDown={(event) => {
-            if (!requiresName) return;
-            event.preventDefault();
-          }}
-          onPointerDownOutside={(event) => {
-            if (!requiresName) return;
-            event.preventDefault();
-          }}
-          onInteractOutside={(event) => {
-            if (!requiresName) return;
-            event.preventDefault();
-          }}
         >
-          <Dialog.Title className="sr-only">Change Name</Dialog.Title>
-          <Dialog.Description className="sr-only">
-            Enter your display name and close the modal.
-          </Dialog.Description>
+          <Dialog.Title className="sr-only">Edit Name</Dialog.Title>
+          <Dialog.Description className="sr-only">Edit your display name.</Dialog.Description>
 
           <div className="relative">
             <ModalDecorations />
@@ -330,7 +305,7 @@ export function LobbyNameModal({ trigger }: LobbyNameModalProps) {
                   secondStrokeWidth={10}
                   // shadowOffsetY="0.4rem"
                 >
-                  Enter Your Name
+                  Edit Your Name
                 </StrokeShadowText>
 
                 <input
@@ -358,10 +333,10 @@ export function LobbyNameModal({ trigger }: LobbyNameModalProps) {
                         className="pointer-events-none absolute inset-0 text-center uppercase text-transparent t24-eb "
                         style={confirmStrokeStyle}
                       >
-                        Confirm
+                        Save
                       </span>
                       <span className="relative text-center uppercase text-white t24-eb">
-                        Confirm
+                        Save
                       </span>
                     </span>
                   </button>
