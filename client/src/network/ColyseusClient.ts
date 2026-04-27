@@ -1,6 +1,7 @@
 import { Client, Room } from '@colyseus/sdk';
+import { API_URL } from '@/shared/api/api.config';
 
-const COLYSEUS_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:3001';
+const COLYSEUS_URL = API_URL;
 
 let client: Client | null = null;
 let activeRoom: Room | null = null;
@@ -70,7 +71,7 @@ export interface JoinableRoom {
 }
 
 export async function listJoinableRooms(): Promise<JoinableRoom[]> {
-  const res = await fetch('/api/rooms');
+  const res = await fetch(new URL('/api/rooms', API_URL).toString());
   if (!res.ok) throw new Error('Failed to load rooms');
   return (await res.json()) as JoinableRoom[];
 }
