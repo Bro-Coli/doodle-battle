@@ -39,6 +39,9 @@ export function CreateRoomScreen() {
 
   const created = !!room && !!roomCode;
   const cleanupRef = useRef<(() => void) | null>(null);
+  // Set true only when the room must outlive this screen (game_starting →
+  // /game). Any other unmount path drops the room so it doesn't linger.
+  const intentionalStayRef = useRef(false);
 
   const syncRoomState = useCallback((r: Room) => {
     const state = r.state as {
@@ -62,6 +65,7 @@ export function CreateRoomScreen() {
     room.onStateChange(onState);
 
     const removeGameStarting = room.onMessage('game_starting', () => {
+      intentionalStayRef.current = true;
       navigate('/game');
     });
 
@@ -72,6 +76,23 @@ export function CreateRoomScreen() {
 
     return () => cleanupRef.current?.();
   }, [room, syncRoomState]);
+
+  // Catch-all unmount cleanup — covers browser back, programmatic nav, and
+  // any other React-side teardown that bypasses our explicit handlers.
+  useEffect(() => {
+    return () => {
+      if (!intentionalStayRef.current) leaveActiveRoom();
+    };
+  }, []);
+
+  // Refresh / tab close. pagehide is more reliable than beforeunload across
+  // mobile and bfcache; the websocket close that follows trips the server's
+  // onLeave so the room disposes without waiting on the reconnection grace.
+  useEffect(() => {
+    const handler = () => leaveActiveRoom();
+    window.addEventListener('pagehide', handler);
+    return () => window.removeEventListener('pagehide', handler);
+  }, []);
 
   async function handleCreateRoom(): Promise<void> {
     const name = storedDisplayName.trim();

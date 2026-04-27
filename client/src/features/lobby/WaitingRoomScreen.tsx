@@ -61,6 +61,9 @@ export function WaitingRoomScreen(): React.JSX.Element {
   const [copied, setCopied] = useState(false);
 
   const cleanupRef = useRef<(() => void) | null>(null);
+  // Set true only when the room must outlive this screen (game_starting →
+  // /game, or the active-game redirect that explicitly leaves first).
+  const intentionalStayRef = useRef(false);
 
   useEffect(() => {
     if (!room) {
@@ -110,6 +113,7 @@ export function WaitingRoomScreen(): React.JSX.Element {
     room.onStateChange(onState);
 
     const removeGameStarting = room.onMessage('game_starting', () => {
+      intentionalStayRef.current = true;
       navigate('/game');
     });
 
@@ -120,6 +124,23 @@ export function WaitingRoomScreen(): React.JSX.Element {
 
     return () => cleanupRef.current?.();
   }, [room]);
+
+  // Catch-all unmount cleanup — covers browser back, programmatic nav, and
+  // any other React-side teardown that bypasses our explicit handlers.
+  useEffect(() => {
+    return () => {
+      if (!intentionalStayRef.current) leaveActiveRoom();
+    };
+  }, []);
+
+  // Refresh / tab close. pagehide is more reliable than beforeunload across
+  // mobile and bfcache; the websocket close that follows trips the server's
+  // onLeave so the room disposes without waiting on the reconnection grace.
+  useEffect(() => {
+    const handler = () => leaveActiveRoom();
+    window.addEventListener('pagehide', handler);
+    return () => window.removeEventListener('pagehide', handler);
+  }, []);
 
   if (!room) {
     return (
