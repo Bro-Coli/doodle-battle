@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState, type CSSProperties } from 'react';
 import type { Room } from '@colyseus/sdk';
-import { createRoom, getActiveRoom } from '../../network/ColyseusClient';
+import { createRoom, getActiveRoom, leaveActiveRoom } from '../../network/ColyseusClient';
 import { navigate } from '../../utils/navigate';
 import { setDisplayName, useDisplayNameStore } from './displayNameStore';
 import { Icon } from '@/ui/icon/Icon';
@@ -131,7 +131,10 @@ export function CreateRoomScreen() {
       {/* Back button */}
       <button
         type="button"
-        onClick={() => navigate('/')}
+        onClick={() => {
+          leaveActiveRoom();
+          navigate('/');
+        }}
         className="ui-icon-button ui-icon-button--sm absolute top-6 left-6 z-10"
         aria-label="Back to lobby"
       >
