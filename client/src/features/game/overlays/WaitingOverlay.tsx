@@ -184,7 +184,7 @@ export function WaitingOverlay({
           <div className="flex justify-center mb-8 animate-[slideDownFade_0.35s_ease-out_both]">
             <GameOverlayBadge>
               <span className="font-nunito text-[1.05rem] font-black tracking-[0.08em] text-white uppercase">
-                {allSubmitted ? 'Bringing drawings to game' : 'Waiting for players'}
+                {allSubmitted ? 'Game will start soon' : 'Waiting for players'}
               </span>
             </GameOverlayBadge>
           </div>
