@@ -96,12 +96,12 @@ export function LobbyScreen(): React.JSX.Element {
           alt="Doodle Battle"
           width={520}
           height={300}
-          className="w-full max-w-[520px] object-contain lg:max-w-[480px]"
+          className="w-full max-w-[520px] object-contain lg:max-w-[480px] sm:max-w-[320px]"
           decoding="async"
         />
-        <div className="-translate-x-4 mx-auto flex w-max items-center justify-center -space-x-4 lg:-space-x-16">
+        <div className="mx-auto flex w-max items-center justify-center -translate-x-4 -space-x-4 lg:-space-x-16 sm:-translate-x-0 sm:-space-x-0 sm:flex-col sm:space-y-4">
           {lobbyActions.map((action, index) => (
-            <div key={action.id} className={cn('shrink-0', index === 2 && 'ml-4')}>
+            <div key={action.id} className={cn('shrink-0', index === 2 && 'ml-4 sm:ml-0')}>
               <LobbyActionButton action={action} />
             </div>
           ))}

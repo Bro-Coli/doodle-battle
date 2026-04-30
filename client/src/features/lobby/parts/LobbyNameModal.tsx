@@ -298,7 +298,7 @@ export function LobbyNameModal({ trigger }: LobbyNameModalProps) {
               <span className="ui-name-glass-spec" aria-hidden />
               <div className="relative z-1 flex h-full flex-col items-center justify-center text-center">
                 <StrokeShadowText
-                  className="t32-eb uppercase"
+                  className="t32-eb uppercase sm:t24-eb"
                   firstStrokeColor="#1a2555"
                   secondStrokeColor="#2c5890"
                   firstStrokeWidth={10}
@@ -316,26 +316,26 @@ export function LobbyNameModal({ trigger }: LobbyNameModalProps) {
                   onKeyDown={handleInputKeyDown}
                   placeholder="Your Name..."
                   maxLength={16}
-                  className="ui-name-input mt-8 px-5 t24-b font-nunito"
+                  className="ui-name-input mt-8 px-5 t24-b font-nunito sm:mt-6 sm:px-4 sm:text-[20px]"
                 />
-                <p className="text-white/90 t16-b font-nunito mt-4">Max 16 characters</p>
+                <p className="text-white/90 t16-b font-nunito mt-4 sm:t14-b sm:mt-3">Max 16 characters</p>
 
                 <div className="mt-2 flex justify-center">
                   <button
                     type="button"
-                    className="ui-pill-button ui-pill-button--mint px-7 mt-5 disabled:cursor-not-allowed disabled:opacity-65"
+                    className="ui-pill-button ui-pill-button--mint px-7 mt-5 disabled:cursor-not-allowed disabled:opacity-65 sm:px-6 sm:mt-4 sm:scale-90"
                     onClick={handleConfirm}
                     disabled={!canConfirm}
                   >
                     <span className="relative z-1 inline-block">
                       <span
                         aria-hidden
-                        className="pointer-events-none absolute inset-0 text-center uppercase text-transparent t24-eb "
+                        className="pointer-events-none absolute inset-0 text-center uppercase text-transparent t24-eb sm:t20-eb"
                         style={confirmStrokeStyle}
                       >
                         Save
                       </span>
-                      <span className="relative text-center uppercase text-white t24-eb">
+                      <span className="relative text-center uppercase text-white t24-eb sm:t20-eb">
                         Save
                       </span>
                     </span>

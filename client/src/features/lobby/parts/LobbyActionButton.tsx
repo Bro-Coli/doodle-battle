@@ -36,6 +36,7 @@ export function LobbyActionButton({ action }: LobbyActionButtonProps) {
         'disabled:cursor-default disabled:opacity-90',
         'disabled:hover:scale-100 disabled:active:scale-100',
         'lg:h-106 lg:w-106',
+        'sm:h-72 sm:w-72',
       )}
       aria-label={action.title}
     >
@@ -47,6 +48,7 @@ export function LobbyActionButton({ action }: LobbyActionButtonProps) {
             'transition-[filter] duration-150 ease-linear',
             'group-hover:filter-[drop-shadow(0_0_12px_var(--glow-color))_drop-shadow(0_0_28px_var(--glow-color))]',
             'lg:h-92 lg:w-92',
+            'sm:h-64 sm:w-64',
           )}
           style={{
             backgroundImage: `url(${action.backgroundImage})`,
@@ -62,17 +64,17 @@ export function LobbyActionButton({ action }: LobbyActionButtonProps) {
           'group-hover:filter-[drop-shadow(0_0_18px_rgba(255,255,255,1))_drop-shadow(0_0_36px_rgba(255,255,255,0.9))_drop-shadow(0_0_58px_rgba(255,255,255,0.5))]',
         )}
       >
-        <Icon name={action.iconName} size="146px" />
+        <Icon name={action.iconName} size="100%" className="h-[146px] w-[146px] lg:h-[120px] lg:w-[120px] sm:h-[80px] sm:w-[80px]" />
       </span>
-      <span className="flex-center relative mt-6 flex-col">
+      <span className="flex-center relative mt-6 flex-col sm:mt-2">
         <StrokeShadowText
-          className="t28-eb tracking-wide lg:t24-eb"
+          className="t28-eb tracking-wide lg:t24-eb sm:t20-eb"
           firstStrokeColor={action.firstStrokeColor}
           secondStrokeColor={action.secondStrokeColor}
         >
           {action.title}
         </StrokeShadowText>
-        <span className=" font-nunito t20-b mt-4 whitespace-pre-line text-center text-white [text-shadow:0_1px_0_rgba(0,0,0,0.18)] lg:t18-b lg:mt-2">
+        <span className=" font-nunito t20-b mt-4 whitespace-pre-line text-center text-white [text-shadow:0_1px_0_rgba(0,0,0,0.18)] lg:t18-b lg:mt-2 sm:t14-b sm:mt-1">
           {action.description}
         </span>
       </span>
